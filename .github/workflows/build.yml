@@ -38,33 +38,3 @@ jobs:
         run: go build -ldflags="-s -w" -v -o ${{ matrix.file }} .
         env:
           CGO_ENABLED: ${{ matrix.cgo }}
-
-  analyze:
-    name: Analyze
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Go
-        uses: actions/setup-go@v1
-        with:
-          go-version: 1.15
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-
-      - run: git checkout HEAD^2
-        if: ${{ github.event_name == 'pull_request' }}
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v1
-        with:
-          languages: go
-
-      - name: Build
-        run: go build -ldflags="-s -w" -v -o go-mlog .
-        env:
-          CGO_ENABLED: 0
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v1
