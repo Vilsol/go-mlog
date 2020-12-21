@@ -43,7 +43,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build
-        run: go build -ldflags="-s -w" -v -o go-mlog.wasm .
+        run: go build -ldflags="-s -w" -v -o go-mlog.wasm ./wasm
         env:
           GOOS: js
           GOARCH: wasm
