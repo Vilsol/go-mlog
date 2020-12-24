@@ -11,14 +11,17 @@ import (
 )
 
 const stackVariable = `@stack`
-const functionReturnVariable = `@return`
+const FunctionReturnVariable = `@return`
 
-const stackCellName = `bank1`
+const StackCellName = `bank1`
 const debugCellName = `cell2`
 const debugCount = 2
 
-// TODO Change to List, Support Math
-const validImport = `"github.com/Vilsol/go-mlog/m"`
+// TODO Registry
+var validImports = map[string]bool{
+	`"github.com/Vilsol/go-mlog/m"`: true,
+	`"github.com/Vilsol/go-mlog/x"`: true,
+}
 
 func GolangToMLOGFile(fileName string, options Options) (string, error) {
 	file, err := ioutil.ReadFile(fileName)
@@ -47,8 +50,8 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	for _, imp := range f.Imports {
-		if imp.Path.Value != validImport {
-			return "", errors.New("you may not use any external imports")
+		if _, ok := validImports[imp.Path.Value]; !ok {
+			return "", errors.New("unregistered import used: " + imp.Path.Value)
 		}
 	}
 
@@ -96,11 +99,32 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			}
 
 			for i, param := range funcDecl.Type.Params.List {
+				if paramTypeIdent, ok := param.Type.(*ast.Ident); ok {
+					if paramTypeIdent.Name != "int" && paramTypeIdent.Name != "float64" {
+						return "", errors.New("function parameters may only be integers or floating point numbers")
+					}
+				} else {
+					return "", errors.New("function parameters may only be integers or floating point numbers")
+				}
+
 				position := len(funcDecl.Type.Params.List) - i
 
 				dVar := &DynamicVariable{}
 
-				// TODO Support multiple names
+				for _, name := range param.Names {
+					statements = append([]MLOGStatement{&MLOG{
+						Comment: "Read parameter into variable",
+						Statement: [][]Resolvable{
+							{
+								&Value{Value: "read"},
+								&NormalVariable{Name: name.Name},
+								&Value{Value: StackCellName},
+								dVar,
+							},
+						},
+					}}, statements...)
+				}
+
 				statements = append([]MLOGStatement{
 					&MLOG{
 						Comment: "Calculate address of parameter",
@@ -111,17 +135,6 @@ func GolangToMLOG(input string, options Options) (string, error) {
 								dVar,
 								&Value{Value: stackVariable},
 								&Value{Value: strconv.Itoa(position)},
-							},
-						},
-					},
-					&MLOG{
-						Comment: "Read parameter into variable",
-						Statement: [][]Resolvable{
-							{
-								&Value{Value: "read"},
-								&NormalVariable{Name: param.Names[0].Name},
-								&Value{Value: stackCellName},
-								dVar,
 							},
 						},
 					},
@@ -211,6 +224,10 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			FunctionName: "main",
 		},
 	})
+
+	if options.NoStartup {
+		startup = make([]MLOGStatement, 0)
+	}
 
 	debugWriter := []MLOGAble{
 		&MLOG{

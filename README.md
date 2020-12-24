@@ -27,6 +27,7 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 * Extensions
 * Variable argument count functions
 * Multiple function return values
+* Optimize simple jump instructions
 
 ## Design Limitations
 

@@ -278,7 +278,7 @@ func (m *MLOGTrampoline) ToMLOG() [][]Resolvable {
 		{
 			&Value{Value: "write"},
 			&Value{Value: strconv.Itoa(m.Position + m.Extra)},
-			&Value{Value: stackCellName},
+			&Value{Value: StackCellName},
 			&Value{Value: m.Variable},
 		},
 	}
@@ -335,7 +335,7 @@ func (m *MLOGTrampolineBack) ToMLOG() [][]Resolvable {
 		{
 			&Value{Value: "read"},
 			&Value{Value: "@counter"},
-			&Value{Value: stackCellName},
+			&Value{Value: StackCellName},
 			&Value{Value: stackVariable},
 		},
 	}

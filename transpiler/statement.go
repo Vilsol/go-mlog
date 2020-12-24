@@ -20,13 +20,12 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 			break
 		}
 
-		// TODO Support all statements
-		if assignStatement, ok := forStatement.Init.(*ast.AssignStmt); ok {
-			assignMlog, err := assignStmtToMLOG(assignStatement, options)
+		if initStmt, ok := forStatement.Init.(ast.Stmt); ok {
+			initMlog, err := statementToMLOG(initStmt, options)
 			if err != nil {
 				return nil, err
 			}
-			results = append(results, assignMlog...)
+			results = append(results, initMlog...)
 		} else {
 			return nil, errors.New("for loop can only have variable assignment initiators")
 		}
@@ -122,7 +121,13 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 	case *ast.IfStmt:
 		ifStmt := statement.(*ast.IfStmt)
 
-		// TODO If statement init
+		if ifStmt.Init != nil {
+			instructions, err := statementToMLOG(ifStmt.Init, options)
+			if err != nil {
+				return nil, err
+			}
+			results = append(results, instructions...)
+		}
 
 		dVar := &DynamicVariable{}
 
@@ -235,7 +240,7 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 				Statement: [][]Resolvable{
 					{
 						&Value{Value: "set"},
-						&Value{Value: functionReturnVariable},
+						&Value{Value: FunctionReturnVariable},
 						resultVar,
 					},
 				},

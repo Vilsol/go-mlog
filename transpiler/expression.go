@@ -6,27 +6,45 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"go/ast"
 	"go/token"
+	"strings"
 )
 
 func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGStatement, error) {
 	switch expr.(type) {
 	case *ast.BasicLit:
 		basicExpr := expr.(*ast.BasicLit)
-		if basicExpr.Kind != token.INT && basicExpr.Kind != token.FLOAT {
-			return nil, errors.New("only integers and floating point numbers can be assigned to variables")
+
+		value := basicExpr.Value
+		if basicExpr.Kind == token.CHAR {
+			value = "\"" + strings.Trim(value, "'") + "\""
 		}
+
 		return []MLOGStatement{&MLOG{
 			Comment: "Set the variable to the value",
 			Statement: [][]Resolvable{
 				{
 					&Value{Value: "set"},
 					ident,
-					&Value{Value: basicExpr.Value},
+					&Value{Value: value},
 				},
 			},
 		}}, nil
 	case *ast.Ident:
 		identExpr := expr.(*ast.Ident)
+
+		if identExpr.Name == "true" || identExpr.Name == "false" {
+			return []MLOGStatement{&MLOG{
+				Comment: "Set the variable to the value",
+				Statement: [][]Resolvable{
+					{
+						&Value{Value: "set"},
+						ident,
+						&Value{Value: identExpr.Name},
+					},
+				},
+			}}, nil
+		}
+
 		return []MLOGStatement{&MLOG{
 			Comment: "Set the variable to the value of other variable",
 			Statement: [][]Resolvable{
@@ -108,7 +126,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 				{
 					&Value{Value: "set"},
 					ident,
-					&Value{Value: functionReturnVariable},
+					&Value{Value: FunctionReturnVariable},
 				},
 			},
 		})
@@ -179,10 +197,41 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 			return nil, err
 		}
 		return instructions, nil
+	case *ast.SelectorExpr:
+		mlog, _, err := selectorExprToMLOG(ident, expr.(*ast.SelectorExpr))
+		return mlog, err
 	default:
 		spew.Dump(expr)
 		return nil, errors.New(fmt.Sprintf("unsupported expression type: %T", expr))
 	}
+}
+
+func selectorExprToMLOG(ident Resolvable, selectorExpr *ast.SelectorExpr) ([]MLOGStatement, string, error) {
+	if _, ok := selectorExpr.X.(*ast.Ident); !ok {
+		return nil, "", errors.New(fmt.Sprintf("unsupported selector type: %T", selectorExpr.X))
+	}
+
+	name := selectorExpr.X.(*ast.Ident).Name + "." + selectorExpr.Sel.Name
+	if selector, ok := selectors[name]; ok {
+		if ident == nil {
+			return nil, selector, nil
+		} else {
+			return []MLOGStatement{
+				&MLOG{
+					Comment: "Set the variable to the value",
+					Statement: [][]Resolvable{
+						{
+							&Value{Value: "set"},
+							ident,
+							&Value{Value: selector},
+						},
+					},
+				},
+			}, "", nil
+		}
+	}
+
+	return nil, "", errors.New(fmt.Sprintf("unknown selector: %s", name))
 }
 
 func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, error) {
@@ -192,7 +241,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, e
 	if identity, ok := callExpr.Fun.(*ast.Ident); ok {
 		funcName = identity.Name
 	} else if selector, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
-		funcName = selector.Sel.Name
+		funcName = selector.X.(*ast.Ident).Name + "." + selector.Sel.Name
 	} else {
 		return nil, errors.New(fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
 	}
@@ -218,10 +267,10 @@ func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, e
 				value = &Value{Value: basicLit.Value}
 			} else if ident, ok := arg.(*ast.Ident); ok {
 				value = &NormalVariable{Name: ident.Name}
-			} else if binaryExpr, ok := arg.(*ast.BinaryExpr); ok {
+			} else if argExpr, ok := arg.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				instructions, err := expressionToMLOG(dVar, binaryExpr, options)
+				instructions, err := expressionToMLOG(dVar, argExpr, options)
 				if err != nil {
 					return nil, err
 				}
@@ -238,7 +287,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, e
 					{
 						&Value{Value: "write"},
 						value,
-						&Value{Value: stackCellName},
+						&Value{Value: StackCellName},
 						&Value{Value: stackVariable},
 					},
 				},
@@ -289,6 +338,12 @@ func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []M
 			result[i] = &Value{Value: basicExpr.Value}
 		} else if identExpr, ok := arg.(*ast.Ident); ok {
 			result[i] = &NormalVariable{Name: identExpr.Name}
+		} else if selectorExpr, ok := arg.(*ast.SelectorExpr); ok {
+			_, str, err := selectorExprToMLOG(nil, selectorExpr)
+			if err != nil {
+				return nil, nil, err
+			}
+			result[i] = &Value{Value: str}
 		} else if expr, ok := arg.(ast.Expr); ok {
 			dVar := &DynamicVariable{}
 
@@ -301,7 +356,7 @@ func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []M
 
 			result[i] = dVar
 		} else {
-			return nil, nil, errors.New(fmt.Sprintf("only arguments of basic types or variables are supported, received: %T", arg))
+			return nil, nil, errors.New(fmt.Sprintf("unknown argument type received: %T", arg))
 		}
 	}
 

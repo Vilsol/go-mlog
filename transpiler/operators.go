@@ -11,6 +11,7 @@ var jumpOperators = map[token.Token]string{
 	token.GEQ: "greaterThanEq",
 }
 
+// TODO Convert to structs and a registry
 var regularOperators = map[token.Token]string{
 	token.ADD:        "add",
 	token.ADD_ASSIGN: "add",
