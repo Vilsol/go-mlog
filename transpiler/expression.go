@@ -3,7 +3,6 @@ package transpiler
 import (
 	"errors"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"go/ast"
 	"go/token"
 	"strings"
@@ -201,7 +200,6 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 		mlog, _, err := selectorExprToMLOG(ident, expr.(*ast.SelectorExpr))
 		return mlog, err
 	default:
-		spew.Dump(expr)
 		return nil, errors.New(fmt.Sprintf("unsupported expression type: %T", expr))
 	}
 }

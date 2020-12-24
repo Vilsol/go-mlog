@@ -2,7 +2,6 @@ package tests
 
 import (
 	"github.com/Vilsol/go-mlog/transpiler"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -124,9 +123,7 @@ func main() {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			z, err := transpiler.GolangToMLOG(test.input, transpiler.Options{})
-
-			spew.Dump(z)
+			_, err := transpiler.GolangToMLOG(test.input, transpiler.Options{})
 			assert.EqualError(t, err, test.output)
 		})
 	}
