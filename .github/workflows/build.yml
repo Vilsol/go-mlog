@@ -54,7 +54,7 @@ jobs:
           fetch-depth: 0
 
       - name: Test
-        run: go test -coverprofile=coverage.txt -covermode=atomic ./...
+        run: go test -coverprofile=coverage.txt -covermode=atomic $(go list ./... | grep -v wasm)
         env:
           CGO_ENABLED: 0
 
