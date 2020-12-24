@@ -1,5 +1,11 @@
 # go-mlog
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vilsol/go-mlog/build)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/vilsol/go-mlog)
+[![codecov](https://codecov.io/gh/Vilsol/go-mlog/branch/master/graph/badge.svg?token=LFNKYWS0N2)](https://codecov.io/gh/Vilsol/go-mlog)
+[![CodeFactor](https://www.codefactor.io/repository/github/vilsol/go-mlog/badge)](https://www.codefactor.io/repository/github/vilsol/go-mlog)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/vilsol/go-mlog)
+
 Go to MLOG transpiler.
 
 ## Web IDE
