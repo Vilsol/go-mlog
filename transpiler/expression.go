@@ -337,7 +337,11 @@ func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []M
 		if basicExpr, ok := arg.(*ast.BasicLit); ok {
 			result[i] = &Value{Value: basicExpr.Value}
 		} else if identExpr, ok := arg.(*ast.Ident); ok {
-			result[i] = &NormalVariable{Name: identExpr.Name}
+			if identExpr.Name == "true" || identExpr.Name == "false" {
+				result[i] = &Value{Value: identExpr.Name}
+			} else {
+				result[i] = &NormalVariable{Name: identExpr.Name}
+			}
 		} else if selectorExpr, ok := arg.(*ast.SelectorExpr); ok {
 			_, str, err := selectorExprToMLOG(nil, selectorExpr)
 			if err != nil {

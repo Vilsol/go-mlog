@@ -29,6 +29,7 @@ type Processable interface {
 
 type WithPosition interface {
 	GetPosition() int
+	Size() int
 }
 
 type MutablePosition interface {
@@ -95,6 +96,10 @@ func (m *MLOG) GetPosition() int {
 	return m.Position
 }
 
+func (m *MLOG) Size() int {
+	return len(m.Statement)
+}
+
 func (m *MLOG) SetPosition(position int) int {
 	m.Position = position
 	return 1
@@ -122,6 +127,10 @@ func (m *MLOGFunc) ToMLOG() [][]Resolvable {
 
 func (m *MLOGFunc) GetPosition() int {
 	return m.Position
+}
+
+func (m *MLOGFunc) Size() int {
+	return m.Function.Count
 }
 
 func (m *MLOGFunc) SetPosition(position int) int {
@@ -179,6 +188,10 @@ func (m *MLOGJump) ToMLOG() [][]Resolvable {
 	}
 }
 
+func (m *MLOGJump) Size() int {
+	return 1
+}
+
 func (m *MLOGJump) PostProcess(global *Global, function *Function) error {
 	for _, resolvable := range m.Condition {
 		if err := resolvable.PostProcess(global, function); err != nil {
@@ -202,6 +215,10 @@ type FunctionJumpTarget struct {
 
 func (m *FunctionJumpTarget) GetPosition() int {
 	return m.Statement.GetPosition()
+}
+
+func (m *FunctionJumpTarget) Size() int {
+	return 1
 }
 
 func (m *FunctionJumpTarget) PostProcess(global *Global, _ *Function) error {
@@ -328,9 +345,13 @@ type StatementJumpTarget struct {
 
 func (m *StatementJumpTarget) GetPosition() int {
 	if m.After {
-		return m.Statement.GetPosition() + 1
+		return m.Statement.GetPosition() + m.Statement.Size()
 	}
 	return m.Statement.GetPosition()
+}
+
+func (m *StatementJumpTarget) Size() int {
+	return 1
 }
 
 func (m *StatementJumpTarget) PostProcess(*Global, *Function) error {

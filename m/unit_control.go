@@ -280,68 +280,94 @@ func init() {
 	})
 }
 
-// TODO Docs
+// Stop all actions including shooting
 func UnitStop() {
 }
 
-// TODO Docs
+// Move to the provided absolute position on the map
 func UnitMove(x float64, y float64) {
 }
 
-// TODO Docs
+// Approach a circular radius around the provided point
+//
+// Will stop moving once it is the provided radius away from the point
 func UnitApproach(x float64, y float64, radius float64) {
 }
 
-// TODO Docs
-func UnitBoost(enable int) {
+// Enable/Disable boosting for mechs
+func UnitBoost(enable bool) {
 }
 
-// TODO Docs
+// Make the unit follow standard AI
+//
+// Find enemy cores, guard spawns, obey command centers
 func UnitPathfind() {
 }
 
-// TODO Docs
-func UnitTarget(x float64, y float64, shoot int) {
+// Like ControlShoot but for units
+//
+// Shoot with the cached unit at the target absolute position
+//
+// If shoot parameter is false, it will cease firing
+//
+// Will not shoot outside of the units range!
+func UnitTarget(x float64, y float64, shoot bool) {
 }
 
-// TODO Docs
-func UnitTargetP(target int, shoot int) {
+// Like ControlShootP but for units
+//
+// Shoot with the cached unit at the predicted position of target unit
+//
+// If shoot parameter is false, it will cease firing
+func UnitTargetP(target int, shoot bool) {
 }
 
-// TODO Docs
+// Drops items into the provided building
+//
+// Will not drop more than provided amount
 func UnitItemDrop(to Building, amount int) {
 }
 
-// TODO Docs
+// Takes the provided item type from the provided building
+//
+// Will not take more than provided amount
 func UnitItemTake(from Building, item string, amount int) {
 }
 
-// TODO Docs
+// Drops the current payload
+//
+// Will only drop blocks if there is an empty space
 func UnitPayloadDrop() {
 }
 
-// TODO Docs
-func UnitPayloadTake(takeUnits int) {
+// Pick up payload from underneath the unit
+//
+// If takeUnits is true, will also pick up units
+func UnitPayloadTake(takeUnits bool) {
 }
 
-// TODO Docs
+// Mine the ore at the specified absolute position
+//
+// Will not do anything if there is no minable ore or it is already being mined
 func UnitMine(x float64, y float64) {
 }
 
-// TODO Docs
+// Set the units flag
+//
+// Shown as a number when hovering over a unit
 func UnitFlag(flag float64) {
 }
 
-// TODO Docs
+// Build a block at the specified absolute position
 func UnitBuild(x float64, y float64, block string, rotation int, config int) {
 }
 
-// TODO Docs
+// Retrieve the building and its type at the specified absolute position
 func UnitGetBlock(x float64, y float64) (blockType string, building Building) {
 	return "", nil
 }
 
-// TODO Docs
-func UnitWithin(x float64, y float64, radius float64) int {
-	return 0
+// Checks whether there is a unit within the specified radius around the provided absolute position
+func UnitWithin(x float64, y float64, radius float64) bool {
+	return false
 }

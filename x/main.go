@@ -40,6 +40,6 @@ func init() {
 	})
 }
 
-// TODO Docs
+// Sleep for n milliseconds
 func Sleep(millis int) {
 }

@@ -31,7 +31,7 @@ func init() {
 			}, nil
 		},
 	})
-	transpiler.RegisterFuncTranslation("m.Write", transpiler.Translator{
+	write := transpiler.Translator{
 		Count: 1,
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			memoryName := strings.Trim(args[1].GetValue(), "\"")
@@ -53,7 +53,9 @@ func init() {
 				},
 			}, nil
 		},
-	})
+	}
+	transpiler.RegisterFuncTranslation("m.Write", write)
+	transpiler.RegisterFuncTranslation("m.WriteInt", write)
 	transpiler.RegisterFuncTranslation("m.PrintFlush", transpiler.Translator{
 		Count: 1,
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
@@ -128,30 +130,40 @@ func init() {
 	})
 }
 
-// TODO Docs
+// Read a float64 value from memory at specified position
 func Read(memory string, position int) int {
 	return 0
 }
 
-// TODO Docs
+// Write a float64 value to memory at specified position
+//
+// For integer equivalent use WriteInt
 func Write(value int, memory string, position int) {
 }
 
-// TODO Docs
+// Write an integer value to memory at specified position
+//
+// For float64 equivalent use Write
+func WriteInt(value int, memory string, position int) {
+}
+
+// Flush all printed statements to the provided message block
 func PrintFlush(targetMessage string) {
 }
 
-// TODO Docs
+// Get the linked tile at the specified address
 func GetLink(address int) Link {
 	return nil
 }
 
-// TODO Docs
-func Radar(from string, target1 RadarTarget, target2 RadarTarget, target3 RadarTarget, sortOrder int, sort RadarSort) Unit {
+// Retrieve a list of units that match specified conditions
+//
+// Conditions are combined using an `and` operation
+func Radar(from string, target1 RadarTarget, target2 RadarTarget, target3 RadarTarget, sortOrder bool, sort RadarSort) Unit {
 	return nil
 }
 
-// TODO Docs
+// Extract information indicated by sense from the provided block
 func Sensor(block string, sense string) int {
 	return 0
 }

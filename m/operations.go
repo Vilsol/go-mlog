@@ -43,12 +43,12 @@ func init() {
 
 // TODO Operations
 
-// TODO Docs
+// Floor the provided floating point number and convert to integer
 func Floor(number float64) int {
 	return 0
 }
 
-// TODO Docs
+// Generate a random floating point number between 0 (inclusive) and max (exclusive)
 func Random(max float64) float64 {
 	return 0
 }

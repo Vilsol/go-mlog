@@ -104,14 +104,19 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 			results = append(results, instructions...)
 		}
 
-		dVar := &DynamicVariable{}
+		var condVar Resolvable
+		if condIdent, ok := ifStmt.Cond.(*ast.Ident); ok {
+			condVar = &NormalVariable{Name: condIdent.Name}
+		} else {
+			condVar = &DynamicVariable{}
 
-		instructions, err := expressionToMLOG([]Resolvable{dVar}, ifStmt.Cond, options)
-		if err != nil {
-			return nil, err
+			instructions, err := expressionToMLOG([]Resolvable{condVar}, ifStmt.Cond, options)
+			if err != nil {
+				return nil, err
+			}
+
+			results = append(results, instructions...)
 		}
-
-		results = append(results, instructions...)
 
 		blockInstructions, err := statementToMLOG(ifStmt.Body, options)
 		if err != nil {
@@ -124,7 +129,7 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 			},
 			Condition: []Resolvable{
 				&Value{Value: "equal"},
-				dVar,
+				condVar,
 				&Value{Value: "1"},
 			},
 			JumpTarget: &StatementJumpTarget{

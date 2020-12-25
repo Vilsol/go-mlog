@@ -35,6 +35,7 @@ func init() {
 type RadarTarget = string
 
 const (
+	// Target anything
 	RTAny      = RadarTarget("any")
 	RTEnemy    = RadarTarget("enemy")
 	RTAlly     = RadarTarget("ally")

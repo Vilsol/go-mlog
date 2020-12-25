@@ -30,8 +30,8 @@ func TestUnitControl(t *testing.T) {
 		},
 		{
 			name:   "UnitBoost",
-			input:  TestMain(`m.UnitBoost(1)`),
-			output: `ucontrol boost 1`,
+			input:  TestMain(`m.UnitBoost(true)`),
+			output: `ucontrol boost true`,
 		},
 		{
 			name:   "UnitPathfind",
@@ -40,13 +40,13 @@ func TestUnitControl(t *testing.T) {
 		},
 		{
 			name:   "UnitTarget",
-			input:  TestMain(`m.UnitTarget(1, 2, 3)`),
-			output: `ucontrol target 1 2 3`,
+			input:  TestMain(`m.UnitTarget(1, 2, true)`),
+			output: `ucontrol target 1 2 true`,
 		},
 		{
 			name:   "UnitTargetP",
-			input:  TestMain(`m.UnitTargetP(1, 2)`),
-			output: `ucontrol targetp 1 2`,
+			input:  TestMain(`m.UnitTargetP(1, true)`),
+			output: `ucontrol targetp 1 true`,
 		},
 		{
 			name:   "UnitItemDrop",
@@ -65,8 +65,8 @@ func TestUnitControl(t *testing.T) {
 		},
 		{
 			name:   "UnitPayloadTake",
-			input:  TestMain(`m.UnitPayloadTake(1)`),
-			output: `ucontrol payTake 1`,
+			input:  TestMain(`m.UnitPayloadTake(true)`),
+			output: `ucontrol payTake true`,
 		},
 		{
 			name:   "UnitMine",
