@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/Vilsol/go-mlog/m"
 	"github.com/Vilsol/go-mlog/transpiler"
+	_ "github.com/Vilsol/go-mlog/x"
 	"runtime/debug"
 	"syscall/js"
 )
