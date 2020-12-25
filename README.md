@@ -5,6 +5,7 @@
 [![codecov](https://codecov.io/gh/Vilsol/go-mlog/branch/master/graph/badge.svg?token=LFNKYWS0N2)](https://codecov.io/gh/Vilsol/go-mlog)
 [![CodeFactor](https://www.codefactor.io/repository/github/vilsol/go-mlog/badge)](https://www.codefactor.io/repository/github/vilsol/go-mlog)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/vilsol/go-mlog)
+[![godoc reference](https://img.shields.io/badge/godoc-reference-5272B4)](https://pkg.go.dev/github.com/Vilsol/go-mlog)
 
 Go to MLOG transpiler.
 
@@ -34,6 +35,7 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 * Variable argument count functions
 * Multiple function return values
 * Optimize simple jump instructions
+* Multi-pass post-processing
 
 ## Design Limitations
 

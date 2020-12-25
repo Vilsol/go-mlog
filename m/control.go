@@ -5,7 +5,7 @@ import "github.com/Vilsol/go-mlog/transpiler"
 func init() {
 	transpiler.RegisterFuncTranslation("m.ControlEnabled", transpiler.Translator{
 		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
@@ -17,12 +17,12 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.ControlShoot", transpiler.Translator{
 		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
@@ -36,12 +36,12 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.ControlShootP", transpiler.Translator{
 		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
@@ -54,12 +54,12 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.ControlConfigure", transpiler.Translator{
 		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
@@ -71,7 +71,7 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 }

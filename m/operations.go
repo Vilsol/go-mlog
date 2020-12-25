@@ -4,37 +4,39 @@ import "github.com/Vilsol/go-mlog/transpiler"
 
 func init() {
 	transpiler.RegisterFuncTranslation("m.Floor", transpiler.Translator{
-		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Count:     1,
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
 						{
 							&transpiler.Value{Value: "op"},
 							&transpiler.Value{Value: "floor"},
-							&transpiler.Value{Value: transpiler.FunctionReturnVariable},
+							vars[0],
 							&transpiler.Value{Value: args[0].GetValue()},
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.Random", transpiler.Translator{
-		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Count:     1,
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
 						{
 							&transpiler.Value{Value: "op"},
 							&transpiler.Value{Value: "rand"},
-							&transpiler.Value{Value: transpiler.FunctionReturnVariable},
+							vars[0],
 							&transpiler.Value{Value: args[0].GetValue()},
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 }

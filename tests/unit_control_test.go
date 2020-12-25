@@ -84,9 +84,14 @@ func TestUnitControl(t *testing.T) {
 			output: `ucontrol build 1 2 "A" 3 4`,
 		},
 		{
+			name:   "UnitGetBlock",
+			input:  TestMain(`x, y := m.UnitGetBlock(1, 2)`),
+			output: `ucontrol getBlock 1 2 _main_x _main_y`,
+		},
+		{
 			name:   "UnitWithin",
-			input:  TestMain(`m.UnitWithin(1, 2, 3)`),
-			output: `ucontrol within 1 2 3 @return`,
+			input:  TestMain(`x := m.UnitWithin(1, 2, 3)`),
+			output: `ucontrol within 1 2 3 _main_x`,
 		},
 	}
 	for _, test := range tests {

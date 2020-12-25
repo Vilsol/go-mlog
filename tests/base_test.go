@@ -15,8 +15,8 @@ func TestBase(t *testing.T) {
 	}{
 		{
 			name:   "Read",
-			input:  TestMain(`m.Read("cell1", 0)`),
-			output: `read @return cell1 0`,
+			input:  TestMain(`x := m.Read("cell1", 0)`),
+			output: `read _main_x cell1 0`,
 		},
 		{
 			name:   "Write",
@@ -30,18 +30,18 @@ func TestBase(t *testing.T) {
 		},
 		{
 			name:   "GetLink",
-			input:  TestMain(`m.GetLink(0)`),
-			output: `getlink @return 0`,
+			input:  TestMain(`x := m.GetLink(0)`),
+			output: `getlink _main_x 0`,
 		},
 		{
 			name:   "Radar",
-			input:  TestMain(`m.Radar("A", m.RTAlly, m.RTEnemy, m.RTBoss, 0, m.RSArmor)`),
-			output: `radar ally enemy boss armor "A" 0 @return`,
+			input:  TestMain(`x := m.Radar("A", m.RTAlly, m.RTEnemy, m.RTBoss, 0, m.RSArmor)`),
+			output: `radar ally enemy boss armor "A" 0 _main_x`,
 		},
 		{
 			name:   "Sensor",
-			input:  TestMain(`m.Sensor("A", "B")`),
-			output: `sensor @return "A" "B"`,
+			input:  TestMain(`x := m.Sensor("A", "B")`),
+			output: `sensor _main_x "A" "B"`,
 		},
 	}
 	for _, test := range tests {

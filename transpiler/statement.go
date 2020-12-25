@@ -20,15 +20,11 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 			break
 		}
 
-		if initStmt, ok := forStatement.Init.(ast.Stmt); ok {
-			initMlog, err := statementToMLOG(initStmt, options)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, initMlog...)
-		} else {
-			return nil, errors.New("for loop can only have variable assignment initiators")
+		initMlog, err := statementToMLOG(forStatement.Init, options)
+		if err != nil {
+			return nil, err
 		}
+		results = append(results, initMlog...)
 
 		var loopStartJump *MLOGJump
 		if binaryExpr, ok := forStatement.Cond.(*ast.BinaryExpr); ok {
@@ -77,28 +73,11 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 
 		results = append(results, bodyMLOG...)
 
-		// TODO Support more statements
-		if incDecStatement, ok := forStatement.Post.(*ast.IncDecStmt); ok {
-			name := &NormalVariable{Name: incDecStatement.X.(*ast.Ident).Name}
-			op := "add"
-			if incDecStatement.Tok == token.DEC {
-				op = "sub"
-			}
-			results = append(results, &MLOG{
-				Comment: "Execute for loop post condition increment/decrement",
-				Statement: [][]Resolvable{
-					{
-						&Value{Value: "op"},
-						&Value{Value: op},
-						name,
-						name,
-						&Value{Value: "1"},
-					},
-				},
-			})
-		} else {
-			return nil, errors.New("for loop supports only increment or decrement post statements")
+		instructions, err := statementToMLOG(forStatement.Post, options)
+		if err != nil {
+			return nil, err
 		}
+		results = append(results, instructions...)
 
 		loopStartJump.JumpTarget = bodyMLOG[0]
 		results = append(results, loopStartJump)
@@ -107,16 +86,12 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 	case *ast.ExprStmt:
 		expressionStatement := statement.(*ast.ExprStmt)
 
-		if callExpression, ok := expressionStatement.X.(*ast.CallExpr); ok {
-			instructions, err := callExprToMLOG(callExpression, options)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, instructions...)
-		} else {
-			return nil, errors.New(fmt.Sprintf("unknown expression statement: %T", expressionStatement.X))
+		instructions, err := expressionToMLOG(nil, expressionStatement.X, options)
+		if err != nil {
+			return nil, err
 		}
 
+		results = append(results, instructions...)
 		break
 	case *ast.IfStmt:
 		ifStmt := statement.(*ast.IfStmt)
@@ -131,7 +106,7 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 
 		dVar := &DynamicVariable{}
 
-		instructions, err := expressionToMLOG(dVar, ifStmt.Cond, options)
+		instructions, err := expressionToMLOG([]Resolvable{dVar}, ifStmt.Cond, options)
 		if err != nil {
 			return nil, err
 		}
@@ -224,7 +199,7 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 			} else if expr, ok := returnValue.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				instructions, err := expressionToMLOG(dVar, expr, options)
+				instructions, err := expressionToMLOG([]Resolvable{dVar}, expr, options)
 				if err != nil {
 					return nil, err
 				}
@@ -259,6 +234,26 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 			results = append(results, instructions...)
 		}
 		break
+	case *ast.IncDecStmt:
+		incDecStatement := statement.(*ast.IncDecStmt)
+		name := &NormalVariable{Name: incDecStatement.X.(*ast.Ident).Name}
+		op := "add"
+		if incDecStatement.Tok == token.DEC {
+			op = "sub"
+		}
+		results = append(results, &MLOG{
+			Comment: "Execute for loop post condition increment/decrement",
+			Statement: [][]Resolvable{
+				{
+					&Value{Value: "op"},
+					&Value{Value: op},
+					name,
+					name,
+					&Value{Value: "1"},
+				},
+			},
+		})
+		break
 	default:
 		return nil, errors.New(fmt.Sprintf("statement type not supported: %T", statement))
 	}
@@ -269,19 +264,37 @@ func statementToMLOG(statement ast.Stmt, options Options) ([]MLOGStatement, erro
 func assignStmtToMLOG(statement *ast.AssignStmt, options Options) ([]MLOGStatement, error) {
 	mlog := make([]MLOGStatement, 0)
 
-	for i, expr := range statement.Lhs {
-		if ident, ok := expr.(*ast.Ident); ok {
-			if statement.Tok != token.ASSIGN && statement.Tok != token.DEFINE {
-				return nil, errors.New("only direct assignment is supported")
+	if len(statement.Lhs) != len(statement.Rhs) {
+		if len(statement.Rhs) == 1 {
+			leftSide := make([]Resolvable, len(statement.Lhs))
+
+			for i, lhs := range statement.Lhs {
+				leftSide[i] = &NormalVariable{Name: lhs.(*ast.Ident).Name}
 			}
 
-			exprMLOG, err := expressionToMLOG(&NormalVariable{Name: ident.Name}, statement.Rhs[i], options)
+			exprMLOG, err := expressionToMLOG(leftSide, statement.Rhs[0], options)
 			if err != nil {
 				return nil, err
 			}
 			mlog = append(mlog, exprMLOG...)
 		} else {
-			return nil, errors.New("left side variable assignment can only contain identifications")
+			return nil, errors.New("mismatched variable assignment sides")
+		}
+	} else {
+		for i, expr := range statement.Lhs {
+			if ident, ok := expr.(*ast.Ident); ok {
+				if statement.Tok != token.ASSIGN && statement.Tok != token.DEFINE {
+					return nil, errors.New("only direct assignment is supported")
+				}
+
+				exprMLOG, err := expressionToMLOG([]Resolvable{&NormalVariable{Name: ident.Name}}, statement.Rhs[i], options)
+				if err != nil {
+					return nil, err
+				}
+				mlog = append(mlog, exprMLOG...)
+			} else {
+				return nil, errors.New("left side variable assignment can only contain identifications")
+			}
 		}
 	}
 

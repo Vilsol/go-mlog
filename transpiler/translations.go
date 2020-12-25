@@ -1,10 +1,10 @@
 package transpiler
 
 type Translator struct {
-	Count int
+	Count     int
+	Variables int
 
-	// TODO Pass return variable as argument
-	Translate func(args []Resolvable) []MLOGStatement
+	Translate func(args []Resolvable, vars []Resolvable) ([]MLOGStatement, error)
 }
 
 var funcTranslations = map[string]Translator{}

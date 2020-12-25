@@ -1,18 +1,20 @@
 package m
 
 import (
+	"errors"
 	"github.com/Vilsol/go-mlog/transpiler"
 	"strings"
 )
 
 func init() {
 	transpiler.RegisterFuncTranslation("m.Read", transpiler.Translator{
-		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Count:     1,
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			memoryName := strings.Trim(args[0].GetValue(), "\"")
 
 			if memoryName == transpiler.StackCellName {
-				panic("can't read/write to memory cell that is used for the stack: " + transpiler.StackCellName)
+				return nil, errors.New("can't read/write to memory cell that is used for the stack: " + transpiler.StackCellName)
 			}
 
 			return []transpiler.MLOGStatement{
@@ -20,22 +22,22 @@ func init() {
 					Statement: [][]transpiler.Resolvable{
 						{
 							&transpiler.Value{Value: "read"},
-							&transpiler.Value{Value: transpiler.FunctionReturnVariable},
+							vars[0],
 							&transpiler.Value{Value: memoryName},
 							&transpiler.Value{Value: args[1].GetValue()},
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.Write", transpiler.Translator{
 		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			memoryName := strings.Trim(args[1].GetValue(), "\"")
 
 			if memoryName == transpiler.StackCellName {
-				panic("can't read/write to memory cell that is used for the stack: " + transpiler.StackCellName)
+				return nil, errors.New("can't read/write to memory cell that is used for the stack: " + transpiler.StackCellName)
 			}
 
 			return []transpiler.MLOGStatement{
@@ -49,12 +51,12 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.PrintFlush", transpiler.Translator{
 		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
@@ -64,28 +66,30 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.GetLink", transpiler.Translator{
-		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Count:     1,
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
 						{
 							&transpiler.Value{Value: "getlink"},
-							&transpiler.Value{Value: transpiler.FunctionReturnVariable},
+							vars[0],
 							&transpiler.Value{Value: args[0].GetValue()},
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.Radar", transpiler.Translator{
-		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Count:     1,
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
@@ -97,28 +101,29 @@ func init() {
 							&transpiler.Value{Value: args[5].GetValue()},
 							&transpiler.Value{Value: args[0].GetValue()},
 							&transpiler.Value{Value: args[4].GetValue()},
-							&transpiler.Value{Value: transpiler.FunctionReturnVariable},
+							vars[0],
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.Sensor", transpiler.Translator{
-		Count: 1,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Count:     1,
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
 					Statement: [][]transpiler.Resolvable{
 						{
 							&transpiler.Value{Value: "sensor"},
-							&transpiler.Value{Value: transpiler.FunctionReturnVariable},
+							vars[0],
 							&transpiler.Value{Value: args[0].GetValue()},
 							&transpiler.Value{Value: args[1].GetValue()},
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 }

@@ -42,13 +42,11 @@ op add @stack @stack 1
 op add _main_0 1 2
 write _main_0 bank1 @stack
 op add @stack @stack 1
-op rand @return 100
-set _main_1 @return
-op floor @return _main_1
-set _main_2 @return
+op rand _main_1 100
+op floor _main_2 _main_1
 write _main_2 bank1 @stack
 op add @stack @stack 1
-write 21 bank1 @stack
+write 19 bank1 @stack
 jump 2 always
 op sub @stack @stack 3
 set _main_3 @return

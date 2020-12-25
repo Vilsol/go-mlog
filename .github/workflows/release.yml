@@ -28,6 +28,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Warm up pkg.go.dev
+        uses: andrewslotin/go-proxy-pull-action@master
+
   pages:
     name: Pages
     runs-on: ubuntu-latest

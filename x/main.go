@@ -5,7 +5,7 @@ import "github.com/Vilsol/go-mlog/transpiler"
 func init() {
 	transpiler.RegisterFuncTranslation("x.Sleep", transpiler.Translator{
 		Count: 2,
-		Translate: func(args []transpiler.Resolvable) []transpiler.MLOGStatement {
+		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			dVar := &transpiler.DynamicVariable{}
 
 			jump := &transpiler.MLOGJump{
@@ -35,7 +35,7 @@ func init() {
 					},
 				},
 				jump,
-			}
+			}, nil
 		},
 	})
 }

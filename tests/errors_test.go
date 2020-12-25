@@ -120,6 +120,39 @@ func main() {
 }`,
 			output: `unknown constant type: *ast.BinaryExpr`,
 		},
+		{
+			name:   "EmptyPrintlnError",
+			input:  TestMain(`println()`),
+			output: `println with 0 arguments`,
+		},
+		{
+			name:   "EmptyPrintError",
+			input:  TestMain(`print()`),
+			output: `print with 0 arguments`,
+		},
+		{
+			name:   "ErrorWriteToStack",
+			input:  TestMain(`m.Write(0, "bank1", 0)`),
+			output: `can't read/write to memory cell that is used for the stack: bank1`,
+		},
+		{
+			name:   "ErrorReadFromStack",
+			input:  TestMain(`x := m.Read("bank1", 0)`),
+			output: `can't read/write to memory cell that is used for the stack: bank1`,
+		},
+		{
+			name: "SingleValueReturns",
+			input: `package main
+
+func main() {
+	sample()
+}
+
+func sample() (int, int) {
+	return 1, 2
+}`,
+			output: `only single value returns are supported`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -138,15 +171,5 @@ func TestRegisterSelectorPanic(t *testing.T) {
 func TestRegisterFuncTranslationPanic(t *testing.T) {
 	assert.Panics(t, func() {
 		transpiler.RegisterFuncTranslation("print", transpiler.Translator{})
-	})
-}
-
-func TestEmptyPrintPanic(t *testing.T) {
-	assert.Panics(t, func() {
-		_, _ = transpiler.GolangToMLOG(TestMain(`println()`), transpiler.Options{})
-	})
-
-	assert.Panics(t, func() {
-		_, _ = transpiler.GolangToMLOG(TestMain(`print()`), transpiler.Options{})
 	})
 }

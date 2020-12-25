@@ -1,11 +1,13 @@
 package transpiler
 
+import "errors"
+
 func init() {
 	RegisterFuncTranslation("print", Translator{
 		Count: 1,
-		Translate: func(args []Resolvable) []MLOGStatement {
+		Translate: func(args []Resolvable, _ []Resolvable) ([]MLOGStatement, error) {
 			if len(args) == 0 {
-				panic("print with 0 arguments")
+				return nil, errors.New("print with 0 arguments")
 			}
 			return []MLOGStatement{
 				&MLOG{
@@ -16,14 +18,14 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 	RegisterFuncTranslation("println", Translator{
 		Count: 2,
-		Translate: func(args []Resolvable) []MLOGStatement {
+		Translate: func(args []Resolvable, _ []Resolvable) ([]MLOGStatement, error) {
 			if len(args) == 0 {
-				panic("println with 0 arguments")
+				return nil, errors.New("println with 0 arguments")
 			}
 			return []MLOGStatement{
 				&MLOG{
@@ -42,7 +44,7 @@ func init() {
 						},
 					},
 				},
-			}
+			}, nil
 		},
 	})
 }

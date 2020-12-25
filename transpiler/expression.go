@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGStatement, error) {
+func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLOGStatement, error) {
 	switch expr.(type) {
 	case *ast.BasicLit:
 		basicExpr := expr.(*ast.BasicLit)
@@ -23,7 +23,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 			Statement: [][]Resolvable{
 				{
 					&Value{Value: "set"},
-					ident,
+					ident[0],
 					&Value{Value: value},
 				},
 			},
@@ -37,7 +37,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 				Statement: [][]Resolvable{
 					{
 						&Value{Value: "set"},
-						ident,
+						ident[0],
 						&Value{Value: identExpr.Name},
 					},
 				},
@@ -49,7 +49,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 			Statement: [][]Resolvable{
 				{
 					&Value{Value: "set"},
-					ident,
+					ident[0],
 					&NormalVariable{Name: identExpr.Name},
 				},
 			},
@@ -69,7 +69,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 			} else if leftExpr, ok := binaryExpr.X.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				exprInstructions, err := expressionToMLOG(dVar, leftExpr, options)
+				exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, leftExpr, options)
 				if err != nil {
 					return nil, err
 				}
@@ -87,7 +87,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 			} else if rightExpr, ok := binaryExpr.Y.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				exprInstructions, err := expressionToMLOG(dVar, rightExpr, options)
+				exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, rightExpr, options)
 				if err != nil {
 					return nil, err
 				}
@@ -104,7 +104,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 					{
 						&Value{Value: "op"},
 						&Value{Value: opTranslated},
-						ident,
+						ident[0],
 						leftSide,
 						rightSide,
 					},
@@ -114,22 +114,10 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 			return nil, errors.New(fmt.Sprintf("operator statement cannot use this operation: %s", binaryExpr.Op.String()))
 		}
 	case *ast.CallExpr:
-		callInstructions, err := callExprToMLOG(expr.(*ast.CallExpr), options)
+		callInstructions, err := callExprToMLOG(expr.(*ast.CallExpr), ident, options)
 		if err != nil {
 			return nil, err
 		}
-
-		callInstructions = append(callInstructions, &MLOG{
-			Comment: "Set the variable to the value",
-			Statement: [][]Resolvable{
-				{
-					&Value{Value: "set"},
-					ident,
-					&Value{Value: FunctionReturnVariable},
-				},
-			},
-		})
-
 		return callInstructions, err
 	case *ast.UnaryExpr:
 		unaryExpr := expr.(*ast.UnaryExpr)
@@ -145,7 +133,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 			} else if leftExpr, ok := unaryExpr.X.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				exprInstructions, err := expressionToMLOG(dVar, leftExpr, options)
+				exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, leftExpr, options)
 				if err != nil {
 					return nil, err
 				}
@@ -162,7 +150,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 				statement = []Resolvable{
 					&Value{Value: "op"},
 					&Value{Value: regularOperators[token.NOT]},
-					ident,
+					ident[0],
 					x,
 					&Value{Value: "-1"},
 				}
@@ -171,7 +159,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 				statement = []Resolvable{
 					&Value{Value: "op"},
 					&Value{Value: regularOperators[token.MUL]},
-					ident,
+					ident[0],
 					x,
 					&Value{Value: "-1"},
 				}
@@ -197,7 +185,7 @@ func expressionToMLOG(ident Resolvable, expr ast.Expr, options Options) ([]MLOGS
 		}
 		return instructions, nil
 	case *ast.SelectorExpr:
-		mlog, _, err := selectorExprToMLOG(ident, expr.(*ast.SelectorExpr))
+		mlog, _, err := selectorExprToMLOG(ident[0], expr.(*ast.SelectorExpr))
 		return mlog, err
 	default:
 		return nil, errors.New(fmt.Sprintf("unsupported expression type: %T", expr))
@@ -232,7 +220,7 @@ func selectorExprToMLOG(ident Resolvable, selectorExpr *ast.SelectorExpr) ([]MLO
 	return nil, "", errors.New(fmt.Sprintf("unknown selector: %s", name))
 }
 
-func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, error) {
+func callExprToMLOG(callExpr *ast.CallExpr, ident []Resolvable, options Options) ([]MLOGStatement, error) {
 	results := make([]MLOGStatement, 0)
 
 	var funcName string
@@ -253,6 +241,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, e
 		results = append(results, &MLOGFunc{
 			Function:  translatedFunc,
 			Arguments: args,
+			Variables: ident,
 		})
 	} else {
 		for _, arg := range callExpr.Args {
@@ -268,7 +257,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, e
 			} else if argExpr, ok := arg.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				instructions, err := expressionToMLOG(dVar, argExpr, options)
+				instructions, err := expressionToMLOG([]Resolvable{dVar}, argExpr, options)
 				if err != nil {
 					return nil, err
 				}
@@ -322,6 +311,19 @@ func callExprToMLOG(callExpr *ast.CallExpr, options Options) ([]MLOGStatement, e
 			Action: "sub",
 			Extra:  len(callExpr.Args),
 		})
+
+		if len(ident) > 0 {
+			results = append(results, &MLOG{
+				Comment: "Set the variable to the value",
+				Statement: [][]Resolvable{
+					{
+						&Value{Value: "set"},
+						ident[0],
+						&Value{Value: FunctionReturnVariable},
+					},
+				},
+			})
+		}
 	}
 
 	return results, nil
@@ -345,7 +347,7 @@ func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []M
 		} else if expr, ok := arg.(ast.Expr); ok {
 			dVar := &DynamicVariable{}
 
-			exprInstructions, err := expressionToMLOG(dVar, expr, options)
+			exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, expr, options)
 			if err != nil {
 				return nil, nil, err
 			}

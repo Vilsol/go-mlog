@@ -108,6 +108,7 @@ type MLOGFunc struct {
 	Position   int
 	Function   Translator
 	Arguments  []Resolvable
+	Variables  []Resolvable
 	Unresolved []MLOGStatement
 }
 
@@ -129,12 +130,22 @@ func (m *MLOGFunc) SetPosition(position int) int {
 }
 
 func (m *MLOGFunc) PostProcess(global *Global, function *Function) error {
+	if len(m.Variables) != m.Function.Variables {
+		return errors.New(fmt.Sprintf("function requires %d variables, provided: %d", m.Function.Variables, len(m.Variables)))
+	}
+
 	for _, argument := range m.Arguments {
 		if err := argument.PostProcess(global, function); err != nil {
 			return err
 		}
 	}
-	m.Unresolved = m.Function.Translate(m.Arguments)
+
+	var err error
+	m.Unresolved, err = m.Function.Translate(m.Arguments, m.Variables)
+	if err != nil {
+		return err
+	}
+
 	for i, statement := range m.Unresolved {
 		statement.SetPosition(m.Position + i)
 		if err := statement.PostProcess(global, function); err != nil {
