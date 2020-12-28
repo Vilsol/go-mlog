@@ -1,8 +1,9 @@
 package transpiler
 
 import (
-	"errors"
+	"context"
 	"fmt"
+	"go/ast"
 	"strconv"
 )
 
@@ -13,6 +14,7 @@ type Global struct {
 
 type Function struct {
 	Name            string
+	Declaration     *ast.FuncDecl
 	Statements      []MLOGStatement
 	ArgumentCount   int
 	VariableCounter int
@@ -24,7 +26,7 @@ type MLOGAble interface {
 }
 
 type Processable interface {
-	PostProcess(*Global, *Function) error
+	PostProcess(context.Context, *Global, *Function) error
 }
 
 type WithPosition interface {
@@ -43,7 +45,7 @@ type MLOGStatement interface {
 	Processable
 }
 
-func MLOGToString(statements [][]Resolvable, statement MLOGAble, lineNumber int, options Options) string {
+func MLOGToString(ctx context.Context, statements [][]Resolvable, statement MLOGAble, lineNumber int) string {
 	result := ""
 	for _, line := range statements {
 		resultLine := ""
@@ -54,11 +56,11 @@ func MLOGToString(statements [][]Resolvable, statement MLOGAble, lineNumber int,
 			resultLine += t.GetValue()
 		}
 
-		if options.Numbers {
+		if ctx.Value(contextOptions).(Options).Numbers {
 			result += fmt.Sprintf("%3d: ", lineNumber)
 		}
 
-		if options.Comments {
+		if ctx.Value(contextOptions).(Options).Comments {
 			result += fmt.Sprintf("%-45s", resultLine)
 			result += " // " + statement.GetComment()
 		} else {
@@ -81,10 +83,10 @@ func (m *MLOG) ToMLOG() [][]Resolvable {
 	return m.Statement
 }
 
-func (m *MLOG) PostProcess(global *Global, function *Function) error {
+func (m *MLOG) PostProcess(ctx context.Context, global *Global, function *Function) error {
 	for _, resolvables := range m.Statement {
 		for _, resolvable := range resolvables {
-			if err := resolvable.PostProcess(global, function); err != nil {
+			if err := resolvable.PostProcess(ctx, global, function); err != nil {
 				return err
 			}
 		}
@@ -97,6 +99,10 @@ func (m *MLOG) GetPosition() int {
 }
 
 func (m *MLOG) Size() int {
+	if len(m.Statement) == 0 {
+		panic("statement without instructions")
+	}
+
 	return len(m.Statement)
 }
 
@@ -138,13 +144,13 @@ func (m *MLOGFunc) SetPosition(position int) int {
 	return m.Function.Count
 }
 
-func (m *MLOGFunc) PostProcess(global *Global, function *Function) error {
+func (m *MLOGFunc) PostProcess(ctx context.Context, global *Global, function *Function) error {
 	if len(m.Variables) != m.Function.Variables {
-		return errors.New(fmt.Sprintf("function requires %d variables, provided: %d", m.Function.Variables, len(m.Variables)))
+		return Err(ctx, fmt.Sprintf("function requires %d variables, provided: %d", m.Function.Variables, len(m.Variables)))
 	}
 
 	for _, argument := range m.Arguments {
-		if err := argument.PostProcess(global, function); err != nil {
+		if err := argument.PostProcess(ctx, global, function); err != nil {
 			return err
 		}
 	}
@@ -157,7 +163,7 @@ func (m *MLOGFunc) PostProcess(global *Global, function *Function) error {
 
 	for i, statement := range m.Unresolved {
 		statement.SetPosition(m.Position + i)
-		if err := statement.PostProcess(global, function); err != nil {
+		if err := statement.PostProcess(ctx, global, function); err != nil {
 			return err
 		}
 	}
@@ -192,13 +198,13 @@ func (m *MLOGJump) Size() int {
 	return 1
 }
 
-func (m *MLOGJump) PostProcess(global *Global, function *Function) error {
+func (m *MLOGJump) PostProcess(ctx context.Context, global *Global, function *Function) error {
 	for _, resolvable := range m.Condition {
-		if err := resolvable.PostProcess(global, function); err != nil {
+		if err := resolvable.PostProcess(ctx, global, function); err != nil {
 			return err
 		}
 	}
-	return m.JumpTarget.PostProcess(global, function)
+	return m.JumpTarget.PostProcess(ctx, global, function)
 }
 
 func (m *MLOGJump) GetComment() string {
@@ -221,14 +227,14 @@ func (m *FunctionJumpTarget) Size() int {
 	return 1
 }
 
-func (m *FunctionJumpTarget) PostProcess(global *Global, _ *Function) error {
+func (m *FunctionJumpTarget) PostProcess(ctx context.Context, global *Global, _ *Function) error {
 	for _, fn := range global.Functions {
 		if fn.Name == m.FunctionName {
 			m.Statement = fn.Statements[0]
 			return nil
 		}
 	}
-	return errors.New("unknown function: " + m.FunctionName)
+	return Err(ctx, "unknown function: "+m.FunctionName)
 }
 
 type Resolvable interface {
@@ -244,7 +250,7 @@ func (m *Value) GetValue() string {
 	return m.Value
 }
 
-func (m *Value) PostProcess(*Global, *Function) error {
+func (m *Value) PostProcess(context.Context, *Global, *Function) error {
 	return nil
 }
 
@@ -257,7 +263,7 @@ type NormalVariable struct {
 	CalculatedName string
 }
 
-func (m *NormalVariable) PostProcess(global *Global, function *Function) error {
+func (m *NormalVariable) PostProcess(ctx context.Context, global *Global, function *Function) error {
 	if m.CalculatedName == "" {
 		if _, ok := global.Constants[m.Name]; ok {
 			m.CalculatedName = m.Name
@@ -279,7 +285,7 @@ type DynamicVariable struct {
 	Name string
 }
 
-func (m *DynamicVariable) PostProcess(global *Global, function *Function) error {
+func (m *DynamicVariable) PostProcess(ctx context.Context, global *Global, function *Function) error {
 	if m.Name == "" {
 		suffix := function.VariableCounter
 		function.VariableCounter += 1
@@ -354,7 +360,7 @@ func (m *StatementJumpTarget) Size() int {
 	return 1
 }
 
-func (m *StatementJumpTarget) PostProcess(*Global, *Function) error {
+func (m *StatementJumpTarget) PostProcess(context.Context, *Global, *Function) error {
 	return nil
 }
 
@@ -375,4 +381,82 @@ func (m *MLOGTrampolineBack) ToMLOG() [][]Resolvable {
 
 func (m *MLOGTrampolineBack) GetComment() string {
 	return "Trampoline back"
+}
+
+type MLOGBreak struct {
+	MLOG
+	Block *ContextBlock
+}
+
+func (m *MLOGBreak) ToMLOG() [][]Resolvable {
+	lastStatement := m.Block.Statements[len(m.Block.Statements)-1]
+	if m.Block.Extra != nil && len(m.Block.Extra) > 0 {
+		lastStatement = m.Block.Extra[len(m.Block.Extra)-1]
+	}
+	return [][]Resolvable{
+		{
+			&Value{Value: "jump"},
+			&Value{Value: strconv.Itoa(lastStatement.GetPosition() + lastStatement.Size())},
+			&Value{Value: "always"},
+		},
+	}
+}
+
+func (m *MLOGBreak) Size() int {
+	return 1
+}
+
+func (m *MLOGBreak) GetComment() string {
+	return "Break"
+}
+
+type MLOGContinue struct {
+	MLOG
+	Block *ContextBlock
+}
+
+func (m *MLOGContinue) ToMLOG() [][]Resolvable {
+	lastStatement := m.Block.Statements[len(m.Block.Statements)-1]
+	return [][]Resolvable{
+		{
+			&Value{Value: "jump"},
+			&Value{Value: strconv.Itoa(lastStatement.GetPosition() + lastStatement.Size())},
+			&Value{Value: "always"},
+		},
+	}
+}
+
+func (m *MLOGContinue) Size() int {
+	return 1
+}
+
+func (m *MLOGContinue) GetComment() string {
+	return "Continue"
+}
+
+type MLOGFallthrough struct {
+	MLOG
+	Block *ContextBlock
+}
+
+func (m *MLOGFallthrough) ToMLOG() [][]Resolvable {
+	lastStatement := m.Block.Statements[len(m.Block.Statements)-1]
+	if m.Block.Extra != nil && len(m.Block.Extra) > 0 {
+		lastStatement = m.Block.Extra[len(m.Block.Extra)-1]
+	}
+	return [][]Resolvable{
+		{
+			&Value{Value: "jump"},
+			&Value{Value: strconv.Itoa(lastStatement.GetPosition() + lastStatement.Size())},
+			&Value{Value: "always"},
+		},
+	}
+}
+
+func (m *MLOGFallthrough) Size() int {
+	return 1
+}
+
+func (m *MLOGFallthrough) GetComment() string {
+	return "Fallthrough"
 }

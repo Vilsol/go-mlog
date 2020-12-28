@@ -1,7 +1,7 @@
 package transpiler
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -38,6 +38,8 @@ func GolangToMLOGBytes(input []byte, options Options) (string, error) {
 }
 
 func GolangToMLOG(input string, options Options) (string, error) {
+	ctx := context.WithValue(context.Background(), contextOptions, options)
+
 	fileSet := token.NewFileSet()
 	f, err := parser.ParseFile(fileSet, "foo", input, 0)
 
@@ -46,40 +48,38 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	if f.Name.Name != "main" {
-		return "", errors.New("package must be main")
+		return "", Err(ctx, "package must be main")
 	}
 
 	for _, imp := range f.Imports {
 		if _, ok := validImports[imp.Path.Value]; !ok {
-			return "", errors.New("unregistered import used: " + imp.Path.Value)
+			return "", Err(context.WithValue(ctx, contextSpec, imp), "unregistered import used: "+imp.Path.Value)
 		}
 	}
 
 	constants := make([]*ast.GenDecl, 0)
 	var mainFunc *ast.FuncDecl
 	for _, decl := range f.Decls {
-		switch decl.(type) {
+		switch castDecl := decl.(type) {
 		case *ast.FuncDecl:
-			funcDecl := decl.(*ast.FuncDecl)
-			if funcDecl.Name.Name == "main" {
-				mainFunc = funcDecl
+			if castDecl.Name.Name == "main" {
+				mainFunc = castDecl
 			}
 			break
 		case *ast.GenDecl:
-			genDecl := decl.(*ast.GenDecl)
-			if genDecl.Tok.String() == "var" {
-				return "", errors.New("global scope may only contain constants not variables")
-			} else if genDecl.Tok.String() == "const" {
-				constants = append(constants, genDecl)
+			if castDecl.Tok.String() == "var" {
+				return "", Err(context.WithValue(ctx, contextDecl, decl), "global scope may only contain constants not variables")
+			} else if castDecl.Tok.String() == "const" {
+				constants = append(constants, castDecl)
 			}
 			break
 		case *ast.BadDecl:
-			return "", errors.New("syntax error in input file")
+			return "", Err(ctx, "syntax error in input file")
 		}
 	}
 
 	if mainFunc == nil {
-		return "", errors.New("file does not contain a main function")
+		return "", Err(ctx, "file does not contain a main function")
 	}
 
 	global := &Global{
@@ -87,27 +87,27 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	for _, decl := range f.Decls {
-		switch decl.(type) {
+		switch castDecl := decl.(type) {
 		case *ast.FuncDecl:
-			funcDecl := decl.(*ast.FuncDecl)
-			if funcDecl.Name.Name == "main" {
+			if castDecl.Name.Name == "main" {
 				continue
 			}
-			statements, err := statementToMLOG(funcDecl.Body, options)
+			fnCtx := context.WithValue(ctx, contextFunction, castDecl)
+			statements, err := statementToMLOG(fnCtx, castDecl.Body)
 			if err != nil {
 				return "", err
 			}
 
-			for i, param := range funcDecl.Type.Params.List {
+			for i, param := range castDecl.Type.Params.List {
 				if paramTypeIdent, ok := param.Type.(*ast.Ident); ok {
 					if paramTypeIdent.Name != "int" && paramTypeIdent.Name != "float64" {
-						return "", errors.New("function parameters may only be integers or floating point numbers")
+						return "", Err(fnCtx, "function parameters may only be integers or floating point numbers")
 					}
 				} else {
-					return "", errors.New("function parameters may only be integers or floating point numbers")
+					return "", Err(fnCtx, "function parameters may only be integers or floating point numbers")
 				}
 
-				position := len(funcDecl.Type.Params.List) - i
+				position := len(castDecl.Type.Params.List) - i
 
 				dVar := &DynamicVariable{}
 
@@ -147,20 +147,22 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			}
 
 			global.Functions = append(global.Functions, &Function{
-				Name:          funcDecl.Name.Name,
+				Name:          castDecl.Name.Name,
+				Declaration:   castDecl,
 				Statements:    statements,
-				ArgumentCount: len(funcDecl.Type.Params.List),
+				ArgumentCount: len(castDecl.Type.Params.List),
 			})
 			break
 		}
 	}
 
-	mainStatements, err := statementToMLOG(mainFunc.Body, options)
+	mainStatements, err := statementToMLOG(context.WithValue(ctx, contextFunction, mainFunc), mainFunc.Body)
 	if err != nil {
 		return "", err
 	}
 	global.Functions = append(global.Functions, &Function{
 		Name:          mainFunc.Name.Name,
+		Declaration:   mainFunc,
 		Statements:    mainStatements,
 		ArgumentCount: len(mainFunc.Type.Params.List),
 	})
@@ -186,12 +188,13 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			valueSpec := spec.(*ast.ValueSpec)
 			for i, name := range valueSpec.Names {
 				var value string
+				// TODO Convert to switch
 				if basicLit, ok := valueSpec.Values[i].(*ast.BasicLit); ok {
 					value = basicLit.Value
 				} else if ident, ok := valueSpec.Values[i].(*ast.Ident); ok {
 					value = ident.Name
 				} else {
-					return "", errors.New(fmt.Sprintf("unknown constant type: %T", valueSpec.Values[i]))
+					return "", Err(context.WithValue(ctx, contextSpec, spec), fmt.Sprintf("unknown constant type: %T", valueSpec.Values[i]))
 				}
 
 				startup = append(startup, &MLOG{
@@ -270,14 +273,14 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	for _, statement := range startup {
-		if err := statement.PostProcess(global, nil); err != nil {
+		if err := statement.PostProcess(context.WithValue(ctx, contextFunction, mainFunc), global, nil); err != nil {
 			return "", err
 		}
 	}
 
 	for _, fn := range global.Functions {
 		for _, statement := range fn.Statements {
-			if err := statement.PostProcess(global, fn); err != nil {
+			if err := statement.PostProcess(context.WithValue(ctx, contextFunction, fn.Declaration), global, fn); err != nil {
 				return "", err
 			}
 		}
@@ -287,7 +290,7 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	lineNumber := 0
 	for _, statement := range startup {
 		statements := statement.ToMLOG()
-		result += MLOGToString(statements, statement, lineNumber, options)
+		result += MLOGToString(context.WithValue(ctx, contextFunction, mainFunc), statements, statement, lineNumber)
 		lineNumber += len(statements)
 	}
 
@@ -304,13 +307,13 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			if options.Debug {
 				for _, debugStatement := range debugWriter {
 					deb := debugStatement.ToMLOG()
-					result += MLOGToString(deb, debugStatement, lineNumber, options)
+					result += MLOGToString(context.WithValue(ctx, contextFunction, fn.Declaration), deb, debugStatement, lineNumber)
 					lineNumber += len(deb)
 				}
 			}
 
 			statements := statement.ToMLOG()
-			result += MLOGToString(statements, statement, lineNumber, options)
+			result += MLOGToString(context.WithValue(ctx, contextFunction, fn.Declaration), statements, statement, lineNumber)
 			lineNumber += len(statements)
 		}
 	}

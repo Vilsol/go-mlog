@@ -26,13 +26,13 @@ func TestErrors(t *testing.T) {
 			name: "NoExternalImports",
 			input: `package main
 import "time"`,
-			output: `unregistered import used: "time"`,
+			output: `error at 21: unregistered import used: "time"`,
 		},
 		{
 			name: "GlobalScopeVariable",
 			input: `package main
 var x = 1`,
-			output: `global scope may only contain constants not variables`,
+			output: `error at 14: global scope may only contain constants not variables`,
 		},
 		{
 			name:   "NoMainFunction",
@@ -42,42 +42,37 @@ var x = 1`,
 		{
 			name:   "InvalidOperator",
 			input:  TestMain(`x := 1 &^ 1`),
-			output: `operator statement cannot use this operation: &^`,
+			output: `error at 103: operator statement cannot use this operation: &^`,
 		},
 		{
 			name:   "NotSupportSelect",
 			input:  TestMain(`select {}`),
-			output: `statement type not supported: *ast.SelectStmt`,
-		},
-		{
-			name:   "NotSupportSwitch",
-			input:  TestMain(`switch {}`),
-			output: `statement type not supported: *ast.SwitchStmt`,
+			output: `error at 103: statement type not supported: *ast.SelectStmt`,
 		},
 		{
 			name:   "NotSupportGo",
 			input:  TestMain(`go foo()`),
-			output: `statement type not supported: *ast.GoStmt`,
+			output: `error at 103: statement type not supported: *ast.GoStmt`,
 		},
 		{
 			name:   "NotSupportSend",
 			input:  TestMain(`foo <- 1`),
-			output: `statement type not supported: *ast.SendStmt`,
+			output: `error at 103: statement type not supported: *ast.SendStmt`,
 		},
 		{
 			name:   "NotSupportDefer",
 			input:  TestMain(`defer func() {}()`),
-			output: `statement type not supported: *ast.DeferStmt`,
+			output: `error at 103: statement type not supported: *ast.DeferStmt`,
 		},
 		{
 			name:   "NotSupportRange",
 			input:  TestMain(`for i := range nums {}`),
-			output: `statement type not supported: *ast.RangeStmt`,
+			output: `error at 103: statement type not supported: *ast.RangeStmt`,
 		},
 		{
 			name:   "InvalidAssignment",
 			input:  TestMain(`1 = 2`),
-			output: `left side variable assignment can only contain identifications`,
+			output: `error at 103: left side variable assignment can only contain identifications`,
 		},
 		{
 			name: "InvalidParamTypeString",
@@ -90,7 +85,7 @@ func main() {
 func sample1(arg string) int {
 	return 1
 }`,
-			output: `function parameters may only be integers or floating point numbers`,
+			output: `error at 57: function parameters may only be integers or floating point numbers`,
 		},
 		{
 			name: "InvalidParamTypeOther",
@@ -103,12 +98,12 @@ func main() {
 func sample1(arg hello.world) int {
 	return 1
 }`,
-			output: `function parameters may only be integers or floating point numbers`,
+			output: `error at 53: function parameters may only be integers or floating point numbers`,
 		},
 		{
 			name:   "CallToUnknownFunction",
 			input:  TestMain(`foo()`),
-			output: `unknown function: foo`,
+			output: `error at 89: unknown function: foo`,
 		},
 		{
 			name: "InvalidConstant",
@@ -118,7 +113,7 @@ const x = 1 + 2
 
 func main() {
 }`,
-			output: `unknown constant type: *ast.BinaryExpr`,
+			output: `error at 21: unknown constant type: *ast.BinaryExpr`,
 		},
 		{
 			name:   "EmptyPrintlnError",
@@ -151,7 +146,7 @@ func main() {
 func sample() (int, int) {
 	return 1, 2
 }`,
-			output: `only single value returns are supported`,
+			output: `error at 70: only single value returns are supported`,
 		},
 	}
 	for _, test := range tests {

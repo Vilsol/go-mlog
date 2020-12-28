@@ -1,20 +1,18 @@
 package transpiler
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"go/ast"
 	"go/token"
 	"strings"
 )
 
-func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLOGStatement, error) {
-	switch expr.(type) {
+func expressionToMLOG(ctx context.Context, ident []Resolvable, expr ast.Expr) ([]MLOGStatement, error) {
+	switch castExpr := expr.(type) {
 	case *ast.BasicLit:
-		basicExpr := expr.(*ast.BasicLit)
-
-		value := basicExpr.Value
-		if basicExpr.Kind == token.CHAR {
+		value := castExpr.Value
+		if castExpr.Kind == token.CHAR {
 			value = "\"" + strings.Trim(value, "'") + "\""
 		}
 
@@ -29,16 +27,14 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 			},
 		}}, nil
 	case *ast.Ident:
-		identExpr := expr.(*ast.Ident)
-
-		if identExpr.Name == "true" || identExpr.Name == "false" {
+		if castExpr.Name == "true" || castExpr.Name == "false" {
 			return []MLOGStatement{&MLOG{
 				Comment: "Set the variable to the value",
 				Statement: [][]Resolvable{
 					{
 						&Value{Value: "set"},
 						ident[0],
-						&Value{Value: identExpr.Name},
+						&Value{Value: castExpr.Name},
 					},
 				},
 			}}, nil
@@ -50,26 +46,25 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 				{
 					&Value{Value: "set"},
 					ident[0],
-					&NormalVariable{Name: identExpr.Name},
+					&NormalVariable{Name: castExpr.Name},
 				},
 			},
 		}}, nil
 	case *ast.BinaryExpr:
-		binaryExpr := expr.(*ast.BinaryExpr)
-
-		if opTranslated, ok := regularOperators[binaryExpr.Op]; ok {
+		if opTranslated, ok := regularOperators[castExpr.Op]; ok {
 			instructions := make([]MLOGStatement, 0)
 			var leftSide Resolvable
 			var rightSide Resolvable
 
-			if basicLit, ok := binaryExpr.X.(*ast.BasicLit); ok {
+			// TODO Convert to switch
+			if basicLit, ok := castExpr.X.(*ast.BasicLit); ok {
 				leftSide = &Value{Value: basicLit.Value}
-			} else if leftIdent, ok := binaryExpr.X.(*ast.Ident); ok {
+			} else if leftIdent, ok := castExpr.X.(*ast.Ident); ok {
 				leftSide = &NormalVariable{Name: leftIdent.Name}
-			} else if leftExpr, ok := binaryExpr.X.(ast.Expr); ok {
+			} else if leftExpr, ok := castExpr.X.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, leftExpr, options)
+				exprInstructions, err := expressionToMLOG(ctx, []Resolvable{dVar}, leftExpr)
 				if err != nil {
 					return nil, err
 				}
@@ -77,17 +72,18 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 				instructions = append(instructions, exprInstructions...)
 				leftSide = dVar
 			} else {
-				return nil, errors.New(fmt.Sprintf("unknown left side expression type: %T", binaryExpr.X))
+				return nil, Err(ctx, fmt.Sprintf("unknown left side expression type: %T", castExpr.X))
 			}
 
-			if basicLit, ok := binaryExpr.Y.(*ast.BasicLit); ok {
+			// TODO Convert to switch
+			if basicLit, ok := castExpr.Y.(*ast.BasicLit); ok {
 				rightSide = &Value{Value: basicLit.Value}
-			} else if rightIdent, ok := binaryExpr.Y.(*ast.Ident); ok {
+			} else if rightIdent, ok := castExpr.Y.(*ast.Ident); ok {
 				rightSide = &NormalVariable{Name: rightIdent.Name}
-			} else if rightExpr, ok := binaryExpr.Y.(ast.Expr); ok {
+			} else if rightExpr, ok := castExpr.Y.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, rightExpr, options)
+				exprInstructions, err := expressionToMLOG(ctx, []Resolvable{dVar}, rightExpr)
 				if err != nil {
 					return nil, err
 				}
@@ -95,7 +91,7 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 				instructions = append(instructions, exprInstructions...)
 				rightSide = dVar
 			} else {
-				return nil, errors.New(fmt.Sprintf("unknown right side expression type: %T", binaryExpr.Y))
+				return nil, Err(ctx, fmt.Sprintf("unknown right side expression type: %T", castExpr.Y))
 			}
 
 			return append(instructions, &MLOG{
@@ -111,29 +107,28 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 				},
 			}), nil
 		} else {
-			return nil, errors.New(fmt.Sprintf("operator statement cannot use this operation: %s", binaryExpr.Op.String()))
+			return nil, Err(ctx, fmt.Sprintf("operator statement cannot use this operation: %s", castExpr.Op.String()))
 		}
 	case *ast.CallExpr:
-		callInstructions, err := callExprToMLOG(expr.(*ast.CallExpr), ident, options)
+		callInstructions, err := callExprToMLOG(ctx, castExpr, ident)
 		if err != nil {
 			return nil, err
 		}
 		return callInstructions, err
 	case *ast.UnaryExpr:
-		unaryExpr := expr.(*ast.UnaryExpr)
-
-		if _, ok := regularOperators[unaryExpr.Op]; ok {
+		if _, ok := regularOperators[castExpr.Op]; ok {
 			instructions := make([]MLOGStatement, 0)
 
 			var x Resolvable
-			if basicLit, ok := unaryExpr.X.(*ast.BasicLit); ok {
+			// TODO Convert to switch
+			if basicLit, ok := castExpr.X.(*ast.BasicLit); ok {
 				x = &Value{Value: basicLit.Value}
-			} else if leftIdent, ok := unaryExpr.X.(*ast.Ident); ok {
+			} else if leftIdent, ok := castExpr.X.(*ast.Ident); ok {
 				x = &NormalVariable{Name: leftIdent.Name}
-			} else if leftExpr, ok := unaryExpr.X.(ast.Expr); ok {
+			} else if leftExpr, ok := castExpr.X.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, leftExpr, options)
+				exprInstructions, err := expressionToMLOG(ctx, []Resolvable{dVar}, leftExpr)
 				if err != nil {
 					return nil, err
 				}
@@ -141,11 +136,11 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 				instructions = append(instructions, exprInstructions...)
 				x = dVar
 			} else {
-				return nil, errors.New(fmt.Sprintf("unknown unary expression type: %T", unaryExpr.X))
+				return nil, Err(ctx, fmt.Sprintf("unknown unary expression type: %T", castExpr.X))
 			}
 
 			var statement []Resolvable
-			switch unaryExpr.Op {
+			switch castExpr.Op {
 			case token.NOT:
 				statement = []Resolvable{
 					&Value{Value: "op"},
@@ -167,7 +162,7 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 			}
 
 			if statement == nil {
-				return nil, errors.New(fmt.Sprintf("unsupported unary operation: %s", unaryExpr.Op.String()))
+				return nil, Err(ctx, fmt.Sprintf("unsupported unary operation: %s", castExpr.Op.String()))
 			}
 
 			return append(instructions, &MLOG{
@@ -175,26 +170,25 @@ func expressionToMLOG(ident []Resolvable, expr ast.Expr, options Options) ([]MLO
 				Statement: [][]Resolvable{statement},
 			}), nil
 		} else {
-			return nil, errors.New(fmt.Sprintf("operator statement cannot use this operation: %s", unaryExpr.Op.String()))
+			return nil, Err(ctx, fmt.Sprintf("operator statement cannot use this operation: %s", castExpr.Op.String()))
 		}
 	case *ast.ParenExpr:
-		parenExpr := expr.(*ast.ParenExpr)
-		instructions, err := expressionToMLOG(ident, parenExpr.X, options)
+		instructions, err := expressionToMLOG(ctx, ident, castExpr.X)
 		if err != nil {
 			return nil, err
 		}
 		return instructions, nil
 	case *ast.SelectorExpr:
-		mlog, _, err := selectorExprToMLOG(ident[0], expr.(*ast.SelectorExpr))
+		mlog, _, err := selectorExprToMLOG(ctx, ident[0], castExpr)
 		return mlog, err
 	default:
-		return nil, errors.New(fmt.Sprintf("unsupported expression type: %T", expr))
+		return nil, Err(ctx, fmt.Sprintf("unsupported expression type: %T", expr))
 	}
 }
 
-func selectorExprToMLOG(ident Resolvable, selectorExpr *ast.SelectorExpr) ([]MLOGStatement, string, error) {
+func selectorExprToMLOG(ctx context.Context, ident Resolvable, selectorExpr *ast.SelectorExpr) ([]MLOGStatement, string, error) {
 	if _, ok := selectorExpr.X.(*ast.Ident); !ok {
-		return nil, "", errors.New(fmt.Sprintf("unsupported selector type: %T", selectorExpr.X))
+		return nil, "", Err(ctx, fmt.Sprintf("unsupported selector type: %T", selectorExpr.X))
 	}
 
 	name := selectorExpr.X.(*ast.Ident).Name + "." + selectorExpr.Sel.Name
@@ -217,23 +211,24 @@ func selectorExprToMLOG(ident Resolvable, selectorExpr *ast.SelectorExpr) ([]MLO
 		}
 	}
 
-	return nil, "", errors.New(fmt.Sprintf("unknown selector: %s", name))
+	return nil, "", Err(ctx, fmt.Sprintf("unknown selector: %s", name))
 }
 
-func callExprToMLOG(callExpr *ast.CallExpr, ident []Resolvable, options Options) ([]MLOGStatement, error) {
+func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolvable) ([]MLOGStatement, error) {
 	results := make([]MLOGStatement, 0)
 
 	var funcName string
+	// TODO Convert to switch
 	if identity, ok := callExpr.Fun.(*ast.Ident); ok {
 		funcName = identity.Name
 	} else if selector, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
 		funcName = selector.X.(*ast.Ident).Name + "." + selector.Sel.Name
 	} else {
-		return nil, errors.New(fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
+		return nil, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
 	}
 
 	if translatedFunc, ok := funcTranslations[funcName]; ok {
-		args, instructions, err := argumentsToResolvables(callExpr.Args, options)
+		args, instructions, err := argumentsToResolvables(ctx, callExpr.Args)
 		if err != nil {
 			return nil, err
 		}
@@ -250,6 +245,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, ident []Resolvable, options Options)
 			})
 
 			var value Resolvable
+			// TODO Convert to switch
 			if basicLit, ok := arg.(*ast.BasicLit); ok {
 				value = &Value{Value: basicLit.Value}
 			} else if ident, ok := arg.(*ast.Ident); ok {
@@ -257,7 +253,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, ident []Resolvable, options Options)
 			} else if argExpr, ok := arg.(ast.Expr); ok {
 				dVar := &DynamicVariable{}
 
-				instructions, err := expressionToMLOG([]Resolvable{dVar}, argExpr, options)
+				instructions, err := expressionToMLOG(ctx, []Resolvable{dVar}, argExpr)
 				if err != nil {
 					return nil, err
 				}
@@ -265,7 +261,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, ident []Resolvable, options Options)
 				results = append(results, instructions...)
 				value = dVar
 			} else {
-				return nil, errors.New(fmt.Sprintf("unknown argument type: %T", arg))
+				return nil, Err(ctx, fmt.Sprintf("unknown argument type: %T", arg))
 			}
 
 			results = append(results, &MLOG{
@@ -286,7 +282,7 @@ func callExprToMLOG(callExpr *ast.CallExpr, ident []Resolvable, options Options)
 		})
 
 		extra := 2
-		if options.Debug {
+		if ctx.Value(contextOptions).(Options).Debug {
 			extra += debugCount
 		}
 
@@ -329,11 +325,12 @@ func callExprToMLOG(callExpr *ast.CallExpr, ident []Resolvable, options Options)
 	return results, nil
 }
 
-func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []MLOGStatement, error) {
+func argumentsToResolvables(ctx context.Context, args []ast.Expr) ([]Resolvable, []MLOGStatement, error) {
 	result := make([]Resolvable, len(args))
 	instructions := make([]MLOGStatement, 0)
 
 	for i, arg := range args {
+		// TODO Convert to switch
 		if basicExpr, ok := arg.(*ast.BasicLit); ok {
 			result[i] = &Value{Value: basicExpr.Value}
 		} else if identExpr, ok := arg.(*ast.Ident); ok {
@@ -343,7 +340,7 @@ func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []M
 				result[i] = &NormalVariable{Name: identExpr.Name}
 			}
 		} else if selectorExpr, ok := arg.(*ast.SelectorExpr); ok {
-			_, str, err := selectorExprToMLOG(nil, selectorExpr)
+			_, str, err := selectorExprToMLOG(ctx, nil, selectorExpr)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -351,7 +348,7 @@ func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []M
 		} else if expr, ok := arg.(ast.Expr); ok {
 			dVar := &DynamicVariable{}
 
-			exprInstructions, err := expressionToMLOG([]Resolvable{dVar}, expr, options)
+			exprInstructions, err := expressionToMLOG(ctx, []Resolvable{dVar}, expr)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -360,7 +357,7 @@ func argumentsToResolvables(args []ast.Expr, options Options) ([]Resolvable, []M
 
 			result[i] = dVar
 		} else {
-			return nil, nil, errors.New(fmt.Sprintf("unknown argument type received: %T", arg))
+			return nil, nil, Err(ctx, fmt.Sprintf("unknown argument type received: %T", arg))
 		}
 	}
 

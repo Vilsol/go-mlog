@@ -20,18 +20,16 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 * `return` from functions
 * `for` loops
 * `if`/`else if`/`else` statements
+* `switch` statement
+* `break`/`continue`/`fallthrough` statements
 * Binary and Unary math
 * Function level variable scopes
+* Contextual errors
 
 ## Roadmap
 
-* Documentation
-* `break` out of loops
-* `switch` statement
 * Full variable block scoping
 * `print`/`println` multiple arguments
-* Errors with context
-* Extensions
 * Variable argument count functions
 * Multiple function return values
 * Optimize simple jump instructions

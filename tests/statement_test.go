@@ -39,9 +39,10 @@ print 6`,
 			name:  "ForLoop",
 			input: TestMain(`for i := 0; i < 10; i++ { print(i) }`),
 			output: `set _main_i 0
+jump 5 lessThan _main_i 10
 print _main_i
 op add _main_i _main_i 1
-jump 1 lessThan _main_i 10`,
+jump 2 lessThan _main_i 10`,
 		},
 		{
 			name:   "Reassignment",
@@ -57,6 +58,86 @@ jump 1 lessThan _main_i 10`,
 			name:   "VariableCharacter",
 			input:  TestMain(`x := 'A'`),
 			output: `set _main_x "A"`,
+		},
+		{
+			name:  "Break",
+			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { break; }; println(i); }`),
+			output: `set _main_i 0
+jump 10 lessThan _main_i 10
+op equal _main_0 _main_i 5
+jump 5 equal _main_0 1
+jump 6 always
+jump 10 always
+print _main_i
+print "\n"
+op add _main_i _main_i 1
+jump 2 lessThan _main_i 10`,
+		},
+		{
+			name:  "Continue",
+			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { continue; }; println(i); }`),
+			output: `set _main_i 0
+jump 10 lessThan _main_i 10
+op equal _main_0 _main_i 5
+jump 5 equal _main_0 1
+jump 6 always
+jump 8 always
+print _main_i
+print "\n"
+op add _main_i _main_i 1
+jump 2 lessThan _main_i 10`,
+		},
+		{
+			name: "Switch",
+			input: TestMain(`switch 10 {
+case 0:
+	println("0")
+case 1:
+	println("1")
+	fallthrough
+case 2:
+	println("2")
+	fallthrough
+case 3, 4:
+	println("3, 4")
+	break
+case 5, 6:
+	println("5, 6")
+	break
+default:
+	println("default")
+	break
+}`),
+			output: `jump 2 equal 10 0
+jump 5 always
+print "0"
+print "\n"
+jump 30 always
+jump 7 equal 10 1
+jump 10 always
+print "1"
+print "\n"
+jump 12 always
+jump 12 equal 10 2
+jump 15 always
+print "2"
+print "\n"
+jump 18 always
+jump 18 equal 10 3
+jump 18 equal 10 4
+jump 21 always
+print "3, 4"
+print "\n"
+jump 30 always
+jump 24 equal 10 5
+jump 24 equal 10 6
+jump 27 always
+print "5, 6"
+print "\n"
+jump 30 always
+print "default"
+print "\n"
+jump 30 always`,
 		},
 	}
 	for _, test := range tests {
