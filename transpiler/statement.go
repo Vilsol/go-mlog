@@ -14,8 +14,6 @@ func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, 
 
 	switch castStmt := statement.(type) {
 	case *ast.ForStmt:
-		// TODO Switch from do while to while do
-
 		if len(castStmt.Body.List) == 0 {
 			break
 		}
@@ -30,26 +28,18 @@ func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, 
 		var loopEndJump *MLOGJump
 		if binaryExpr, ok := castStmt.Cond.(*ast.BinaryExpr); ok {
 			if translatedOp, ok := jumpOperators[binaryExpr.Op]; ok {
-				var leftSide Resolvable
-				var rightSide Resolvable
 
-				// TODO Convert to switch
-				if basicLit, ok := binaryExpr.X.(*ast.BasicLit); ok {
-					leftSide = &Value{Value: basicLit.Value}
-				} else if ident, ok := binaryExpr.X.(*ast.Ident); ok {
-					leftSide = &NormalVariable{Name: ident.Name}
-				} else {
-					return nil, Err(subCtx, fmt.Sprintf("unknown left side expression type: %T", binaryExpr.X))
+				leftSide, leftExprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
+				if err != nil {
+					return nil, err
 				}
+				results = append(results, leftExprInstructions...)
 
-				// TODO Convert to switch
-				if basicLit, ok := binaryExpr.Y.(*ast.BasicLit); ok {
-					rightSide = &Value{Value: basicLit.Value}
-				} else if ident, ok := binaryExpr.Y.(*ast.Ident); ok {
-					rightSide = &NormalVariable{Name: ident.Name}
-				} else {
-					return nil, Err(subCtx, fmt.Sprintf("unknown right side expression type: %T", binaryExpr.Y))
+				rightSide, rightExprInstructions, err := exprToResolvable(ctx, binaryExpr.Y)
+				if err != nil {
+					return nil, err
 				}
+				results = append(results, rightExprInstructions...)
 
 				loopStartJump = &MLOGJump{
 					MLOG: MLOG{
@@ -213,25 +203,11 @@ func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, 
 		if len(castStmt.Results) > 0 {
 			returnValue := castStmt.Results[0]
 
-			var resultVar Resolvable
-			// TODO Convert to switch
-			if ident, ok := returnValue.(*ast.Ident); ok {
-				resultVar = &NormalVariable{Name: ident.Name}
-			} else if basicLit, ok := returnValue.(*ast.BasicLit); ok {
-				resultVar = &Value{Value: basicLit.Value}
-			} else if expr, ok := returnValue.(ast.Expr); ok {
-				dVar := &DynamicVariable{}
-
-				instructions, err := expressionToMLOG(subCtx, []Resolvable{dVar}, expr)
-				if err != nil {
-					return nil, err
-				}
-
-				results = append(results, instructions...)
-				resultVar = dVar
-			} else {
-				return nil, Err(subCtx, fmt.Sprintf("unknown return value type: %T", returnValue))
+			resultVar, exprInstructions, err := exprToResolvable(ctx, returnValue)
+			if err != nil {
+				return nil, err
 			}
+			results = append(results, exprInstructions...)
 
 			results = append(results, &MLOG{
 				Comment: "Set return data",
@@ -321,15 +297,11 @@ func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, 
 			results = append(results, instructions...)
 		}
 
-		// TODO Convert to switch
-		var tag Resolvable
-		if tagBasic, ok := castStmt.Tag.(*ast.BasicLit); ok {
-			tag = &Value{Value: tagBasic.Value}
-		} else if tagIdent, ok := castStmt.Tag.(*ast.Ident); ok {
-			tag = &NormalVariable{Name: tagIdent.Name}
-		} else {
-			return nil, Err(subCtx, fmt.Sprintf("unknown switch condition type: %T", castStmt.Tag))
+		tag, leftExprInstructions, err := exprToResolvable(ctx, castStmt.Tag)
+		if err != nil {
+			return nil, err
 		}
+		results = append(results, leftExprInstructions...)
 
 		blockCtxStruct := &ContextBlock{}
 		blockCtx := context.WithValue(subCtx, contextBreakableBlock, blockCtxStruct)
@@ -458,11 +430,35 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 	} else {
 		for i, expr := range statement.Lhs {
 			if ident, ok := expr.(*ast.Ident); ok {
+				nVar := &NormalVariable{Name: ident.Name}
+				if opTranslated, ok := regularOperators[statement.Tok]; ok {
+					instructions := make([]MLOGStatement, 0)
+
+					rightSide, rightExprInstructions, err := exprToResolvable(ctx, statement.Rhs[i])
+					if err != nil {
+						return nil, err
+					}
+					instructions = append(instructions, rightExprInstructions...)
+
+					return append(instructions, &MLOG{
+						Comment: "Execute operation",
+						Statement: [][]Resolvable{
+							{
+								&Value{Value: "op"},
+								&Value{Value: opTranslated},
+								nVar,
+								nVar,
+								rightSide,
+							},
+						},
+					}), nil
+				}
+
 				if statement.Tok != token.ASSIGN && statement.Tok != token.DEFINE {
 					return nil, Err(ctx, "only direct assignment is supported")
 				}
 
-				exprMLOG, err := expressionToMLOG(ctx, []Resolvable{&NormalVariable{Name: ident.Name}}, statement.Rhs[i])
+				exprMLOG, err := expressionToMLOG(ctx, []Resolvable{nVar}, statement.Rhs[i])
 				if err != nil {
 					return nil, err
 				}

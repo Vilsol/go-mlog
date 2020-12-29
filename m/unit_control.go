@@ -4,7 +4,9 @@ import "github.com/Vilsol/go-mlog/transpiler"
 
 func init() {
 	transpiler.RegisterFuncTranslation("m.UnitStop", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -19,7 +21,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitMove", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -36,7 +40,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitApproach", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -54,7 +60,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitBoost", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -70,7 +78,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitPathfind", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -85,7 +95,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitTarget", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -103,7 +115,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitTargetP", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -120,7 +134,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitItemDrop", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -137,7 +153,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitItemTake", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -155,7 +173,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitPayloadDrop", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -170,7 +190,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitPayloadTake", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -186,7 +208,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitMine", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -203,7 +227,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitFlag", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -219,7 +245,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitBuild", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -239,7 +267,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitGetBlock", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 2,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -259,7 +289,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitWithin", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{

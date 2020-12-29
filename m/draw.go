@@ -7,7 +7,9 @@ import (
 
 func init() {
 	transpiler.RegisterFuncTranslation("m.DrawClear", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -25,7 +27,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawColor", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -44,7 +48,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawStroke", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -60,7 +66,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawLine", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -79,7 +87,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawRect", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -98,7 +108,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawLineRect", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -117,7 +129,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawPoly", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -137,7 +151,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawLinePoly", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -157,7 +173,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawTriangle", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -178,7 +196,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawImage", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -198,7 +218,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.DrawFlush", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{

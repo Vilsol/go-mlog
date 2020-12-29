@@ -112,6 +112,7 @@ func sample1(arg hello.world) int {
 const x = 1 + 2
 
 func main() {
+	println("1")
 }`,
 			output: `error at 21: unknown constant type: *ast.BinaryExpr`,
 		},
@@ -147,6 +148,11 @@ func sample() (int, int) {
 	return 1, 2
 }`,
 			output: `error at 70: only single value returns are supported`,
+		},
+		{
+			name:   "ErrorEmptyMain",
+			input:  TestMain(``),
+			output: `empty main function`,
 		},
 	}
 	for _, test := range tests {

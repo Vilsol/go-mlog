@@ -17,12 +17,6 @@ const StackCellName = `bank1`
 const debugCellName = `cell2`
 const debugCount = 2
 
-// TODO Registry
-var validImports = map[string]bool{
-	`"github.com/Vilsol/go-mlog/m"`: true,
-	`"github.com/Vilsol/go-mlog/x"`: true,
-}
-
 func GolangToMLOGFile(fileName string, options Options) (string, error) {
 	file, err := ioutil.ReadFile(fileName)
 
@@ -157,9 +151,15 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	mainStatements, err := statementToMLOG(context.WithValue(ctx, contextFunction, mainFunc), mainFunc.Body)
+
 	if err != nil {
 		return "", err
 	}
+
+	if len(mainStatements) == 0 {
+		return "", Err(ctx, "empty main function")
+	}
+
 	global.Functions = append(global.Functions, &Function{
 		Name:          mainFunc.Name.Name,
 		Declaration:   mainFunc,
@@ -188,12 +188,14 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			valueSpec := spec.(*ast.ValueSpec)
 			for i, name := range valueSpec.Names {
 				var value string
-				// TODO Convert to switch
-				if basicLit, ok := valueSpec.Values[i].(*ast.BasicLit); ok {
-					value = basicLit.Value
-				} else if ident, ok := valueSpec.Values[i].(*ast.Ident); ok {
-					value = ident.Name
-				} else {
+				switch valueType := valueSpec.Values[i].(type) {
+				case *ast.BasicLit:
+					value = valueType.Value
+					break
+				case *ast.Ident:
+					value = valueType.Name
+					break
+				default:
 					return "", Err(context.WithValue(ctx, contextSpec, spec), fmt.Sprintf("unknown constant type: %T", valueSpec.Values[i]))
 				}
 

@@ -136,12 +136,12 @@ func (m *MLOGFunc) GetPosition() int {
 }
 
 func (m *MLOGFunc) Size() int {
-	return m.Function.Count
+	return m.Function.Count(m.Arguments, m.Variables)
 }
 
 func (m *MLOGFunc) SetPosition(position int) int {
 	m.Position = position
-	return m.Function.Count
+	return m.Function.Count(m.Arguments, m.Variables)
 }
 
 func (m *MLOGFunc) PostProcess(ctx context.Context, global *Global, function *Function) error {

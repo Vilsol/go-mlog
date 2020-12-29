@@ -29,11 +29,11 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 ## Roadmap
 
 * Full variable block scoping
-* `print`/`println` multiple arguments
 * Variable argument count functions
 * Multiple function return values
 * Optimize simple jump instructions
 * Multi-pass post-processing
+* Tree-shake unused functions
 
 ## Design Limitations
 

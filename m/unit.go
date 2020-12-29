@@ -7,7 +7,9 @@ import (
 
 func init() {
 	transpiler.RegisterFuncTranslation("m.UnitBind", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -22,7 +24,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitRadar", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -44,7 +48,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitLocateOre", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 3,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -67,7 +73,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitLocateBuilding", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 4,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -90,7 +98,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitLocateSpawn", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 4,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -113,7 +123,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.UnitLocateDamaged", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 4,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{

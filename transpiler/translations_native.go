@@ -4,47 +4,60 @@ import "errors"
 
 func init() {
 	RegisterFuncTranslation("print", Translator{
-		Count: 1,
+		Count: func(args []Resolvable, vars []Resolvable) int {
+			return len(args)
+		},
 		Translate: func(args []Resolvable, _ []Resolvable) ([]MLOGStatement, error) {
 			if len(args) == 0 {
 				return nil, errors.New("print with 0 arguments")
 			}
-			return []MLOGStatement{
-				&MLOG{
+
+			results := make([]MLOGStatement, len(args))
+			for i, arg := range args {
+				results[i] = &MLOG{
 					Statement: [][]Resolvable{
 						{
 							&Value{Value: "print"},
-							&Value{Value: args[0].GetValue()},
+							&Value{Value: arg.GetValue()},
 						},
 					},
-				},
-			}, nil
+				}
+			}
+
+			return results, nil
 		},
 	})
 	RegisterFuncTranslation("println", Translator{
-		Count: 2,
+		Count: func(args []Resolvable, vars []Resolvable) int {
+			return len(args) + 1
+		},
 		Translate: func(args []Resolvable, _ []Resolvable) ([]MLOGStatement, error) {
 			if len(args) == 0 {
 				return nil, errors.New("println with 0 arguments")
 			}
-			return []MLOGStatement{
-				&MLOG{
+
+			results := make([]MLOGStatement, len(args)+1)
+			for i, arg := range args {
+				results[i] = &MLOG{
 					Statement: [][]Resolvable{
 						{
 							&Value{Value: "print"},
-							&Value{Value: args[0].GetValue()},
+							&Value{Value: arg.GetValue()},
 						},
 					},
-				},
-				&MLOG{
-					Statement: [][]Resolvable{
-						{
-							&Value{Value: "print"},
-							&Value{Value: `"\n"`},
-						},
+				}
+			}
+
+			results[len(results)-1] = &MLOG{
+				Statement: [][]Resolvable{
+					{
+						&Value{Value: "print"},
+						&Value{Value: `"\n"`},
 					},
 				},
-			}, nil
+			}
+
+			return results, nil
 		},
 	})
 }

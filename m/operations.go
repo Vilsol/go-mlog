@@ -4,7 +4,9 @@ import "github.com/Vilsol/go-mlog/transpiler"
 
 func init() {
 	transpiler.RegisterFuncTranslation("m.Floor", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -22,7 +24,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.Random", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{

@@ -14,14 +14,18 @@ func TestNative(t *testing.T) {
 		output string
 	}{
 		{
-			name:   "print",
-			input:  TestMain(`print(1)`),
-			output: `print 1`,
+			name:  "print",
+			input: TestMain(`print(1, "A", x)`),
+			output: `print 1
+print "A"
+print _main_x`,
 		},
 		{
 			name:  "println",
-			input: TestMain(`println(1)`),
+			input: TestMain(`println(1, "A", x)`),
 			output: `print 1
+print "A"
+print _main_x
 print "\n"`,
 		},
 	}

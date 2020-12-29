@@ -1,7 +1,7 @@
 package transpiler
 
 type Translator struct {
-	Count     int
+	Count     func(args []Resolvable, vars []Resolvable) int
 	Variables int
 
 	Translate func(args []Resolvable, vars []Resolvable) ([]MLOGStatement, error)

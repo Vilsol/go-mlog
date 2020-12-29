@@ -8,7 +8,9 @@ import (
 
 func init() {
 	transpiler.RegisterFuncTranslation("m.Read", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			memoryName := strings.Trim(args[0].GetValue(), "\"")
@@ -32,7 +34,9 @@ func init() {
 		},
 	})
 	write := transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			memoryName := strings.Trim(args[1].GetValue(), "\"")
 
@@ -57,7 +61,9 @@ func init() {
 	transpiler.RegisterFuncTranslation("m.Write", write)
 	transpiler.RegisterFuncTranslation("m.WriteInt", write)
 	transpiler.RegisterFuncTranslation("m.PrintFlush", transpiler.Translator{
-		Count: 1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
 				&transpiler.MLOG{
@@ -72,7 +78,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.GetLink", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -89,7 +97,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.Radar", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
@@ -111,7 +121,9 @@ func init() {
 		},
 	})
 	transpiler.RegisterFuncTranslation("m.Sensor", transpiler.Translator{
-		Count:     1,
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
 		Variables: 1,
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			return []transpiler.MLOGStatement{
