@@ -134,6 +134,35 @@ write 8 bank1 @stack
 jump 2 always
 op sub @stack @stack 1`,
 		},
+		{
+			name: "TreeShake",
+			input: `package main
+
+func main() {
+	hello()
+}
+
+func hello() {
+	println("hello")
+}
+
+func foo() {
+	println("foo")
+}
+
+func bar() {
+	println("bar")
+}`,
+			output: `set @stack 0
+jump 5 always
+print "hello"
+print "\n"
+read @counter bank1 @stack
+op add @stack @stack 1
+write 8 bank1 @stack
+jump 2 always
+op sub @stack @stack 1`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

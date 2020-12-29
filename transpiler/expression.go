@@ -11,137 +11,23 @@ import (
 func expressionToMLOG(ctx context.Context, ident []Resolvable, expr ast.Expr) ([]MLOGStatement, error) {
 	switch castExpr := expr.(type) {
 	case *ast.BasicLit:
-		value := castExpr.Value
-		if castExpr.Kind == token.CHAR {
-			value = "\"" + strings.Trim(value, "'") + "\""
-		}
-
-		return []MLOGStatement{&MLOG{
-			Comment: "Set the variable to the value",
-			Statement: [][]Resolvable{
-				{
-					&Value{Value: "set"},
-					ident[0],
-					&Value{Value: value},
-				},
-			},
-		}}, nil
+		return basicLitToMLOG(ctx, ident, castExpr)
 	case *ast.Ident:
-		if castExpr.Name == "true" || castExpr.Name == "false" {
-			return []MLOGStatement{&MLOG{
-				Comment: "Set the variable to the value",
-				Statement: [][]Resolvable{
-					{
-						&Value{Value: "set"},
-						ident[0],
-						&Value{Value: castExpr.Name},
-					},
-				},
-			}}, nil
-		}
-
-		return []MLOGStatement{&MLOG{
-			Comment: "Set the variable to the value of other variable",
-			Statement: [][]Resolvable{
-				{
-					&Value{Value: "set"},
-					ident[0],
-					&NormalVariable{Name: castExpr.Name},
-				},
-			},
-		}}, nil
+		return identToMLOG(ctx, ident, castExpr)
 	case *ast.BinaryExpr:
-		if opTranslated, ok := regularOperators[castExpr.Op]; ok {
-			instructions := make([]MLOGStatement, 0)
-
-			leftSide, leftExprInstructions, err := exprToResolvable(ctx, castExpr.X)
-			if err != nil {
-				return nil, err
-			}
-			instructions = append(instructions, leftExprInstructions...)
-
-			rightSide, rightExprInstructions, err := exprToResolvable(ctx, castExpr.Y)
-			if err != nil {
-				return nil, err
-			}
-			instructions = append(instructions, rightExprInstructions...)
-
-			return append(instructions, &MLOG{
-				Comment: "Execute operation",
-				Statement: [][]Resolvable{
-					{
-						&Value{Value: "op"},
-						&Value{Value: opTranslated},
-						ident[0],
-						leftSide,
-						rightSide,
-					},
-				},
-			}), nil
-		} else {
-			return nil, Err(ctx, fmt.Sprintf("operator statement cannot use this operation: %s", castExpr.Op.String()))
-		}
+		return binaryExprToMLOG(ctx, ident, castExpr)
 	case *ast.CallExpr:
-		callInstructions, err := callExprToMLOG(ctx, castExpr, ident)
-		if err != nil {
-			return nil, err
-		}
-		return callInstructions, err
+		return callExprToMLOG(ctx, castExpr, ident)
 	case *ast.UnaryExpr:
-		if _, ok := regularOperators[castExpr.Op]; ok {
-			instructions := make([]MLOGStatement, 0)
-
-			x, exprInstructions, err := exprToResolvable(ctx, castExpr.X)
-			if err != nil {
-				return nil, err
-			}
-			instructions = append(instructions, exprInstructions...)
-
-			var statement []Resolvable
-			switch castExpr.Op {
-			case token.NOT:
-				statement = []Resolvable{
-					&Value{Value: "op"},
-					&Value{Value: regularOperators[token.NOT]},
-					ident[0],
-					x,
-					&Value{Value: "-1"},
-				}
-				break
-			case token.SUB:
-				statement = []Resolvable{
-					&Value{Value: "op"},
-					&Value{Value: regularOperators[token.MUL]},
-					ident[0],
-					x,
-					&Value{Value: "-1"},
-				}
-				break
-			}
-
-			if statement == nil {
-				return nil, Err(ctx, fmt.Sprintf("unsupported unary operation: %s", castExpr.Op.String()))
-			}
-
-			return append(instructions, &MLOG{
-				Comment:   "Execute unary operation",
-				Statement: [][]Resolvable{statement},
-			}), nil
-		} else {
-			return nil, Err(ctx, fmt.Sprintf("operator statement cannot use this operation: %s", castExpr.Op.String()))
-		}
+		return unaryExprToMLOG(ctx, ident, castExpr)
 	case *ast.ParenExpr:
-		instructions, err := expressionToMLOG(ctx, ident, castExpr.X)
-		if err != nil {
-			return nil, err
-		}
-		return instructions, nil
+		return expressionToMLOG(ctx, ident, castExpr.X)
 	case *ast.SelectorExpr:
 		mlog, _, err := selectorExprToMLOG(ctx, ident[0], castExpr)
 		return mlog, err
-	default:
-		return nil, Err(ctx, fmt.Sprintf("unsupported expression type: %T", expr))
 	}
+
+	return nil, Err(ctx, fmt.Sprintf("unsupported expression type: %T", expr))
 }
 
 func exprToResolvable(ctx context.Context, expr ast.Expr) (Resolvable, []MLOGStatement, error) {
@@ -163,10 +49,9 @@ func exprToResolvable(ctx context.Context, expr ast.Expr) (Resolvable, []MLOGSta
 		}
 
 		return dVar, exprInstructions, nil
-	default:
-		return nil, nil, Err(ctx, fmt.Sprintf("unknown resolvable expression type: %T", expr))
 	}
 
+	return nil, nil, Err(ctx, fmt.Sprintf("unknown resolvable expression type: %T", expr))
 }
 
 func selectorExprToMLOG(ctx context.Context, ident Resolvable, selectorExpr *ast.SelectorExpr) ([]MLOGStatement, string, error) {
@@ -322,4 +207,126 @@ func argumentsToResolvables(ctx context.Context, args []ast.Expr) ([]Resolvable,
 	}
 
 	return result, instructions, nil
+}
+
+func unaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.UnaryExpr) ([]MLOGStatement, error) {
+	if _, ok := regularOperators[expr.Op]; ok {
+		instructions := make([]MLOGStatement, 0)
+
+		x, exprInstructions, err := exprToResolvable(ctx, expr.X)
+		if err != nil {
+			return nil, err
+		}
+		instructions = append(instructions, exprInstructions...)
+
+		var statement []Resolvable
+		switch expr.Op {
+		case token.NOT:
+			statement = []Resolvable{
+				&Value{Value: "op"},
+				&Value{Value: regularOperators[token.NOT]},
+				ident[0],
+				x,
+				&Value{Value: "-1"},
+			}
+			break
+		case token.SUB:
+			statement = []Resolvable{
+				&Value{Value: "op"},
+				&Value{Value: regularOperators[token.MUL]},
+				ident[0],
+				x,
+				&Value{Value: "-1"},
+			}
+			break
+		}
+
+		if statement == nil {
+			return nil, Err(ctx, fmt.Sprintf("unsupported unary operation: %s", expr.Op.String()))
+		}
+
+		return append(instructions, &MLOG{
+			Comment:   "Execute unary operation",
+			Statement: [][]Resolvable{statement},
+		}), nil
+	}
+
+	return nil, Err(ctx, fmt.Sprintf("operator statement cannot use this operation: %s", expr.Op.String()))
+}
+
+func binaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.BinaryExpr) ([]MLOGStatement, error) {
+	if opTranslated, ok := regularOperators[expr.Op]; ok {
+		instructions := make([]MLOGStatement, 0)
+
+		leftSide, leftExprInstructions, err := exprToResolvable(ctx, expr.X)
+		if err != nil {
+			return nil, err
+		}
+		instructions = append(instructions, leftExprInstructions...)
+
+		rightSide, rightExprInstructions, err := exprToResolvable(ctx, expr.Y)
+		if err != nil {
+			return nil, err
+		}
+		instructions = append(instructions, rightExprInstructions...)
+
+		return append(instructions, &MLOG{
+			Comment: "Execute operation",
+			Statement: [][]Resolvable{
+				{
+					&Value{Value: "op"},
+					&Value{Value: opTranslated},
+					ident[0],
+					leftSide,
+					rightSide,
+				},
+			},
+		}), nil
+	}
+
+	return nil, Err(ctx, fmt.Sprintf("operator statement cannot use this operation: %s", expr.Op.String()))
+}
+
+func identToMLOG(_ context.Context, ident []Resolvable, expr *ast.Ident) ([]MLOGStatement, error) {
+	if expr.Name == "true" || expr.Name == "false" {
+		return []MLOGStatement{&MLOG{
+			Comment: "Set the variable to the value",
+			Statement: [][]Resolvable{
+				{
+					&Value{Value: "set"},
+					ident[0],
+					&Value{Value: expr.Name},
+				},
+			},
+		}}, nil
+	}
+
+	return []MLOGStatement{&MLOG{
+		Comment: "Set the variable to the value of other variable",
+		Statement: [][]Resolvable{
+			{
+				&Value{Value: "set"},
+				ident[0],
+				&NormalVariable{Name: expr.Name},
+			},
+		},
+	}}, nil
+}
+
+func basicLitToMLOG(_ context.Context, ident []Resolvable, expr *ast.BasicLit) ([]MLOGStatement, error) {
+	value := expr.Value
+	if expr.Kind == token.CHAR {
+		value = "\"" + strings.Trim(value, "'") + "\""
+	}
+
+	return []MLOGStatement{&MLOG{
+		Comment: "Set the variable to the value",
+		Statement: [][]Resolvable{
+			{
+				&Value{Value: "set"},
+				ident[0],
+				&Value{Value: value},
+			},
+		},
+	}}, nil
 }

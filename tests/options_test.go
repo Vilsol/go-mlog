@@ -142,7 +142,7 @@ op sub @stack @stack 2                        // Update Stack Pointer
 set _main_0 @return                           // Set the variable to the value
 print _main_0                                 // Call to native function
 print "\n"                                    // Call to native function
-op add _main_i _main_i 1                      // Execute for loop post condition increment/decrement
+op add _main_i _main_i 1                      // Execute increment/decrement
 jump 9 lessThan _main_i 10                    // Jump to start of loop`,
 		},
 		{
@@ -174,7 +174,7 @@ jump 9 lessThan _main_i 10                    // Jump to start of loop`,
  15: set _main_0 @return                           // Set the variable to the value
  16: print _main_0                                 // Call to native function
  17: print "\n"                                    // Call to native function
- 18: op add _main_i _main_i 1                      // Execute for loop post condition increment/decrement
+ 18: op add _main_i _main_i 1                      // Execute increment/decrement
  19: jump 9 lessThan _main_i 10                    // Jump to start of loop`,
 		},
 	}

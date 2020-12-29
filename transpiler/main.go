@@ -17,6 +17,8 @@ const StackCellName = `bank1`
 const debugCellName = `cell2`
 const debugCount = 2
 
+const mainFuncName = `main`
+
 func GolangToMLOGFile(fileName string, options Options) (string, error) {
 	file, err := ioutil.ReadFile(fileName)
 
@@ -56,7 +58,7 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	for _, decl := range f.Decls {
 		switch castDecl := decl.(type) {
 		case *ast.FuncDecl:
-			if castDecl.Name.Name == "main" {
+			if castDecl.Name.Name == mainFuncName {
 				mainFunc = castDecl
 			}
 			break
@@ -83,13 +85,17 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	for _, decl := range f.Decls {
 		switch castDecl := decl.(type) {
 		case *ast.FuncDecl:
-			if castDecl.Name.Name == "main" {
+			if castDecl.Name.Name == mainFuncName {
 				continue
 			}
 			fnCtx := context.WithValue(ctx, contextFunction, castDecl)
 			statements, err := statementToMLOG(fnCtx, castDecl.Body)
 			if err != nil {
 				return "", err
+			}
+
+			if len(statements) == 0 {
+				continue
 			}
 
 			for i, param := range castDecl.Type.Params.List {
@@ -161,7 +167,8 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	global.Functions = append(global.Functions, &Function{
-		Name:          mainFunc.Name.Name,
+		Name:          mainFuncName,
+		Called:        true,
 		Declaration:   mainFunc,
 		Statements:    mainStatements,
 		ArgumentCount: len(mainFunc.Type.Params.List),
@@ -226,7 +233,7 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			&Value{Value: "always"},
 		},
 		JumpTarget: &FunctionJumpTarget{
-			FunctionName: "main",
+			FunctionName: mainFuncName,
 		},
 	})
 
@@ -263,8 +270,26 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		panic("debugWriter count != debugCount")
 	}
 
+	for _, statement := range startup {
+		if err := statement.PreProcess(context.WithValue(ctx, contextFunction, mainFunc), global, nil); err != nil {
+			return "", err
+		}
+	}
+
+	for _, fn := range global.Functions {
+		for _, statement := range fn.Statements {
+			if err := statement.PreProcess(context.WithValue(ctx, contextFunction, fn.Declaration), global, fn); err != nil {
+				return "", err
+			}
+		}
+	}
+
 	position := len(startup)
 	for _, fn := range global.Functions {
+		if !fn.Called {
+			continue
+		}
+
 		for _, statement := range fn.Statements {
 			if options.Debug {
 				position += debugCount
@@ -281,6 +306,10 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	for _, fn := range global.Functions {
+		if !fn.Called {
+			continue
+		}
+
 		for _, statement := range fn.Statements {
 			if err := statement.PostProcess(context.WithValue(ctx, contextFunction, fn.Declaration), global, fn); err != nil {
 				return "", err
@@ -297,6 +326,10 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	}
 
 	for _, fn := range global.Functions {
+		if !fn.Called {
+			continue
+		}
+
 		if options.Comments {
 			if result != "" {
 				result += "\n"

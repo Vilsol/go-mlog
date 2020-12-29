@@ -25,6 +25,8 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 * Binary and Unary math
 * Function level variable scopes
 * Contextual errors
+* Tree-shaking unused functions
+* Multi-pass pre/post-processing
 
 ## Roadmap
 
@@ -32,8 +34,6 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 * Variable argument count functions
 * Multiple function return values
 * Optimize simple jump instructions
-* Multi-pass post-processing
-* Tree-shake unused functions
 
 ## Design Limitations
 
