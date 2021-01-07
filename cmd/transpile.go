@@ -18,9 +18,11 @@ var transpileCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		result, err := transpiler.GolangToMLOGFile(args[0], transpiler.Options{
-			Numbers:  viper.GetBool("numbers"),
-			Comments: viper.GetBool("comments"),
-			Stacked:  viper.GetString("stacked"),
+			Numbers:       viper.GetBool("numbers"),
+			Comments:      viper.GetBool("comments"),
+			CommentOffset: viper.GetInt("comment-offset"),
+			Stacked:       viper.GetString("stacked"),
+			Source:        viper.GetBool("source"),
 		})
 		if err != nil {
 			return err

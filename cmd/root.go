@@ -54,8 +54,9 @@ func init() {
 
 	rootCmd.PersistentFlags().Bool("numbers", false, "Output line numbers")
 	rootCmd.PersistentFlags().Bool("comments", false, "Output comments")
-	rootCmd.PersistentFlags().Bool("debug", false, "Write to debug memory cell")
+	rootCmd.PersistentFlags().Int("comment-offset", 50, "Comment offset from line start")
 	rootCmd.PersistentFlags().String("stacked", "", "Use a provided memory cell/bank as a stack")
+	rootCmd.PersistentFlags().Bool("source", false, "Output source code after comment")
 
 	rootCmd.PersistentFlags().String("output", "", "Output file. Outputs to stdout if unspecified")
 
@@ -64,7 +65,9 @@ func init() {
 
 	_ = viper.BindPFlag("numbers", rootCmd.PersistentFlags().Lookup("numbers"))
 	_ = viper.BindPFlag("comments", rootCmd.PersistentFlags().Lookup("comments"))
-	_ = viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
+	_ = viper.BindPFlag("comment-offset", rootCmd.PersistentFlags().Lookup("comment-offset"))
+	_ = viper.BindPFlag("stacked", rootCmd.PersistentFlags().Lookup("stacked"))
+	_ = viper.BindPFlag("source", rootCmd.PersistentFlags().Lookup("source"))
 
 	_ = viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 }

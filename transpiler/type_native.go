@@ -1,6 +1,9 @@
 package transpiler
 
-import "strconv"
+import (
+	"context"
+	"strconv"
+)
 
 type MLOGStackWriter struct {
 	MLOG
@@ -30,9 +33,9 @@ type MLOGTrampolineBack struct {
 	Function string
 }
 
-func (m *MLOGTrampolineBack) ToMLOG() [][]Resolvable {
+func (m *MLOGTrampolineBack) PreProcess(ctx context.Context, global *Global, function *Function) error {
 	if m.Stacked != "" {
-		return [][]Resolvable{
+		m.Statement = [][]Resolvable{
 			{
 				&Value{Value: "read"},
 				&Value{Value: "@counter"},
@@ -40,15 +43,17 @@ func (m *MLOGTrampolineBack) ToMLOG() [][]Resolvable {
 				&Value{Value: stackVariable},
 			},
 		}
+	} else {
+		m.Statement = [][]Resolvable{
+			{
+				&Value{Value: "set"},
+				&Value{Value: "@counter"},
+				&Value{Value: FunctionTrampolinePrefix + m.Function},
+			},
+		}
 	}
 
-	return [][]Resolvable{
-		{
-			&Value{Value: "set"},
-			&Value{Value: "@counter"},
-			&Value{Value: FunctionTrampolinePrefix + m.Function},
-		},
-	}
+	return m.MLOG.PreProcess(ctx, global, function)
 }
 
 func (m *MLOGTrampolineBack) GetComment(int) string {

@@ -100,11 +100,17 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			prevArgs := 0
 			for i, param := range castDecl.Type.Params.List {
 				if paramTypeIdent, ok := param.Type.(*ast.Ident); ok {
-					if paramTypeIdent.Name != "int" && paramTypeIdent.Name != "float64" {
-						return "", Err(fnCtx, "function parameters may only be integers or floating point numbers")
+					if options.Stacked != "" {
+						if paramTypeIdent.Name != "int" && paramTypeIdent.Name != "float64" {
+							return "", Err(fnCtx, "function parameters may only be integers or floating point numbers in stack mode")
+						}
+					} else {
+						if paramTypeIdent.Name != "int" && paramTypeIdent.Name != "float64" && paramTypeIdent.Name != "string" {
+							return "", Err(fnCtx, "function parameters may only be integers, floating point numbers or strings")
+						}
 					}
 				} else {
-					return "", Err(fnCtx, "function parameters may only be integers or floating point numbers")
+					return "", Err(fnCtx, "function parameters may only be basic types")
 				}
 
 				position := len(castDecl.Type.Params.List) - i

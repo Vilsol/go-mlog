@@ -3,6 +3,7 @@ package transpiler
 import (
 	"context"
 	"go/ast"
+	"go/token"
 )
 
 type Global struct {
@@ -22,6 +23,8 @@ type Function struct {
 type MLOGAble interface {
 	ToMLOG() [][]Resolvable
 	GetComment(int) string
+	SetSourcePos(token.Pos)
+	GetSourcePos() token.Pos
 }
 
 type Processable interface {

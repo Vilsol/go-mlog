@@ -3,6 +3,7 @@ package transpiler
 import (
 	"context"
 	"fmt"
+	"go/token"
 	"strconv"
 )
 
@@ -10,6 +11,7 @@ type MLOG struct {
 	Statement [][]Resolvable
 	Position  int
 	Comment   string
+	SourcePos token.Pos
 }
 
 func (m *MLOG) ToMLOG() [][]Resolvable {
@@ -59,12 +61,21 @@ func (m *MLOG) GetComment(int) string {
 	return m.Comment
 }
 
+func (m *MLOG) SetSourcePos(pos token.Pos) {
+	m.SourcePos = pos
+}
+
+func (m *MLOG) GetSourcePos() token.Pos {
+	return m.SourcePos
+}
+
 type MLOGFunc struct {
 	Position   int
 	Function   Translator
 	Arguments  []Resolvable
 	Variables  []Resolvable
 	Unresolved []MLOGStatement
+	SourcePos  token.Pos
 }
 
 func (m *MLOGFunc) ToMLOG() [][]Resolvable {
@@ -131,6 +142,14 @@ func (m *MLOGFunc) PostProcess(ctx context.Context, global *Global, function *Fu
 
 func (m *MLOGFunc) GetComment(int) string {
 	return "Call to native function"
+}
+
+func (m *MLOGFunc) SetSourcePos(pos token.Pos) {
+	m.SourcePos = pos
+}
+
+func (m *MLOGFunc) GetSourcePos() token.Pos {
+	return m.SourcePos
 }
 
 type MLOGTrampoline struct {

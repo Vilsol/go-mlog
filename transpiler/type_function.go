@@ -3,6 +3,7 @@ package transpiler
 import (
 	"context"
 	"go/ast"
+	"go/token"
 	"strconv"
 )
 
@@ -13,6 +14,7 @@ type MLOGCustomFunction struct {
 	Unresolved   []MLOGStatement
 	FunctionName string
 	Comments     map[int]string
+	SourcePos    token.Pos
 }
 
 func (m *MLOGCustomFunction) ToMLOG() [][]Resolvable {
@@ -159,4 +161,12 @@ func (m *MLOGCustomFunction) PostProcess(ctx context.Context, global *Global, fu
 
 func (m *MLOGCustomFunction) GetComment(pos int) string {
 	return m.Comments[pos]
+}
+
+func (m *MLOGCustomFunction) SetSourcePos(pos token.Pos) {
+	m.SourcePos = pos
+}
+
+func (m *MLOGCustomFunction) GetSourcePos() token.Pos {
+	return m.SourcePos
 }
