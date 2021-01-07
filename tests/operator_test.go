@@ -205,3 +205,46 @@ op not _main_x _main_0 -1`,
 		})
 	}
 }
+
+func TestFunctionOperator(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		output string
+	}{
+		{
+			name:   "Floor",
+			input:  TestMain(`x := m.Floor(1.2)`),
+			output: `op floor _main_x 1.2`,
+		},
+		{
+			name:   "Ceil",
+			input:  TestMain(`x := m.Ceil(1.2)`),
+			output: `op ceil _main_x 1.2`,
+		},
+		{
+			name:   "Random",
+			input:  TestMain(`x := m.Random(1.2)`),
+			output: `op rand _main_x 1.2`,
+		},
+		{
+			name:   "Log10",
+			input:  TestMain(`x := m.Log10(1.2)`),
+			output: `op log10 _main_x 1.2`,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mlog, err := transpiler.GolangToMLOG(test.input, transpiler.Options{
+				NoStartup: true,
+			})
+
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
+		})
+	}
+}
