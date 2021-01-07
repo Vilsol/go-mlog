@@ -15,7 +15,7 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 
 ## Examples
 
-There are several example programs available on the wiki. // TODO
+There are several example programs available on [the wiki](https://github.com/Vilsol/go-mlog/wiki/Examples).
 
 ## Supports
 
