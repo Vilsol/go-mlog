@@ -32,10 +32,14 @@ type NormalVariable struct {
 
 func (m *NormalVariable) PreProcess(_ context.Context, global *Global, function *Function) error {
 	if m.CalculatedName == "" {
-		if _, ok := global.Constants[m.Name]; ok {
-			m.CalculatedName = m.Name
+		if m.Name == "_" {
+			m.CalculatedName = "@_"
 		} else {
-			m.CalculatedName = "_" + function.Name + "_" + m.Name
+			if _, ok := global.Constants[m.Name]; ok {
+				m.CalculatedName = m.Name
+			} else {
+				m.CalculatedName = "_" + function.Name + "_" + m.Name
+			}
 		}
 	}
 	return nil

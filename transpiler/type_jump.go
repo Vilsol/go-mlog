@@ -42,7 +42,7 @@ func (m *MLOGJump) PostProcess(ctx context.Context, global *Global, function *Fu
 	return m.JumpTarget.PostProcess(ctx, global, function)
 }
 
-func (m *MLOGJump) GetComment() string {
+func (m *MLOGJump) GetComment(int) string {
 	if m.Comment == "" {
 		return "Jump to target"
 	}
@@ -99,8 +99,4 @@ func (m *StatementJumpTarget) PreProcess(context.Context, *Global, *Function) er
 
 func (m *StatementJumpTarget) PostProcess(context.Context, *Global, *Function) error {
 	return nil
-}
-
-type MLOGTrampolineBack struct {
-	MLOG
 }

@@ -61,7 +61,7 @@ func TestDraw(t *testing.T) {
 		{
 			name:   "DrawImage",
 			input:  TestMain(`m.DrawImage(1, 2, "A", 4, 5)`),
-			output: `draw image 1 2 "A" 4 5`,
+			output: `draw image 1 2 A 4 5`,
 		},
 		{
 			name:   "DrawFlush",

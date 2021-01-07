@@ -55,7 +55,7 @@ func (m *MLOG) SetPosition(position int) int {
 	return 1
 }
 
-func (m *MLOG) GetComment() string {
+func (m *MLOG) GetComment(int) string {
 	return m.Comment
 }
 
@@ -129,7 +129,7 @@ func (m *MLOGFunc) PostProcess(ctx context.Context, global *Global, function *Fu
 	return nil
 }
 
-func (m *MLOGFunc) GetComment() string {
+func (m *MLOGFunc) GetComment(int) string {
 	return "Call to native function"
 }
 
@@ -137,19 +137,31 @@ type MLOGTrampoline struct {
 	MLOG
 	Variable string
 	Extra    int
+	Stacked  string
+	Function string
 }
 
 func (m *MLOGTrampoline) ToMLOG() [][]Resolvable {
+	if m.Stacked != "" {
+		return [][]Resolvable{
+			{
+				&Value{Value: "write"},
+				&Value{Value: strconv.Itoa(m.Position + m.Extra)},
+				&Value{Value: m.Stacked},
+				&Value{Value: m.Variable},
+			},
+		}
+	}
+
 	return [][]Resolvable{
 		{
-			&Value{Value: "write"},
+			&Value{Value: "set"},
+			&Value{Value: FunctionTrampolinePrefix + m.Function},
 			&Value{Value: strconv.Itoa(m.Position + m.Extra)},
-			&Value{Value: StackCellName},
-			&Value{Value: m.Variable},
 		},
 	}
 }
 
-func (m *MLOGTrampoline) GetComment() string {
+func (m *MLOGTrampoline) GetComment(int) string {
 	return "Set Trampoline Address"
 }

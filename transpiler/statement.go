@@ -128,7 +128,10 @@ func returnStmtToMLOG(ctx context.Context, statement *ast.ReturnStmt) ([]MLOGSta
 		})
 	}
 
-	return append(results, &MLOGTrampolineBack{}), nil
+	return append(results, &MLOGTrampolineBack{
+		Stacked:  ctx.Value(contextOptions).(Options).Stacked,
+		Function: ctx.Value(contextFunction).(*ast.FuncDecl).Name.Name,
+	}), nil
 }
 
 func ifStmtToMLOG(ctx context.Context, statement *ast.IfStmt) ([]MLOGStatement, error) {
@@ -232,6 +235,7 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 	results = append(results, initMlog...)
 
 	var loopStartJump *MLOGJump
+	var intoLoopJump *MLOGJump
 	var loopEndJump *MLOGJump
 	if binaryExpr, ok := statement.Cond.(*ast.BinaryExpr); ok {
 		if translatedOp, ok := jumpOperators[binaryExpr.Op]; ok {
@@ -259,14 +263,23 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 				},
 			}
 
-			loopEndJump = &MLOGJump{
+			intoLoopJump = &MLOGJump{
 				MLOG: MLOG{
-					Comment: "Jump to end of loop",
+					Comment: "Jump into the loop",
 				},
 				Condition: []Resolvable{
 					&Value{Value: translatedOp},
 					leftSide,
 					rightSide,
+				},
+			}
+
+			loopEndJump = &MLOGJump{
+				MLOG: MLOG{
+					Comment: "Jump to end of loop",
+				},
+				Condition: []Resolvable{
+					&Value{Value: "always"},
 				},
 				JumpTarget: &StatementJumpTarget{
 					Statement: loopStartJump,
@@ -286,6 +299,9 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 		return nil, err
 	}
 	blockCtxStruct.Statements = bodyMLOG
+
+	intoLoopJump.JumpTarget = bodyMLOG[0]
+	results = append(results, intoLoopJump)
 
 	results = append(results, loopEndJump)
 

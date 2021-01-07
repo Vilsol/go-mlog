@@ -13,6 +13,10 @@ Go to MLOG transpiler.
 
 A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 
+## Examples
+
+There are several example programs available on the wiki. // TODO
+
 ## Supports
 
 * Functions
@@ -27,13 +31,18 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 * Contextual errors
 * Tree-shaking unused functions
 * Multi-pass pre/post-processing
+* Stackless functions
 
 ## Roadmap
 
 * Full variable block scoping
 * Variable argument count functions
 * Multiple function return values
-* Optimize simple jump instructions
+
+## Planned Optimizations
+
+* Simple jump instructions
+* Switch case jumps at the start of the block
 
 ## Design Limitations
 
@@ -46,7 +55,7 @@ A Web IDE is available [here](https://vilsol.github.io/go-mlog-web/?1)
 * Transpilation optimizations
 * MLOG Runtime
 
-## Usage
+## CLI Usage
 
 ```
 Usage:

@@ -62,7 +62,9 @@ type Unit = interface{}
 
 type HealthC = interface{}
 
-type Building = interface{}
+type Building = struct {
+	HealthC
+}
 
 type BlockFlag = string
 

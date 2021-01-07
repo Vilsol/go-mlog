@@ -16,7 +16,7 @@ func TestUnit(t *testing.T) {
 		{
 			name:   "UnitBind",
 			input:  TestMain(`m.UnitBind("A")`),
-			output: `ubind "A"`,
+			output: `ubind A`,
 		},
 		{
 			name:   "UnitRadar",

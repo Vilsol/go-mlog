@@ -26,7 +26,6 @@ func transpileWrapper() js.Func {
 		mlog, err := transpiler.GolangToMLOG(input, transpiler.Options{
 			Numbers:  false,
 			Comments: false,
-			Debug:    false,
 		})
 		if err != nil {
 			fmt.Printf("error transpiling: %s\n", err)

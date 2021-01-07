@@ -29,6 +29,6 @@ func (m *MLOGBranch) Size() int {
 	return 1
 }
 
-func (m *MLOGBranch) GetComment() string {
+func (m *MLOGBranch) GetComment(int) string {
 	return "Branch: " + m.Token.String()
 }

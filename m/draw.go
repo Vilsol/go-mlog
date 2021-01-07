@@ -208,7 +208,7 @@ func init() {
 							&transpiler.Value{Value: "image"},
 							&transpiler.Value{Value: args[0].GetValue()},
 							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
+							&transpiler.Value{Value: strings.Trim(args[2].GetValue(), "\"")},
 							&transpiler.Value{Value: args[3].GetValue()},
 							&transpiler.Value{Value: args[4].GetValue()},
 						},
@@ -263,11 +263,11 @@ func DrawLineRect(x int, y int, width int, height int) {
 }
 
 // Draw a filled equilateral polygon centered around the provided point
-func DrawPoly(x int, y int, sides int, radius float32, rotation float32) {
+func DrawPoly(x int, y int, sides int, radius float64, rotation float64) {
 }
 
 // Draw an outlined equilateral polygon centered around the provided point
-func DrawLinePoly(x int, y int, sides int, radius float32, rotation float32) {
+func DrawLinePoly(x int, y int, sides int, radius float64, rotation float64) {
 }
 
 // Draw a filled triangle between provided points
@@ -275,7 +275,7 @@ func DrawTriangle(x1 int, y1 int, x2 int, y2 int, x3 int, y3 int) {
 }
 
 // Draw provided icon centered around the provided point
-func DrawImage(x int, y int, image string, size float32, rotation float32) {
+func DrawImage(x int, y int, image string, size float64, rotation float64) {
 }
 
 // Flush all draw statements to the provided display block

@@ -32,87 +32,22 @@ func foo(x int) int {
 			options: transpiler.Options{
 				Numbers: true,
 			},
-			output: `  0: set @stack 0
-  1: jump 7 always
-  2: op sub _foo_0 @stack 1
-  3: read _foo_x bank1 _foo_0
-  4: op add _foo_1 _foo_x 20
-  5: set @return _foo_1
-  6: read @counter bank1 @stack
-  7: set _main_i 0
-  8: jump 20 lessThan _main_i 10
-  9: op add @stack @stack 1
- 10: write _main_i bank1 @stack
- 11: op add @stack @stack 1
- 12: write 14 bank1 @stack
- 13: jump 2 always
- 14: op sub @stack @stack 2
- 15: set _main_0 @return
- 16: print _main_0
- 17: print "\n"
- 18: op add _main_i _main_i 1
- 19: jump 9 lessThan _main_i 10`,
-		},
-		{
-			name:  "Debug",
-			input: testInput,
-			options: transpiler.Options{
-				Debug: true,
-			},
-			output: `set @stack 0
-jump 19 always
-write @counter cell2 0
-write @stack cell2 1
-op sub _foo_0 @stack 1
-write @counter cell2 0
-write @stack cell2 1
-read _foo_x bank1 _foo_0
-write @counter cell2 0
-write @stack cell2 1
-op add _foo_1 _foo_x 20
-write @counter cell2 0
-write @stack cell2 1
-set @return _foo_1
-write @counter cell2 0
-write @stack cell2 1
-read @counter bank1 @stack
-write @counter cell2 0
-write @stack cell2 1
-set _main_i 0
-write @counter cell2 0
-write @stack cell2 1
-jump 54 lessThan _main_i 10
-write @counter cell2 0
-write @stack cell2 1
-op add @stack @stack 1
-write @counter cell2 0
-write @stack cell2 1
-write _main_i bank1 @stack
-write @counter cell2 0
-write @stack cell2 1
-op add @stack @stack 1
-write @counter cell2 0
-write @stack cell2 1
-write 38 bank1 @stack
-write @counter cell2 0
-write @stack cell2 1
-jump 4 always
-write @counter cell2 0
-write @stack cell2 1
-op sub @stack @stack 2
-write @counter cell2 0
-write @stack cell2 1
-set _main_0 @return
-write @counter cell2 0
-write @stack cell2 1
-print _main_0
-print "\n"
-write @counter cell2 0
-write @stack cell2 1
-op add _main_i _main_i 1
-write @counter cell2 0
-write @stack cell2 1
-jump 25 lessThan _main_i 10`,
+			output: `  0: jump 5 always
+  1: set _foo_x @funcArg_foo_0
+  2: op add _foo_0 _foo_x 20
+  3: set @return _foo_0
+  4: set @counter @funcTramp_foo
+  5: set _main_i 0
+  6: jump 8 lessThan _main_i 10
+  7: jump 16 always
+  8: set @funcArg_foo_0 _main_i
+  9: set @funcTramp_foo 11
+ 10: jump 1 always
+ 11: set _main_0 @return
+ 12: print _main_0
+ 13: print "\n"
+ 14: op add _main_i _main_i 1
+ 15: jump 8 lessThan _main_i 10`,
 		},
 		{
 			name:  "Comments",
@@ -120,30 +55,26 @@ jump 25 lessThan _main_i 10`,
 			options: transpiler.Options{
 				Comments: true,
 			},
-			output: `set @stack 0                                  // Reset Stack
-jump 7 always                                 // Jump to start of main
+			output: `jump 5 always                                 // Jump to start of main
 
      // Function: foo //
-op sub _foo_0 @stack 1                        // Calculate address of parameter
-read _foo_x bank1 _foo_0                      // Read parameter into variable
-op add _foo_1 _foo_x 20                       // Execute operation
-set @return _foo_1                            // Set return data
-read @counter bank1 @stack                    // Trampoline back
+set _foo_x @funcArg_foo_0                     // Read parameter into variable
+op add _foo_0 _foo_x 20                       // Execute operation
+set @return _foo_0                            // Set return data
+set @counter @funcTramp_foo                   // Trampoline back
 
      // Function: main //
 set _main_i 0                                 // Set the variable to the value
-jump 20 lessThan _main_i 10                   // Jump to end of loop
-op add @stack @stack 1                        // Update Stack Pointer
-write _main_i bank1 @stack                    // Write argument to memory
-op add @stack @stack 1                        // Update Stack Pointer
-write 14 bank1 @stack                         // Set Trampoline Address
-jump 2 always                                 // Jump to function: foo
-op sub @stack @stack 2                        // Update Stack Pointer
-set _main_0 @return                           // Set the variable to the value
+jump 8 lessThan _main_i 10                    // Jump into the loop
+jump 16 always                                // Jump to end of loop
+set @funcArg_foo_0 _main_i                    // Set foo argument: 0
+set @funcTramp_foo 11                         // Set Trampoline Address
+jump 1 always                                 // Jump to function: foo
+set _main_0 @return                           // Set variable to returned value
 print _main_0                                 // Call to native function
 print "\n"                                    // Call to native function
 op add _main_i _main_i 1                      // Execute increment/decrement
-jump 9 lessThan _main_i 10                    // Jump to start of loop`,
+jump 8 lessThan _main_i 10                    // Jump to start of loop`,
 		},
 		{
 			name:  "All",
@@ -152,30 +83,26 @@ jump 9 lessThan _main_i 10                    // Jump to start of loop`,
 				Numbers:  true,
 				Comments: true,
 			},
-			output: `  0: set @stack 0                                  // Reset Stack
-  1: jump 7 always                                 // Jump to start of main
+			output: `  0: jump 5 always                                 // Jump to start of main
 
      // Function: foo //
-  2: op sub _foo_0 @stack 1                        // Calculate address of parameter
-  3: read _foo_x bank1 _foo_0                      // Read parameter into variable
-  4: op add _foo_1 _foo_x 20                       // Execute operation
-  5: set @return _foo_1                            // Set return data
-  6: read @counter bank1 @stack                    // Trampoline back
+  1: set _foo_x @funcArg_foo_0                     // Read parameter into variable
+  2: op add _foo_0 _foo_x 20                       // Execute operation
+  3: set @return _foo_0                            // Set return data
+  4: set @counter @funcTramp_foo                   // Trampoline back
 
      // Function: main //
-  7: set _main_i 0                                 // Set the variable to the value
-  8: jump 20 lessThan _main_i 10                   // Jump to end of loop
-  9: op add @stack @stack 1                        // Update Stack Pointer
- 10: write _main_i bank1 @stack                    // Write argument to memory
- 11: op add @stack @stack 1                        // Update Stack Pointer
- 12: write 14 bank1 @stack                         // Set Trampoline Address
- 13: jump 2 always                                 // Jump to function: foo
- 14: op sub @stack @stack 2                        // Update Stack Pointer
- 15: set _main_0 @return                           // Set the variable to the value
- 16: print _main_0                                 // Call to native function
- 17: print "\n"                                    // Call to native function
- 18: op add _main_i _main_i 1                      // Execute increment/decrement
- 19: jump 9 lessThan _main_i 10                    // Jump to start of loop`,
+  5: set _main_i 0                                 // Set the variable to the value
+  6: jump 8 lessThan _main_i 10                    // Jump into the loop
+  7: jump 16 always                                // Jump to end of loop
+  8: set @funcArg_foo_0 _main_i                    // Set foo argument: 0
+  9: set @funcTramp_foo 11                         // Set Trampoline Address
+ 10: jump 1 always                                 // Jump to function: foo
+ 11: set _main_0 @return                           // Set variable to returned value
+ 12: print _main_0                                 // Call to native function
+ 13: print "\n"                                    // Call to native function
+ 14: op add _main_i _main_i 1                      // Execute increment/decrement
+ 15: jump 8 lessThan _main_i 10                    // Jump to start of loop`,
 		},
 	}
 	for _, test := range tests {

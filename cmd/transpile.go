@@ -20,7 +20,7 @@ var transpileCmd = &cobra.Command{
 		result, err := transpiler.GolangToMLOGFile(args[0], transpiler.Options{
 			Numbers:  viper.GetBool("numbers"),
 			Comments: viper.GetBool("comments"),
-			Debug:    viper.GetBool("debug"),
+			Stacked:  viper.GetString("stacked"),
 		})
 		if err != nil {
 			return err

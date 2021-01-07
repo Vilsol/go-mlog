@@ -55,6 +55,7 @@ func init() {
 	rootCmd.PersistentFlags().Bool("numbers", false, "Output line numbers")
 	rootCmd.PersistentFlags().Bool("comments", false, "Output comments")
 	rootCmd.PersistentFlags().Bool("debug", false, "Write to debug memory cell")
+	rootCmd.PersistentFlags().String("stacked", "", "Use a provided memory cell/bank as a stack")
 
 	rootCmd.PersistentFlags().String("output", "", "Output file. Outputs to stdout if unspecified")
 

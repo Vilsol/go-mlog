@@ -22,7 +22,7 @@ func MLOGToString(ctx context.Context, statements [][]Resolvable, statement MLOG
 
 		if ctx.Value(contextOptions).(Options).Comments {
 			result += fmt.Sprintf("%-45s", resultLine)
-			result += " // " + statement.GetComment()
+			result += " // " + statement.GetComment(lineNumber)
 		} else {
 			result += resultLine
 		}

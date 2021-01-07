@@ -13,9 +13,8 @@ import (
 const stackVariable = `@stack`
 const FunctionReturnVariable = `@return`
 
-const StackCellName = `bank1`
-const debugCellName = `cell2`
-const debugCount = 2
+const FunctionArgumentPrefix = `@funcArg_`
+const FunctionTrampolinePrefix = `@funcTramp_`
 
 const mainFuncName = `main`
 
@@ -98,6 +97,7 @@ func GolangToMLOG(input string, options Options) (string, error) {
 				continue
 			}
 
+			prevArgs := 0
 			for i, param := range castDecl.Type.Params.List {
 				if paramTypeIdent, ok := param.Type.(*ast.Ident); ok {
 					if paramTypeIdent.Name != "int" && paramTypeIdent.Name != "float64" {
@@ -111,39 +111,59 @@ func GolangToMLOG(input string, options Options) (string, error) {
 
 				dVar := &DynamicVariable{}
 
-				for _, name := range param.Names {
-					statements = append([]MLOGStatement{&MLOG{
-						Comment: "Read parameter into variable",
-						Statement: [][]Resolvable{
-							{
-								&Value{Value: "read"},
-								&NormalVariable{Name: name.Name},
-								&Value{Value: StackCellName},
-								dVar,
+				if options.Stacked != "" {
+					for _, name := range param.Names {
+						statements = append([]MLOGStatement{&MLOG{
+							Comment: "Read parameter into variable",
+							Statement: [][]Resolvable{
+								{
+									&Value{Value: "read"},
+									&NormalVariable{Name: name.Name},
+									&Value{Value: options.Stacked},
+									dVar,
+								},
+							},
+						}}, statements...)
+					}
+
+					statements = append([]MLOGStatement{
+						&MLOG{
+							Comment: "Calculate address of parameter",
+							Statement: [][]Resolvable{
+								{
+									&Value{Value: "op"},
+									&Value{Value: "sub"},
+									dVar,
+									&Value{Value: stackVariable},
+									&Value{Value: strconv.Itoa(position)},
+								},
 							},
 						},
-					}}, statements...)
+					}, statements...)
+				} else {
+					for j, name := range param.Names {
+						statements = append([]MLOGStatement{&MLOG{
+							Comment: "Read parameter into variable",
+							Statement: [][]Resolvable{
+								{
+									&Value{Value: "set"},
+									&NormalVariable{Name: name.Name},
+									&Value{Value: FunctionArgumentPrefix + castDecl.Name.Name + "_" + strconv.Itoa(prevArgs+j)},
+								},
+							},
+						}}, statements...)
+					}
 				}
 
-				statements = append([]MLOGStatement{
-					&MLOG{
-						Comment: "Calculate address of parameter",
-						Statement: [][]Resolvable{
-							{
-								&Value{Value: "op"},
-								&Value{Value: "sub"},
-								dVar,
-								&Value{Value: stackVariable},
-								&Value{Value: strconv.Itoa(position)},
-							},
-						},
-					},
-				}, statements...)
+				prevArgs += len(param.Names)
 			}
 
 			lastStatement := statements[len(statements)-1]
 			if _, ok := lastStatement.(*MLOGTrampolineBack); !ok {
-				statements = append(statements, &MLOGTrampolineBack{})
+				statements = append(statements, &MLOGTrampolineBack{
+					Stacked:  options.Stacked,
+					Function: castDecl.Name.Name,
+				})
 			}
 
 			global.Functions = append(global.Functions, &Function{
@@ -174,8 +194,9 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		ArgumentCount: len(mainFunc.Type.Params.List),
 	})
 
-	startup := []MLOGStatement{
-		&MLOG{
+	var startup []MLOGStatement
+	if options.Stacked != "" {
+		startup = append(startup, &MLOG{
 			Comment: "Reset Stack",
 			Statement: [][]Resolvable{
 				{
@@ -184,7 +205,7 @@ func GolangToMLOG(input string, options Options) (string, error) {
 					&Value{Value: "0"},
 				},
 			},
-		},
+		})
 	}
 
 	global.Constants = make(map[string]bool)
@@ -241,35 +262,6 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		startup = make([]MLOGStatement, 0)
 	}
 
-	debugWriter := []MLOGAble{
-		&MLOG{
-			Comment: "Debug",
-			Statement: [][]Resolvable{
-				{
-					&Value{Value: "write"},
-					&Value{Value: "@counter"},
-					&Value{Value: debugCellName},
-					&Value{Value: "0"},
-				},
-			},
-		},
-		&MLOG{
-			Comment: "Debug",
-			Statement: [][]Resolvable{
-				{
-					&Value{Value: "write"},
-					&Value{Value: stackVariable},
-					&Value{Value: debugCellName},
-					&Value{Value: "1"},
-				},
-			},
-		},
-	}
-
-	if len(debugWriter) != debugCount {
-		panic("debugWriter count != debugCount")
-	}
-
 	for _, statement := range startup {
 		if err := statement.PreProcess(context.WithValue(ctx, contextFunction, mainFunc), global, nil); err != nil {
 			return "", err
@@ -291,10 +283,6 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		}
 
 		for _, statement := range fn.Statements {
-			if options.Debug {
-				position += debugCount
-			}
-
 			position += statement.SetPosition(position)
 		}
 	}
@@ -339,14 +327,6 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		}
 
 		for _, statement := range fn.Statements {
-			if options.Debug {
-				for _, debugStatement := range debugWriter {
-					deb := debugStatement.ToMLOG()
-					result += MLOGToString(context.WithValue(ctx, contextFunction, fn.Declaration), deb, debugStatement, lineNumber)
-					lineNumber += len(deb)
-				}
-			}
-
 			statements := statement.ToMLOG()
 			result += MLOGToString(context.WithValue(ctx, contextFunction, fn.Declaration), statements, statement, lineNumber)
 			lineNumber += len(statements)

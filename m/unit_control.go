@@ -351,7 +351,7 @@ func UnitTarget(x float64, y float64, shoot bool) {
 // Shoot with the cached unit at the predicted position of target unit
 //
 // If shoot parameter is false, it will cease firing
-func UnitTargetP(target int, shoot bool) {
+func UnitTargetP(target HealthC, shoot bool) {
 }
 
 // Drops items into the provided building
@@ -396,7 +396,7 @@ func UnitBuild(x float64, y float64, block string, rotation int, config int) {
 
 // Retrieve the building and its type at the specified absolute position
 func UnitGetBlock(x float64, y float64) (blockType string, building Building) {
-	return "", nil
+	return "", Building{}
 }
 
 // Checks whether there is a unit within the specified radius around the provided absolute position

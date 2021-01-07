@@ -109,73 +109,11 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 			Variables: ident,
 		})
 	} else {
-		for _, arg := range callExpr.Args {
-			results = append(results, &MLOGStackWriter{
-				Action: "add",
-			})
-
-			value, leftExprInstructions, err := exprToResolvable(ctx, arg)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, leftExprInstructions...)
-
-			results = append(results, &MLOG{
-				Comment: "Write argument to memory",
-				Statement: [][]Resolvable{
-					{
-						&Value{Value: "write"},
-						value,
-						&Value{Value: StackCellName},
-						&Value{Value: stackVariable},
-					},
-				},
-			})
-		}
-
-		results = append(results, &MLOGStackWriter{
-			Action: "add",
+		results = append(results, &MLOGCustomFunction{
+			Arguments:    callExpr.Args,
+			Variables:    ident,
+			FunctionName: funcName,
 		})
-
-		extra := 2
-		if ctx.Value(contextOptions).(Options).Debug {
-			extra += debugCount
-		}
-
-		results = append(results, &MLOGTrampoline{
-			Variable: stackVariable,
-			Extra:    extra,
-		})
-
-		results = append(results, &MLOGJump{
-			MLOG: MLOG{
-				Comment: "Jump to function: " + funcName,
-			},
-			Condition: []Resolvable{
-				&Value{Value: "always"},
-			},
-			JumpTarget: &FunctionJumpTarget{
-				FunctionName: funcName,
-			},
-		})
-
-		results = append(results, &MLOGStackWriter{
-			Action: "sub",
-			Extra:  len(callExpr.Args),
-		})
-
-		if len(ident) > 0 {
-			results = append(results, &MLOG{
-				Comment: "Set the variable to the value",
-				Statement: [][]Resolvable{
-					{
-						&Value{Value: "set"},
-						ident[0],
-						&Value{Value: FunctionReturnVariable},
-					},
-				},
-			})
-		}
 	}
 
 	return results, nil

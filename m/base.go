@@ -15,8 +15,9 @@ func init() {
 		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			memoryName := strings.Trim(args[0].GetValue(), "\"")
 
-			if memoryName == transpiler.StackCellName {
-				return nil, errors.New("can't read/write to memory cell that is used for the stack: " + transpiler.StackCellName)
+			// TODO Remove hardcode
+			if memoryName == "bank1" {
+				return nil, errors.New("can't read/write to memory cell that is used for the stack: bank1")
 			}
 
 			return []transpiler.MLOGStatement{
@@ -40,8 +41,8 @@ func init() {
 		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
 			memoryName := strings.Trim(args[1].GetValue(), "\"")
 
-			if memoryName == transpiler.StackCellName {
-				return nil, errors.New("can't read/write to memory cell that is used for the stack: " + transpiler.StackCellName)
+			if memoryName == "bank1" {
+				return nil, errors.New("can't read/write to memory cell that is used for the stack: bank1")
 			}
 
 			return []transpiler.MLOGStatement{
@@ -132,8 +133,8 @@ func init() {
 						{
 							&transpiler.Value{Value: "sensor"},
 							vars[0],
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
+							&transpiler.Value{Value: strings.Trim(args[0].GetValue(), "\"")},
+							&transpiler.Value{Value: strings.Trim(args[1].GetValue(), "\"")},
 						},
 					},
 				},
@@ -176,6 +177,6 @@ func Radar(from string, target1 RadarTarget, target2 RadarTarget, target3 RadarT
 }
 
 // Extract information indicated by sense from the provided block
-func Sensor(block string, sense string) int {
+func Sensor(block interface{}, sense string) float64 {
 	return 0
 }

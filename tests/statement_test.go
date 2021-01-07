@@ -39,10 +39,11 @@ print 6`,
 			name:  "ForLoop",
 			input: TestMain(`for i := 0; i < 10; i++ { print(i) }`),
 			output: `set _main_i 0
-jump 5 lessThan _main_i 10
+jump 3 lessThan _main_i 10
+jump 6 always
 print _main_i
 op add _main_i _main_i 1
-jump 2 lessThan _main_i 10`,
+jump 3 lessThan _main_i 10`,
 		},
 		{
 			name:   "Reassignment",
@@ -63,29 +64,31 @@ jump 2 lessThan _main_i 10`,
 			name:  "Break",
 			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { break; }; println(i); }`),
 			output: `set _main_i 0
-jump 10 lessThan _main_i 10
+jump 3 lessThan _main_i 10
+jump 11 always
 op equal _main_0 _main_i 5
-jump 5 equal _main_0 1
-jump 6 always
-jump 10 always
+jump 6 equal _main_0 1
+jump 7 always
+jump 11 always
 print _main_i
 print "\n"
 op add _main_i _main_i 1
-jump 2 lessThan _main_i 10`,
+jump 3 lessThan _main_i 10`,
 		},
 		{
 			name:  "Continue",
 			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { continue; }; println(i); }`),
 			output: `set _main_i 0
-jump 10 lessThan _main_i 10
+jump 3 lessThan _main_i 10
+jump 11 always
 op equal _main_0 _main_i 5
-jump 5 equal _main_0 1
-jump 6 always
-jump 8 always
+jump 6 equal _main_0 1
+jump 7 always
+jump 9 always
 print _main_i
 print "\n"
 op add _main_i _main_i 1
-jump 2 lessThan _main_i 10`,
+jump 3 lessThan _main_i 10`,
 		},
 		{
 			name: "Switch",

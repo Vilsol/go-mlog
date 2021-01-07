@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestFunction(t *testing.T) {
+func TestStacklessFunction(t *testing.T) {
 	tests := []struct {
 		name   string
 		input  string
@@ -29,26 +29,19 @@ func main() {
 func sampleDynamic(arg1 int, arg2 int) int {
 	return arg1 + arg2
 }`,
-			output: `set @stack 0
-jump 9 always
-op sub _sampleDynamic_0 @stack 1
-read _sampleDynamic_arg2 bank1 _sampleDynamic_0
-op sub _sampleDynamic_1 @stack 2
-read _sampleDynamic_arg1 bank1 _sampleDynamic_1
-op add _sampleDynamic_2 _sampleDynamic_arg1 _sampleDynamic_arg2
-set @return _sampleDynamic_2
-read @counter bank1 @stack
-op add @stack @stack 1
+			output: `jump 6 always
+set _sampleDynamic_arg2 @funcArg_sampleDynamic_1
+set _sampleDynamic_arg1 @funcArg_sampleDynamic_0
+op add _sampleDynamic_0 _sampleDynamic_arg1 _sampleDynamic_arg2
+set @return _sampleDynamic_0
+set @counter @funcTramp_sampleDynamic
 op add _main_0 1 2
-write _main_0 bank1 @stack
-op add @stack @stack 1
+set @funcArg_sampleDynamic_0 _main_0
 op rand _main_1 100
 op floor _main_2 _main_1
-write _main_2 bank1 @stack
-op add @stack @stack 1
-write 19 bank1 @stack
-jump 2 always
-op sub @stack @stack 3
+set @funcArg_sampleDynamic_1 _main_2
+set @funcTramp_sampleDynamic 13
+jump 1 always
 set _main_3 @return
 print _main_3`,
 		},
@@ -68,14 +61,11 @@ func main() {
 func sampleStatic() int {
 	return 9
 }`,
-			output: `set @stack 0
-jump 4 always
+			output: `jump 3 always
 set @return 9
-read @counter bank1 @stack
-op add @stack @stack 1
-write 7 bank1 @stack
-jump 2 always
-op sub @stack @stack 1
+set @counter @funcTramp_sampleStatic
+set @funcTramp_sampleStatic 5
+jump 1 always
 set _main_0 @return
 print _main_0`,
 		},
@@ -96,15 +86,12 @@ func sampleVariable() int {
 	x := 5
 	return x
 }`,
-			output: `set @stack 0
-jump 5 always
+			output: `jump 4 always
 set _sampleVariable_x 5
 set @return _sampleVariable_x
-read @counter bank1 @stack
-op add @stack @stack 1
-write 8 bank1 @stack
-jump 2 always
-op sub @stack @stack 1
+set @counter @funcTramp_sampleVariable
+set @funcTramp_sampleVariable 6
+jump 1 always
 set _main_0 @return
 print _main_0`,
 		},
@@ -124,15 +111,12 @@ func main() {
 func sampleNone() {
 	println("hello")
 }`,
-			output: `set @stack 0
-jump 5 always
+			output: `jump 4 always
 print "hello"
 print "\n"
-read @counter bank1 @stack
-op add @stack @stack 1
-write 8 bank1 @stack
-jump 2 always
-op sub @stack @stack 1`,
+set @counter @funcTramp_sampleNone
+set @funcTramp_sampleNone 6
+jump 1 always`,
 		},
 		{
 			name: "TreeShake",
@@ -153,15 +137,12 @@ func foo() {
 func bar() {
 	println("bar")
 }`,
-			output: `set @stack 0
-jump 5 always
+			output: `jump 4 always
 print "hello"
 print "\n"
-read @counter bank1 @stack
-op add @stack @stack 1
-write 8 bank1 @stack
-jump 2 always
-op sub @stack @stack 1`,
+set @counter @funcTramp_hello
+set @funcTramp_hello 6
+jump 1 always`,
 		},
 	}
 	for _, test := range tests {

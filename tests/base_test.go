@@ -41,7 +41,7 @@ func TestBase(t *testing.T) {
 		{
 			name:   "Sensor",
 			input:  TestMain(`x := m.Sensor("A", "B")`),
-			output: `sensor _main_x "A" "B"`,
+			output: `sensor _main_x A B`,
 		},
 	}
 	for _, test := range tests {

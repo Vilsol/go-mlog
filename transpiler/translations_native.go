@@ -60,4 +60,25 @@ func init() {
 			return results, nil
 		},
 	})
+	// TODO Optimize
+	basicSet := Translator{
+		Count: func(args []Resolvable, vars []Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []Resolvable, vars []Resolvable) ([]MLOGStatement, error) {
+			return []MLOGStatement{
+				&MLOG{
+					Statement: [][]Resolvable{
+						{
+							&Value{Value: "set"},
+							vars[0],
+							args[0],
+						},
+					},
+				},
+			}, nil
+		},
+	}
+	RegisterFuncTranslation("float64", basicSet)
 }

@@ -23,10 +23,9 @@ const y = x
 func main() {
 	print(x)
 }`,
-			output: `set @stack 0
-set x 1
+			output: `set x 1
 set y x
-jump 4 always
+jump 3 always
 print x`,
 		},
 	}

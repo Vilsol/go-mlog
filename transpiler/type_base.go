@@ -21,7 +21,7 @@ type Function struct {
 
 type MLOGAble interface {
 	ToMLOG() [][]Resolvable
-	GetComment() string
+	GetComment(int) string
 }
 
 type Processable interface {
