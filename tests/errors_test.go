@@ -75,19 +75,6 @@ var x = 1`,
 			output: `error at 103: left side variable assignment can only contain identifications`,
 		},
 		{
-			name: "InvalidParamTypeString",
-			input: `package main
-
-func main() {
-	print(sample1("hello"))
-}
-
-func sample1(arg string) int {
-	return 1
-}`,
-			output: `error at 57: function parameters may only be integers or floating point numbers`,
-		},
-		{
 			name: "InvalidParamTypeOther",
 			input: `package main
 
@@ -98,7 +85,7 @@ func main() {
 func sample1(arg hello.world) int {
 	return 1
 }`,
-			output: `error at 53: function parameters may only be integers or floating point numbers`,
+			output: `error at 53: function parameters may only be basic types`,
 		},
 		{
 			name:   "CallToUnknownFunction",

@@ -53,7 +53,8 @@ func foo(x int) int {
 			name:  "Comments",
 			input: testInput,
 			options: transpiler.Options{
-				Comments: true,
+				Comments:      true,
+				CommentOffset: 45,
 			},
 			output: `jump 5 always                                 // Jump to start of main
 
@@ -80,8 +81,9 @@ jump 8 lessThan _main_i 10                    // Jump to start of loop`,
 			name:  "All",
 			input: testInput,
 			options: transpiler.Options{
-				Numbers:  true,
-				Comments: true,
+				Numbers:       true,
+				Comments:      true,
+				CommentOffset: 45,
 			},
 			output: `  0: jump 5 always                                 // Jump to start of main
 
