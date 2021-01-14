@@ -90,7 +90,7 @@ func sample1(arg hello.world) int {
 		{
 			name:   "CallToUnknownFunction",
 			input:  TestMain(`foo()`),
-			output: `error at 89: unknown function: foo`,
+			output: `error at 103: unknown function: foo`,
 		},
 		{
 			name: "InvalidConstant",
@@ -140,6 +140,16 @@ func sample() (int, int) {
 			name:   "ErrorEmptyMain",
 			input:  TestMain(``),
 			output: `empty main function`,
+		},
+		{
+			name:   "ErrorIncorrectVarCount",
+			input:  TestMain(`a, b := m.Read("bank1", 0)`),
+			output: `error at 111: function requires 1 variables, provided: 2`,
+		},
+		{
+			name:   "ErrorMismatchedSides",
+			input:  TestMain(`a, b, c := 1, 2`),
+			output: `error at 103: mismatched variable assignment sides`,
 		},
 	}
 	for _, test := range tests {

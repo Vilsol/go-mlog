@@ -28,6 +28,11 @@ print "A"
 print _main_x
 print "\n"`,
 		},
+		{
+			name:   "float64",
+			input:  TestMain(`x := float64(1)`),
+			output: `set _main_x 1`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

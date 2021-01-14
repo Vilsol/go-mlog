@@ -2,6 +2,7 @@ package transpiler
 
 import (
 	"context"
+	"go/token"
 	"strconv"
 )
 
@@ -52,6 +53,7 @@ func (m *MLOGJump) GetComment(int) string {
 type FunctionJumpTarget struct {
 	Statement    WithPosition
 	FunctionName string
+	SourcePos    token.Pos
 }
 
 func (m *FunctionJumpTarget) GetPosition() int {
@@ -70,7 +72,7 @@ func (m *FunctionJumpTarget) PreProcess(ctx context.Context, global *Global, _ *
 			return nil
 		}
 	}
-	return Err(ctx, "unknown function: "+m.FunctionName)
+	return ErrPos(ctx, m.SourcePos, "unknown function: "+m.FunctionName)
 }
 
 func (m *FunctionJumpTarget) PostProcess(context.Context, *Global, *Function) error {

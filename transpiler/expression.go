@@ -107,12 +107,14 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 			Function:  translatedFunc,
 			Arguments: args,
 			Variables: ident,
+			SourcePos: callExpr.Pos(),
 		})
 	} else {
 		results = append(results, &MLOGCustomFunction{
 			Arguments:    callExpr.Args,
 			Variables:    ident,
 			FunctionName: funcName,
+			SourcePos:    callExpr.Pos(),
 		})
 	}
 

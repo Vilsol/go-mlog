@@ -36,7 +36,6 @@ There are several example programs available on [the wiki](https://github.com/Vi
 ## Roadmap
 
 * Full variable block scoping
-* Variable argument count functions
 * Multiple function return values
 
 ## Planned Optimizations

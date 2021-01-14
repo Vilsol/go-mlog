@@ -118,6 +118,7 @@ func (m *MLOGCustomFunction) PreProcess(ctx context.Context, global *Global, fun
 		},
 		JumpTarget: &FunctionJumpTarget{
 			FunctionName: m.FunctionName,
+			SourcePos:    m.SourcePos,
 		},
 	})
 

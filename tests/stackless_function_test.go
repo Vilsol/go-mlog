@@ -144,6 +144,27 @@ set @counter @funcTramp_hello
 set @funcTramp_hello 6
 jump 1 always`,
 		},
+		{
+			name: "IgnoreEmpty",
+			input: `package main
+
+func main() {
+	hello()
+}
+
+func hello() {
+	println("hello")
+}
+
+func foo() {
+}`,
+			output: `jump 4 always
+print "hello"
+print "\n"
+set @counter @funcTramp_hello
+set @funcTramp_hello 6
+jump 1 always`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

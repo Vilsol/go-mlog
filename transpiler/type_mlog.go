@@ -101,7 +101,7 @@ func (m *MLOGFunc) SetPosition(position int) int {
 
 func (m *MLOGFunc) PreProcess(ctx context.Context, global *Global, function *Function) error {
 	if len(m.Variables) != m.Function.Variables {
-		return Err(ctx, fmt.Sprintf("function requires %d variables, provided: %d", m.Function.Variables, len(m.Variables)))
+		return ErrPos(ctx, m.SourcePos, fmt.Sprintf("function requires %d variables, provided: %d", m.Function.Variables, len(m.Variables)))
 	}
 
 	for _, argument := range m.Arguments {

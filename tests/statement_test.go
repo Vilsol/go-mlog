@@ -142,6 +142,16 @@ print "default"
 print "\n"
 jump 30 always`,
 		},
+		{
+			name:   "IgnoredVariable",
+			input:  TestMain(`_ := false`),
+			output: `set @_ false`,
+		},
+		{
+			name:   "OperatorAssign",
+			input:  TestMain(`x += 1`),
+			output: `op add _main_x _main_x 1`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
