@@ -32,6 +32,7 @@ There are several example programs available on [the wiki](https://github.com/Vi
 * Tree-shaking unused functions
 * Multi-pass pre/post-processing
 * Stackless functions
+* Comment generation including source mapping
 
 ## Roadmap
 
@@ -64,10 +65,12 @@ Flags:
   -h, --help   help for transpile
 
 Global Flags:
-      --colors          Force log output with colors
-      --comments        Output comments
-      --debug           Write to debug memory cell
-      --log string      The log level to output (default "info")
-      --numbers         Output line numbers
-      --output string   Output file. Outputs to stdout if unspecified
+      --colors               Force log output with colors
+      --comment-offset int   Comment offset from line start (default 60)
+      --comments             Output comments
+      --log string           The log level to output (default "info")
+      --numbers              Output line numbers
+      --output string        Output file. Outputs to stdout if unspecified
+      --source               Output source code after comment
+      --stacked string       Use a provided memory cell/bank as a stack
 ```
