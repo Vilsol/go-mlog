@@ -66,7 +66,7 @@ func selectorExprToMLOG(ctx context.Context, ident Resolvable, selectorExpr *ast
 		} else {
 			return []MLOGStatement{
 				&MLOG{
-					Comment: "Set the variable to the value",
+					Comment: "Assign value to variable",
 					Statement: [][]Resolvable{
 						{
 							&Value{Value: "set"},
@@ -74,6 +74,7 @@ func selectorExprToMLOG(ctx context.Context, ident Resolvable, selectorExpr *ast
 							&Value{Value: selector},
 						},
 					},
+					SourcePos: ctx.Value(contextStatement).(ast.Node),
 				},
 			}, "", nil
 		}
@@ -107,14 +108,14 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 			Function:  translatedFunc,
 			Arguments: args,
 			Variables: ident,
-			SourcePos: callExpr.Pos(),
+			SourcePos: callExpr,
 		})
 	} else {
 		results = append(results, &MLOGCustomFunction{
 			Arguments:    callExpr.Args,
 			Variables:    ident,
 			FunctionName: funcName,
-			SourcePos:    callExpr.Pos(),
+			SourcePos:    callExpr,
 		})
 	}
 
@@ -221,16 +222,21 @@ func binaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.BinaryE
 					rightSide,
 				},
 			},
+			SourcePos: expr,
 		}), nil
 	}
 
 	return nil, Err(ctx, fmt.Sprintf("operator statement cannot use this operation: %s", expr.Op.String()))
 }
 
-func identToMLOG(_ context.Context, ident []Resolvable, expr *ast.Ident) ([]MLOGStatement, error) {
+func identToMLOG(ctx context.Context, ident []Resolvable, expr *ast.Ident) ([]MLOGStatement, error) {
+	if len(ident) < 1 {
+		return nil, Err(ctx, "assignment identity not provided")
+	}
+
 	if expr.Name == "true" || expr.Name == "false" {
 		return []MLOGStatement{&MLOG{
-			Comment: "Set the variable to the value",
+			Comment: "Assign value to variable",
 			Statement: [][]Resolvable{
 				{
 					&Value{Value: "set"},
@@ -238,11 +244,12 @@ func identToMLOG(_ context.Context, ident []Resolvable, expr *ast.Ident) ([]MLOG
 					&Value{Value: expr.Name},
 				},
 			},
+			SourcePos: ctx.Value(contextStatement).(ast.Node),
 		}}, nil
 	}
 
 	return []MLOGStatement{&MLOG{
-		Comment: "Set the variable to the value of other variable",
+		Comment: "Assign variable to another",
 		Statement: [][]Resolvable{
 			{
 				&Value{Value: "set"},
@@ -250,17 +257,18 @@ func identToMLOG(_ context.Context, ident []Resolvable, expr *ast.Ident) ([]MLOG
 				&NormalVariable{Name: expr.Name},
 			},
 		},
+		SourcePos: ctx.Value(contextStatement).(ast.Node),
 	}}, nil
 }
 
-func basicLitToMLOG(_ context.Context, ident []Resolvable, expr *ast.BasicLit) ([]MLOGStatement, error) {
+func basicLitToMLOG(ctx context.Context, ident []Resolvable, expr *ast.BasicLit) ([]MLOGStatement, error) {
 	value := expr.Value
 	if expr.Kind == token.CHAR {
 		value = "\"" + strings.Trim(value, "'") + "\""
 	}
 
 	return []MLOGStatement{&MLOG{
-		Comment: "Set the variable to the value",
+		Comment: "Assign value to variable",
 		Statement: [][]Resolvable{
 			{
 				&Value{Value: "set"},
@@ -268,5 +276,6 @@ func basicLitToMLOG(_ context.Context, ident []Resolvable, expr *ast.BasicLit) (
 				&Value{Value: value},
 			},
 		},
+		SourcePos: ctx.Value(contextStatement).(ast.Node),
 	}}, nil
 }

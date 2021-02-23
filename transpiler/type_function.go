@@ -3,28 +3,30 @@ package transpiler
 import (
 	"context"
 	"go/ast"
-	"go/token"
 	"strconv"
 )
 
 type MLOGCustomFunction struct {
-	Position     int
-	Arguments    []ast.Expr
-	Variables    []Resolvable
-	Unresolved   []MLOGStatement
-	FunctionName string
-	Comments     map[int]string
-	SourcePos    token.Pos
+	Position        int
+	Arguments       []ast.Expr
+	Variables       []Resolvable
+	Unresolved      []MLOGStatement
+	FunctionName    string
+	Comments        map[int]string
+	SourcePositions map[int]ast.Node
+	SourcePos       ast.Node
 }
 
 func (m *MLOGCustomFunction) ToMLOG() [][]Resolvable {
 	results := make([][]Resolvable, 0)
 	m.Comments = make(map[int]string)
+	m.SourcePositions = make(map[int]ast.Node)
 	for _, statement := range m.Unresolved {
 		lines := statement.ToMLOG()
 		results = append(results, lines...)
 		for i := statement.GetPosition(); i < statement.GetPosition()+len(lines); i++ {
 			m.Comments[i] = statement.GetComment(i)
+			m.SourcePositions[i] = statement.GetSourcePos(i)
 		}
 	}
 	return results
@@ -99,6 +101,9 @@ func (m *MLOGCustomFunction) PreProcess(ctx context.Context, global *Global, fun
 	if stacked != "" {
 		m.Unresolved = append(m.Unresolved, &MLOGStackWriter{
 			Action: "add",
+			MLOG: MLOG{
+				SourcePos: m.SourcePos,
+			},
 		})
 	}
 
@@ -111,7 +116,8 @@ func (m *MLOGCustomFunction) PreProcess(ctx context.Context, global *Global, fun
 
 	m.Unresolved = append(m.Unresolved, &MLOGJump{
 		MLOG: MLOG{
-			Comment: "Jump to function: " + m.FunctionName,
+			Comment:   "Jump to function: " + m.FunctionName,
+			SourcePos: m.SourcePos,
 		},
 		Condition: []Resolvable{
 			&Value{Value: "always"},
@@ -164,10 +170,14 @@ func (m *MLOGCustomFunction) GetComment(pos int) string {
 	return m.Comments[pos]
 }
 
-func (m *MLOGCustomFunction) SetSourcePos(pos token.Pos) {
+func (m *MLOGCustomFunction) SetSourcePos(pos ast.Node) {
 	m.SourcePos = pos
 }
 
-func (m *MLOGCustomFunction) GetSourcePos() token.Pos {
+func (m *MLOGCustomFunction) GetSourcePos(pos int) ast.Node {
+	if p, ok := m.SourcePositions[pos]; ok {
+		return p
+	}
+
 	return m.SourcePos
 }

@@ -54,7 +54,7 @@ func init() {
 
 	rootCmd.PersistentFlags().Bool("numbers", false, "Output line numbers")
 	rootCmd.PersistentFlags().Bool("comments", false, "Output comments")
-	rootCmd.PersistentFlags().Int("comment-offset", 50, "Comment offset from line start")
+	rootCmd.PersistentFlags().Int("comment-offset", 60, "Comment offset from line start")
 	rootCmd.PersistentFlags().String("stacked", "", "Use a provided memory cell/bank as a stack")
 	rootCmd.PersistentFlags().Bool("source", false, "Output source code after comment")
 

@@ -3,11 +3,13 @@ package transpiler
 import (
 	"context"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
 	"strconv"
+	"strings"
 )
 
 const stackVariable = `@stack`
@@ -242,7 +244,8 @@ func GolangToMLOG(input string, options Options) (string, error) {
 							&Value{Value: value},
 						},
 					},
-					Comment: "Set global variable",
+					Comment:   "Set global variable",
+					SourcePos: spec,
 				})
 				constantPos += 1
 
@@ -311,11 +314,34 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		}
 	}
 
-	result := ""
+	var tableString *strings.Builder
+	var table *tablewriter.Table
+	if options.Comments || options.Numbers || options.Source {
+		tableString = &strings.Builder{}
+		table = tablewriter.NewWriter(tableString)
+		table.SetBorder(false)
+		table.SetAutoWrapText(false)
+		table.SetCenterSeparator("#")
+		table.SetColumnSeparator("#")
+		table.SetHeaderLine(false)
+		table.SetAlignment(tablewriter.ALIGN_LEFT)
+		table.SetNoWhiteSpace(true)
+		table.SetTablePadding("\t")
+	}
+
+	outputData := ""
+
 	lineNumber := 0
 	for _, statement := range startup {
 		statements := statement.ToMLOG()
-		result += MLOGToString(context.WithValue(ctx, contextFunction, mainFunc), statements, statement, lineNumber)
+		mlogLines := MLOGToString(context.WithValue(ctx, contextFunction, mainFunc), statements, statement, lineNumber, input)
+		if table != nil {
+			table.AppendBulk(mlogLines)
+		} else {
+			for _, line := range mlogLines {
+				outputData += line[0] + "\n"
+			}
+		}
 		lineNumber += len(statements)
 	}
 
@@ -324,20 +350,30 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			continue
 		}
 
-		if options.Comments {
-			if result != "" {
-				result += "\n"
-			}
-
-			result += "     // Function: " + fn.Name + " //\n"
+		if options.Comments && table != nil {
+			table.Append([]string{"#"})
+			table.Append([]string{"# Function: " + fn.Name + " #"})
+			table.Append([]string{"#"})
 		}
 
 		for _, statement := range fn.Statements {
 			statements := statement.ToMLOG()
-			result += MLOGToString(context.WithValue(ctx, contextFunction, fn.Declaration), statements, statement, lineNumber)
+			mlogLines := MLOGToString(context.WithValue(ctx, contextFunction, fn.Declaration), statements, statement, lineNumber, input)
+			if table != nil {
+				table.AppendBulk(mlogLines)
+			} else {
+				for _, line := range mlogLines {
+					outputData += line[0] + "\n"
+				}
+			}
 			lineNumber += len(statements)
 		}
 	}
 
-	return result, nil
+	if table != nil && tableString != nil {
+		table.Render()
+		return tableString.String(), nil
+	}
+
+	return outputData, nil
 }

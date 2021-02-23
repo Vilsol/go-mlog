@@ -2,7 +2,7 @@ package transpiler
 
 import (
 	"context"
-	"go/token"
+	"go/ast"
 	"strconv"
 )
 
@@ -53,7 +53,7 @@ func (m *MLOGJump) GetComment(int) string {
 type FunctionJumpTarget struct {
 	Statement    WithPosition
 	FunctionName string
-	SourcePos    token.Pos
+	SourcePos    ast.Node
 }
 
 func (m *FunctionJumpTarget) GetPosition() int {

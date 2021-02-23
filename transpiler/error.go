@@ -5,18 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"go/token"
 )
 
 type ContextualError struct {
 	error
 	Context context.Context
-	Pos     *token.Pos
+	Pos     *ast.Node
 }
 
 func (e ContextualError) Error() string {
 	if e.Pos != nil {
-		return fmt.Sprintf("error at %d: %s", *e.Pos, e.error.Error())
+		return fmt.Sprintf("error at %d-%d: %s", (*e.Pos).Pos(), (*e.Pos).End(), e.error.Error())
 	}
 
 	if e.Context != nil {
@@ -40,7 +39,7 @@ func Err(ctx context.Context, err string) ContextualError {
 	}
 }
 
-func ErrPos(ctx context.Context, pos token.Pos, err string) ContextualError {
+func ErrPos(ctx context.Context, pos ast.Node, err string) ContextualError {
 	return ContextualError{
 		error:   errors.New(err),
 		Context: ctx,

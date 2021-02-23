@@ -77,6 +77,7 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 								rightSide,
 							},
 						},
+						SourcePos: statement,
 					}), nil
 				}
 
@@ -125,6 +126,7 @@ func returnStmtToMLOG(ctx context.Context, statement *ast.ReturnStmt) ([]MLOGSta
 					resultVar,
 				},
 			},
+			SourcePos: statement,
 		})
 	}
 
@@ -353,6 +355,7 @@ func incDecStmtToMLOG(_ context.Context, statement *ast.IncDecStmt) ([]MLOGState
 				&Value{Value: "1"},
 			},
 		},
+		SourcePos: statement,
 	}}, nil
 }
 

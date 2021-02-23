@@ -3,7 +3,7 @@ package transpiler
 import (
 	"context"
 	"fmt"
-	"go/token"
+	"go/ast"
 	"strconv"
 )
 
@@ -11,7 +11,7 @@ type MLOG struct {
 	Statement [][]Resolvable
 	Position  int
 	Comment   string
-	SourcePos token.Pos
+	SourcePos ast.Node
 }
 
 func (m *MLOG) ToMLOG() [][]Resolvable {
@@ -61,11 +61,11 @@ func (m *MLOG) GetComment(int) string {
 	return m.Comment
 }
 
-func (m *MLOG) SetSourcePos(pos token.Pos) {
+func (m *MLOG) SetSourcePos(pos ast.Node) {
 	m.SourcePos = pos
 }
 
-func (m *MLOG) GetSourcePos() token.Pos {
+func (m *MLOG) GetSourcePos(int) ast.Node {
 	return m.SourcePos
 }
 
@@ -75,7 +75,7 @@ type MLOGFunc struct {
 	Arguments  []Resolvable
 	Variables  []Resolvable
 	Unresolved []MLOGStatement
-	SourcePos  token.Pos
+	SourcePos  ast.Node
 }
 
 func (m *MLOGFunc) ToMLOG() [][]Resolvable {
@@ -144,11 +144,11 @@ func (m *MLOGFunc) GetComment(int) string {
 	return "Call to native function"
 }
 
-func (m *MLOGFunc) SetSourcePos(pos token.Pos) {
+func (m *MLOGFunc) SetSourcePos(pos ast.Node) {
 	m.SourcePos = pos
 }
 
-func (m *MLOGFunc) GetSourcePos() token.Pos {
+func (m *MLOGFunc) GetSourcePos(int) ast.Node {
 	return m.SourcePos
 }
 

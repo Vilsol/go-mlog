@@ -2,13 +2,14 @@ package transpiler
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 )
 
-func MLOGToString(ctx context.Context, statements [][]Resolvable, statement MLOGAble, lineNumber int) string {
-	result := ""
+func MLOGToString(ctx context.Context, statements [][]Resolvable, statement MLOGAble, lineNumber int, source string) [][]string {
+	lines := make([][]string, 0)
+
 	for _, line := range statements {
+		currentLine := make([]string, 0)
 		resultLine := ""
 		for _, t := range line {
 			if resultLine != "" {
@@ -17,19 +18,28 @@ func MLOGToString(ctx context.Context, statements [][]Resolvable, statement MLOG
 			resultLine += t.GetValue()
 		}
 
+		currentLine = append(currentLine, resultLine)
+
 		if ctx.Value(contextOptions).(Options).Numbers {
-			result += fmt.Sprintf("%3d: ", lineNumber)
+			currentLine = append(currentLine, "# "+strconv.Itoa(lineNumber))
 		}
 
 		if ctx.Value(contextOptions).(Options).Comments {
-			result += fmt.Sprintf("%-"+strconv.Itoa(ctx.Value(contextOptions).(Options).CommentOffset)+"s", resultLine)
-			result += " // " + statement.GetComment(lineNumber)
-		} else {
-			result += resultLine
+			currentLine = append(currentLine, "# "+statement.GetComment(lineNumber))
 		}
 
-		result += "\n"
+		if ctx.Value(contextOptions).(Options).Source {
+			sourcePos := statement.GetSourcePos(lineNumber)
+			if sourcePos != nil {
+				currentLine = append(currentLine, "# "+source[sourcePos.Pos()-1:sourcePos.End()-1])
+			} else {
+				currentLine = append(currentLine, "")
+			}
+		}
+
+		lines = append(lines, currentLine)
 		lineNumber++
 	}
-	return result
+
+	return lines
 }
