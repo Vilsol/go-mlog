@@ -86,13 +86,15 @@ func selectorExprToMLOG(ctx context.Context, ident Resolvable, selectorExpr *ast
 func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolvable) ([]MLOGStatement, error) {
 	results := make([]MLOGStatement, 0)
 
-	var funcName string
+	var funcName, exprName, selName string
 	switch funType := callExpr.Fun.(type) {
 	case *ast.Ident:
 		funcName = funType.Name
 		break
 	case *ast.SelectorExpr:
-		funcName = funType.X.(*ast.Ident).Name + "." + funType.Sel.Name
+		exprName = funType.X.(*ast.Ident).Name
+		selName = funType.Sel.Name
+		funcName = exprName + "." + selName
 		break
 	default:
 		return nil, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
@@ -107,6 +109,15 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 		results = append(results, &MLOGFunc{
 			Function:  translatedFunc,
 			Arguments: args,
+			Variables: ident,
+			SourcePos: callExpr,
+		})
+	} else if translatedFunc, ok := funcTranslations[selName]; ok {
+		results = append(results, &MLOGFunc{
+			Function: translatedFunc,
+			Arguments: []Resolvable{
+				&NormalVariable{Name: exprName},
+			},
 			Variables: ident,
 			SourcePos: callExpr,
 		})

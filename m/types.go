@@ -58,11 +58,18 @@ const (
 
 type Link = interface{}
 
-type Unit = interface{}
+type HealthC = interface{
+	GetHealth() int
+	GetName() string
+	GetX() float64
+	GetY() float64
+}
 
-type HealthC = interface{}
+type Unit = interface{
+	HealthC
+}
 
-type Building = struct {
+type Building = interface {
 	HealthC
 }
 

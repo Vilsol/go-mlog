@@ -396,7 +396,7 @@ func UnitBuild(x float64, y float64, block string, rotation int, config int) {
 
 // Retrieve the building and its type at the specified absolute position
 func UnitGetBlock(x float64, y float64) (blockType string, building Building) {
-	return "", Building{}
+	return "", nil
 }
 
 // Checks whether there is a unit within the specified radius around the provided absolute position
