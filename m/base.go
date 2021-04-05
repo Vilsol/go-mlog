@@ -142,10 +142,10 @@ func init() {
 		},
 	})
 
-	transpiler.RegisterFuncTranslation("GetHealth", CreateSensorFuncTranslation("@health"))
-	transpiler.RegisterFuncTranslation("GetName", CreateSensorFuncTranslation("@name"))
-	transpiler.RegisterFuncTranslation("GetX", CreateSensorFuncTranslation("@x"))
-	transpiler.RegisterFuncTranslation("GetY", CreateSensorFuncTranslation("@y"))
+	transpiler.RegisterFuncTranslation("GetHealth", createSensorFuncTranslation("@health"))
+	transpiler.RegisterFuncTranslation("GetName", createSensorFuncTranslation("@name"))
+	transpiler.RegisterFuncTranslation("GetX", createSensorFuncTranslation("@x"))
+	transpiler.RegisterFuncTranslation("GetY", createSensorFuncTranslation("@y"))
 }
 
 // Read a float64 value from memory at specified position
@@ -186,7 +186,7 @@ func Sensor(block HealthC, sense string) float64 {
 	return 0
 }
 
-func CreateSensorFuncTranslation(attribute string) transpiler.Translator {
+func createSensorFuncTranslation(attribute string) transpiler.Translator {
 	return transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
