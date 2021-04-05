@@ -83,6 +83,8 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		Functions: make([]*Function, 0),
 	}
 
+	ctx = context.WithValue(ctx, contextGlobal, global)
+
 	for _, decl := range f.Decls {
 		switch castDecl := decl.(type) {
 		case *ast.FuncDecl:

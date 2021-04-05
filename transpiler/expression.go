@@ -30,25 +30,29 @@ func expressionToMLOG(ctx context.Context, ident []Resolvable, expr ast.Expr) ([
 	return nil, Err(ctx, fmt.Sprintf("unsupported expression type: %T", expr))
 }
 
-func exprToResolvable(ctx context.Context, expr ast.Expr) (Resolvable, []MLOGStatement, error) {
+func exprToResolvable(ctx context.Context, expr ast.Expr) ([]Resolvable, []MLOGStatement, error) {
 	switch castUnary := expr.(type) {
 	case *ast.BasicLit:
-		return &Value{Value: castUnary.Value}, nil, nil
+		return []Resolvable{&Value{Value: castUnary.Value}}, nil, nil
 	case *ast.Ident:
 		if castUnary.Name == "true" || castUnary.Name == "false" {
-			return &Value{Value: castUnary.Name}, nil, nil
+			return []Resolvable{&Value{Value: castUnary.Name}}, nil, nil
 		} else {
-			return &NormalVariable{Name: castUnary.Name}, nil, nil
+			return []Resolvable{&NormalVariable{Name: castUnary.Name}}, nil, nil
 		}
 	case ast.Expr:
-		dVar := &DynamicVariable{}
+		dVars, err := getSuggestedDynamicVariableCount(ctx, castUnary)
 
-		exprInstructions, err := expressionToMLOG(ctx, []Resolvable{dVar}, castUnary)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		return dVar, exprInstructions, nil
+		exprInstructions, err := expressionToMLOG(ctx, dVars, castUnary)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return dVars, exprInstructions, nil
 	}
 
 	return nil, nil, Err(ctx, fmt.Sprintf("unknown resolvable expression type: %T", expr))
@@ -134,18 +138,17 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 }
 
 func argumentsToResolvables(ctx context.Context, args []ast.Expr) ([]Resolvable, []MLOGStatement, error) {
-	result := make([]Resolvable, len(args))
+	result := make([]Resolvable, 0)
 	instructions := make([]MLOGStatement, 0)
 
-	for i, arg := range args {
-
+	for _, arg := range args {
 		switch argType := arg.(type) {
 		case *ast.SelectorExpr:
 			_, str, err := selectorExprToMLOG(ctx, nil, argType)
 			if err != nil {
 				return nil, nil, err
 			}
-			result[i] = &Value{Value: str}
+			result = append(result, &Value{Value: str})
 			break
 		default:
 			res, leftExprInstructions, err := exprToResolvable(ctx, arg)
@@ -153,7 +156,7 @@ func argumentsToResolvables(ctx context.Context, args []ast.Expr) ([]Resolvable,
 				return nil, nil, err
 			}
 			instructions = append(instructions, leftExprInstructions...)
-			result[i] = res
+			result = append(result, res...)
 			break
 		}
 	}
@@ -171,6 +174,10 @@ func unaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.UnaryExp
 		}
 		instructions = append(instructions, exprInstructions...)
 
+		if len(x) != 1 {
+			return nil, Err(ctx, "unknown error")
+		}
+
 		var statement []Resolvable
 		switch expr.Op {
 		case token.NOT:
@@ -178,7 +185,7 @@ func unaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.UnaryExp
 				&Value{Value: "op"},
 				&Value{Value: regularOperators[token.NOT]},
 				ident[0],
-				x,
+				x[0],
 				&Value{Value: "-1"},
 			}
 			break
@@ -187,7 +194,7 @@ func unaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.UnaryExp
 				&Value{Value: "op"},
 				&Value{Value: regularOperators[token.MUL]},
 				ident[0],
-				x,
+				x[0],
 				&Value{Value: "-1"},
 			}
 			break
@@ -216,11 +223,19 @@ func binaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.BinaryE
 		}
 		instructions = append(instructions, leftExprInstructions...)
 
+		if len(leftSide) != 1 {
+			return nil, Err(ctx, "unknown error")
+		}
+
 		rightSide, rightExprInstructions, err := exprToResolvable(ctx, expr.Y)
 		if err != nil {
 			return nil, err
 		}
 		instructions = append(instructions, rightExprInstructions...)
+
+		if len(rightSide) != 1 {
+			return nil, Err(ctx, "unknown error")
+		}
 
 		return append(instructions, &MLOG{
 			Comment: "Execute operation",
@@ -229,8 +244,8 @@ func binaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.BinaryE
 					&Value{Value: "op"},
 					&Value{Value: opTranslated},
 					ident[0],
-					leftSide,
-					rightSide,
+					leftSide[0],
+					rightSide[0],
 				},
 			},
 			SourcePos: expr,

@@ -2,6 +2,7 @@ package transpiler
 
 const (
 	contextOptions           = "options"
+	contextGlobal            = "global"
 	contextFunction          = "function"
 	contextStatement         = "statement"
 	contextSpec              = "spec"

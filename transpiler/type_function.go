@@ -59,42 +59,47 @@ func (m *MLOGCustomFunction) PreProcess(ctx context.Context, global *Global, fun
 	}
 
 	stacked := ctx.Value(contextOptions).(Options).Stacked
+	argOffset := 0
 
-	for i, arg := range m.Arguments {
+	for _, arg := range m.Arguments {
 		value, argInstructions, err := exprToResolvable(ctx, arg)
 		if err != nil {
 			return err
 		}
 		m.Unresolved = append(m.Unresolved, argInstructions...)
 
-		if stacked != "" {
-			m.Unresolved = append(m.Unresolved, &MLOGStackWriter{
-				Action: "add",
-			})
+		for _, resolvable := range value {
+			if stacked != "" {
+				m.Unresolved = append(m.Unresolved, &MLOGStackWriter{
+					Action: "add",
+				})
 
-			m.Unresolved = append(m.Unresolved, &MLOG{
-				Comment: "Write argument to memory",
-				Statement: [][]Resolvable{
-					{
-						&Value{Value: "write"},
-						value,
-						&Value{Value: stacked},
-						&Value{Value: stackVariable},
+				m.Unresolved = append(m.Unresolved, &MLOG{
+					Comment: "Write argument to memory",
+					Statement: [][]Resolvable{
+						{
+							&Value{Value: "write"},
+							resolvable,
+							&Value{Value: stacked},
+							&Value{Value: stackVariable},
+						},
 					},
-				},
-			})
-		} else {
-			argNum := strconv.Itoa(i)
-			m.Unresolved = append(m.Unresolved, &MLOG{
-				Comment: "Set " + m.FunctionName + " argument: " + argNum,
-				Statement: [][]Resolvable{
-					{
-						&Value{Value: "set"},
-						&Value{Value: FunctionArgumentPrefix + m.FunctionName + "_" + argNum},
-						value,
+				})
+			} else {
+				argNum := strconv.Itoa(argOffset)
+				m.Unresolved = append(m.Unresolved, &MLOG{
+					Comment: "Set " + m.FunctionName + " argument: " + argNum,
+					Statement: [][]Resolvable{
+						{
+							&Value{Value: "set"},
+							&Value{Value: FunctionArgumentPrefix + m.FunctionName + "_" + argNum},
+							resolvable,
+						},
 					},
-				},
-			})
+				})
+			}
+
+			argOffset++
 		}
 	}
 
@@ -131,21 +136,23 @@ func (m *MLOGCustomFunction) PreProcess(ctx context.Context, global *Global, fun
 	if stacked != "" {
 		m.Unresolved = append(m.Unresolved, &MLOGStackWriter{
 			Action: "sub",
-			Extra:  len(m.Arguments),
+			Extra:  argOffset,
 		})
 	}
 
 	if len(m.Variables) > 0 {
-		m.Unresolved = append(m.Unresolved, &MLOG{
-			Comment: "Set variable to returned value",
-			Statement: [][]Resolvable{
-				{
-					&Value{Value: "set"},
-					m.Variables[0],
-					&Value{Value: FunctionReturnVariable},
+		for i, variable := range m.Variables {
+			m.Unresolved = append(m.Unresolved, &MLOG{
+				Comment: "Set variable to returned value",
+				Statement: [][]Resolvable{
+					{
+						&Value{Value: "set"},
+						variable,
+						&Value{Value: FunctionReturnVariable + "_" + strconv.Itoa(i)},
+					},
 				},
-			},
-		})
+			})
+		}
 	}
 
 	for _, statement := range m.Unresolved {
@@ -156,9 +163,9 @@ func (m *MLOGCustomFunction) PreProcess(ctx context.Context, global *Global, fun
 
 	return nil
 }
+
 func (m *MLOGCustomFunction) PostProcess(ctx context.Context, global *Global, function *Function) error {
-	for i, statement := range m.Unresolved {
-		statement.SetPosition(m.Position + i)
+	for _, statement := range m.Unresolved {
 		if err := statement.PostProcess(ctx, global, function); err != nil {
 			return err
 		}

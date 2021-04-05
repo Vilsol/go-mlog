@@ -21,6 +21,7 @@ There are several example programs available on [the wiki](https://github.com/Vi
 
 * Functions
 * Multiple function parameters/arguments
+* Multiple function return values
 * `return` from functions
 * `for` loops
 * `if`/`else if`/`else` statements
@@ -37,12 +38,10 @@ There are several example programs available on [the wiki](https://github.com/Vi
 ## Roadmap
 
 * Full variable block scoping
-* Multiple function return values
 
 ## Planned Optimizations
 
 * Simple jump instructions
-* Switch case jumps at the start of the block
 
 ## Design Limitations
 

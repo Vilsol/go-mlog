@@ -124,19 +124,6 @@ func main() {
 			output: `can't read/write to memory cell that is used for the stack: bank1`,
 		},
 		{
-			name: "SingleValueReturns",
-			input: `package main
-
-func main() {
-	sample()
-}
-
-func sample() (int, int) {
-	return 1, 2
-}`,
-			output: `error at 70: only single value returns are supported`,
-		},
-		{
 			name:   "ErrorEmptyMain",
 			input:  TestMain(``),
 			output: `empty main function`,
@@ -144,7 +131,7 @@ func sample() (int, int) {
 		{
 			name:   "ErrorIncorrectVarCount",
 			input:  TestMain(`a, b := m.Read("bank1", 0)`),
-			output: `error at 111-129: function requires 1 variables, provided: 2`,
+			output: `error at 103: mismatched variable assignment sides`,
 		},
 		{
 			name:   "ErrorMismatchedSides",

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"strconv"
 )
 
 func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, error) {
@@ -45,6 +46,17 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 				leftSide[i] = &NormalVariable{Name: lhs.(*ast.Ident).Name}
 			}
 
+			if callExpr, ok := statement.Rhs[0].(*ast.CallExpr); ok {
+				count, err := getFunctionReturnCount(ctx, callExpr)
+				if err != nil {
+					return nil, err
+				}
+
+				if count != len(statement.Lhs) {
+					return nil, Err(ctx, "mismatched variable assignment sides")
+				}
+			}
+
 			exprMLOG, err := expressionToMLOG(ctx, leftSide, statement.Rhs[0])
 			if err != nil {
 				return nil, err
@@ -66,6 +78,10 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 					}
 					instructions = append(instructions, rightExprInstructions...)
 
+					if len(rightSide) != 1 {
+						return nil, Err(ctx, "unknown error")
+					}
+
 					return append(instructions, &MLOG{
 						Comment: "Execute operation",
 						Statement: [][]Resolvable{
@@ -74,7 +90,7 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 								&Value{Value: opTranslated},
 								nVar,
 								nVar,
-								rightSide,
+								rightSide[0],
 							},
 						},
 						SourcePos: statement,
@@ -83,6 +99,17 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 
 				if statement.Tok != token.ASSIGN && statement.Tok != token.DEFINE {
 					return nil, Err(ctx, "only direct assignment is supported")
+				}
+
+				if callExpr, ok := statement.Rhs[i].(*ast.CallExpr); ok {
+					count, err := getFunctionReturnCount(ctx, callExpr)
+					if err != nil {
+						return nil, err
+					}
+
+					if count != len(statement.Lhs) {
+						return nil, Err(ctx, "mismatched variable assignment sides")
+					}
 				}
 
 				exprMLOG, err := expressionToMLOG(ctx, []Resolvable{nVar}, statement.Rhs[i])
@@ -100,34 +127,33 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 }
 
 func returnStmtToMLOG(ctx context.Context, statement *ast.ReturnStmt) ([]MLOGStatement, error) {
-	if len(statement.Results) > 1 {
-		// TODO Multi-value returns
-		return nil, Err(ctx, "only single value returns are supported")
-	}
-
 	results := make([]MLOGStatement, 0)
 
 	if len(statement.Results) > 0 {
-		returnValue := statement.Results[0]
+		for i, returnValue := range statement.Results {
+			resultVar, exprInstructions, err := exprToResolvable(ctx, returnValue)
+			if err != nil {
+				return nil, err
+			}
 
-		resultVar, exprInstructions, err := exprToResolvable(ctx, returnValue)
-		if err != nil {
-			return nil, err
-		}
+			if len(resultVar) != 1 {
+				return nil, Err(ctx, "unknown error")
+			}
 
-		results = append(results, exprInstructions...)
+			results = append(results, exprInstructions...)
 
-		results = append(results, &MLOG{
-			Comment: "Set return data",
-			Statement: [][]Resolvable{
-				{
-					&Value{Value: "set"},
-					&Value{Value: FunctionReturnVariable},
-					resultVar,
+			results = append(results, &MLOG{
+				Comment: "Set return data",
+				Statement: [][]Resolvable{
+					{
+						&Value{Value: "set"},
+						&Value{Value: FunctionReturnVariable + "_" + strconv.Itoa(i)},
+						resultVar[0],
+					},
 				},
-			},
-			SourcePos: statement,
-		})
+				SourcePos: statement,
+			})
+		}
 	}
 
 	return append(results, &MLOGTrampolineBack{
@@ -248,11 +274,19 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 			}
 			results = append(results, leftExprInstructions...)
 
+			if len(leftSide) != 1 {
+				return nil, Err(ctx, "unknown error")
+			}
+
 			rightSide, rightExprInstructions, err := exprToResolvable(ctx, binaryExpr.Y)
 			if err != nil {
 				return nil, err
 			}
 			results = append(results, rightExprInstructions...)
+
+			if len(rightSide) != 1 {
+				return nil, Err(ctx, "unknown error")
+			}
 
 			loopStartJump = &MLOGJump{
 				MLOG: MLOG{
@@ -260,8 +294,8 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 				},
 				Condition: []Resolvable{
 					&Value{Value: translatedOp},
-					leftSide,
-					rightSide,
+					leftSide[0],
+					rightSide[0],
 				},
 			}
 
@@ -271,8 +305,8 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 				},
 				Condition: []Resolvable{
 					&Value{Value: translatedOp},
-					leftSide,
-					rightSide,
+					leftSide[0],
+					rightSide[0],
 				},
 			}
 
@@ -373,14 +407,8 @@ func branchStmtToMLOG(ctx context.Context, statement *ast.BranchStmt) ([]MLOGSta
 			Token: statement.Tok,
 		}}, nil
 	case token.FALLTHROUGH:
-		block := ctx.Value(contextSwitchClauseBlock)
-		if block == nil {
-			return nil, Err(ctx, fmt.Sprintf("fallthrough statement outside switch scope"))
-		}
-		return []MLOGStatement{&MLOGBranch{
-			Block: block.(*ContextBlock),
-			Token: statement.Tok,
-		}}, nil
+		// Requires no extra instructions
+		return []MLOGStatement{}, nil
 	}
 
 	return nil, Err(ctx, fmt.Sprintf("branch statement not supported: %s", statement.Tok))
@@ -403,8 +431,14 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 	}
 	results = append(results, leftExprInstructions...)
 
+	if len(tag) != 1 {
+		return nil, Err(ctx, "unknown error")
+	}
+
 	blockCtxStruct := &ContextBlock{}
 	blockCtx := context.WithValue(ctx, contextBreakableBlock, blockCtxStruct)
+
+	jumpInstructions := make([]MLOGStatement, 0)
 	instructions := make([]MLOGStatement, 0)
 
 	var previousSwitchClause *ContextBlock
@@ -437,36 +471,16 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 					},
 					Condition: []Resolvable{
 						&Value{Value: "equal"},
-						tag,
+						tag[0],
 						caseTag,
 					},
 					JumpTarget: &StatementJumpTarget{
 						Statement: statements[0],
 					},
 				}
-				instructions = append(instructions, jumpIn)
+				jumpInstructions = append(jumpInstructions, jumpIn)
 				if previousSwitchClause != nil {
 					previousSwitchClause.Extra = append(previousSwitchClause.Extra, jumpIn)
-				}
-			}
-
-			var skipClause *MLOGJump
-			if len(caseStmt.List) > 0 {
-				skipClause = &MLOGJump{
-					MLOG: MLOG{
-						Comment: "Otherwise skip clause",
-					},
-					Condition: []Resolvable{
-						&Value{Value: "always"},
-					},
-					JumpTarget: &StatementJumpTarget{
-						Statement: statements[len(statements)-1],
-						After:     true,
-					},
-				}
-				instructions = append(instructions, skipClause)
-				if previousSwitchClause != nil {
-					previousSwitchClause.Extra = append(previousSwitchClause.Extra, skipClause)
 				}
 			}
 
@@ -484,10 +498,6 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 					Block: blockCtxStruct,
 				}
 				instructions = append(instructions, endBreak)
-
-				if skipClause != nil {
-					skipClause.JumpTarget.(*StatementJumpTarget).Statement = endBreak
-				}
 			}
 
 			previousSwitchClause = switchClauseBlockCtxStruct
@@ -496,7 +506,17 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 		}
 	}
 
-	blockCtxStruct.Statements = instructions
+	combined := append(
+		jumpInstructions,
+		append(
+			[]MLOGStatement{&MLOGBranch{
+				Block: blockCtxStruct,
+			}},
+			instructions...,
+		)...,
+	)
 
-	return append(results, instructions...), nil
+	blockCtxStruct.Statements = combined
+
+	return append(results, combined...), nil
 }

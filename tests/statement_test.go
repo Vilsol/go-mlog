@@ -111,36 +111,30 @@ default:
 	println("default")
 	break
 }`),
-			output: `jump 2 equal 10 0
-jump 5 always
+			output: `jump 8 equal 10 0
+jump 11 equal 10 1
+jump 13 equal 10 2
+jump 15 equal 10 3
+jump 15 equal 10 4
+jump 18 equal 10 5
+jump 18 equal 10 6
+jump 24 always
 print "0"
 print "\n"
-jump 30 always
-jump 7 equal 10 1
-jump 10 always
+jump 24 always
 print "1"
 print "\n"
-jump 12 always
-jump 12 equal 10 2
-jump 15 always
 print "2"
 print "\n"
-jump 18 always
-jump 18 equal 10 3
-jump 18 equal 10 4
-jump 21 always
 print "3, 4"
 print "\n"
-jump 30 always
-jump 24 equal 10 5
-jump 24 equal 10 6
-jump 27 always
+jump 24 always
 print "5, 6"
 print "\n"
-jump 30 always
+jump 24 always
 print "default"
 print "\n"
-jump 30 always`,
+jump 24 always`,
 		},
 		{
 			name:   "IgnoredVariable",
