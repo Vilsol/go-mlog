@@ -30,6 +30,18 @@ func init() {
 	transpiler.RegisterSelector("m.BReactor", BReactor)
 	transpiler.RegisterSelector("m.BUnitModifier", BUnitModifier)
 	transpiler.RegisterSelector("m.BExtinguisher", BExtinguisher)
+
+	transpiler.RegisterSelector("m.This", ThisVar)
+	transpiler.RegisterSelector("m.ThisX", ThisXVar)
+	transpiler.RegisterSelector("m.ThisY", ThisYVar)
+	transpiler.RegisterSelector("m.Ipt", IptVar)
+	transpiler.RegisterSelector("m.Counter", CounterVar)
+	transpiler.RegisterSelector("m.Links", LinksVar)
+	transpiler.RegisterSelector("m.CurUnit", CurUnitVar)
+	transpiler.RegisterSelector("m.Time", TimeVar)
+	transpiler.RegisterSelector("m.Tick", TickVar)
+	transpiler.RegisterSelector("m.MapW", MapWVar)
+	transpiler.RegisterSelector("m.MapH", MapHVar)
 }
 
 type RadarTarget = string
@@ -58,13 +70,43 @@ const (
 
 type Link = interface{}
 
-type Unit = interface{}
+type HealthC = interface {
+	GetHealth() int
+	GetName() string
+	GetX() float64
+	GetY() float64
+}
 
-type HealthC = interface{}
-
-type Building = struct {
+type Unit = interface {
 	HealthC
 }
+
+type Building = interface {
+	HealthC
+}
+
+var (
+	This    Building
+	ThisX   float64
+	ThisY   float64
+	CurUnit Unit
+)
+
+type SpecialVar = string
+
+const (
+	ThisVar    = SpecialVar("@this")
+	ThisXVar   = SpecialVar("@thisx")
+	ThisYVar   = SpecialVar("@thisy")
+	IptVar     = SpecialVar("@ipt")
+	CounterVar = SpecialVar("@counter")
+	LinksVar   = SpecialVar("@links")
+	CurUnitVar = SpecialVar("@unit")
+	TimeVar    = SpecialVar("@time")
+	TickVar    = SpecialVar("@tick")
+	MapWVar    = SpecialVar("@mapw")
+	MapHVar    = SpecialVar("@maph")
+)
 
 type BlockFlag = string
 

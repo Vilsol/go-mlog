@@ -141,6 +141,11 @@ func init() {
 			}, nil
 		},
 	})
+
+	transpiler.RegisterFuncTranslation("GetHealth", createSensorFuncTranslation("@health"))
+	transpiler.RegisterFuncTranslation("GetName", createSensorFuncTranslation("@name"))
+	transpiler.RegisterFuncTranslation("GetX", createSensorFuncTranslation("@x"))
+	transpiler.RegisterFuncTranslation("GetY", createSensorFuncTranslation("@y"))
 }
 
 // Read a float64 value from memory at specified position
@@ -172,11 +177,34 @@ func GetLink(address int) Link {
 // Retrieve a list of units that match specified conditions
 //
 // Conditions are combined using an `and` operation
-func Radar(from string, target1 RadarTarget, target2 RadarTarget, target3 RadarTarget, sortOrder bool, sort RadarSort) Unit {
+func Radar(from Building, target1 RadarTarget, target2 RadarTarget, target3 RadarTarget, sortOrder bool, sort RadarSort) Unit {
 	return nil
 }
 
 // Extract information indicated by sense from the provided block
-func Sensor(block interface{}, sense string) float64 {
+func Sensor(block HealthC, sense string) float64 {
 	return 0
+}
+
+func createSensorFuncTranslation(attribute string) transpiler.Translator {
+	return transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "sensor"},
+							vars[0],
+							&transpiler.Value{Value: strings.Trim(args[0].GetValue(), "\"")},
+							&transpiler.Value{Value: attribute},
+						},
+					},
+				},
+			}, nil
+		},
+	}
 }

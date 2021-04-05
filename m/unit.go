@@ -177,19 +177,19 @@ func UnitLocateOre(ore string) (x int, y int, found bool) {
 //
 // Also locates blocks outside the range of the unit
 func UnitLocateBuilding(buildingType BlockFlag, enemy bool) (x int, y int, found bool, building Building) {
-	return 0, 0, false, Building{}
+	return 0, 0, false, nil
 }
 
 // Locate the enemy spawn
 //
 // Also locates blocks outside the range of the unit
 func UnitLocateSpawn() (x int, y int, found bool, building Building) {
-	return 0, 0, false, Building{}
+	return 0, 0, false, nil
 }
 
 // Locate a damaged building
 //
 // Also locates blocks outside the range of the unit
 func UnitLocateDamaged() (x int, y int, found bool, building Building) {
-	return 0, 0, false, Building{}
+	return 0, 0, false, nil
 }

@@ -43,6 +43,16 @@ func TestBase(t *testing.T) {
 			input:  TestMain(`x := m.Sensor("A", "B")`),
 			output: `sensor _main_x A B`,
 		},
+		{
+			name:   "Sensor_GetHealth",
+			input:  TestMain(`x := y.GetHealth()`),
+			output: `sensor _main_x _main_y @health`,
+		},
+		{
+			name:   "Radar_This",
+			input:  TestMain(`x := m.Radar(m.This, m.RTAlly, m.RTEnemy, m.RTBoss, 0, m.RSArmor)`),
+			output: `radar ally enemy boss armor @this 0 _main_x`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
