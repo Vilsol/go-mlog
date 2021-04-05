@@ -184,7 +184,7 @@ func UnitLocateBuilding(buildingType BlockFlag, enemy bool) (x int, y int, found
 //
 // Also locates blocks outside the range of the unit
 func UnitLocateSpawn() (x int, y int, found bool, building Building) {
-	return 0, 0, false,nil
+	return 0, 0, false, nil
 }
 
 // Locate a damaged building
