@@ -31,17 +31,17 @@ func init() {
 	transpiler.RegisterSelector("m.BUnitModifier", BUnitModifier)
 	transpiler.RegisterSelector("m.BExtinguisher", BExtinguisher)
 
-	transpiler.RegisterSelector("m.This", ThisVar)
-	transpiler.RegisterSelector("m.ThisX", ThisXVar)
-	transpiler.RegisterSelector("m.ThisY", ThisYVar)
-	transpiler.RegisterSelector("m.Ipt", IptVar)
-	transpiler.RegisterSelector("m.Counter", CounterVar)
-	transpiler.RegisterSelector("m.Links", LinksVar)
-	transpiler.RegisterSelector("m.CurUnit", CurUnitVar)
-	transpiler.RegisterSelector("m.Time", TimeVar)
-	transpiler.RegisterSelector("m.Tick", TickVar)
-	transpiler.RegisterSelector("m.MapW", MapWVar)
-	transpiler.RegisterSelector("m.MapH", MapHVar)
+	transpiler.RegisterSelector("m.This", This)
+	transpiler.RegisterSelector("m.ThisX", ThisX)
+	transpiler.RegisterSelector("m.ThisY", ThisY)
+	transpiler.RegisterSelector("m.Ipt", Ipt)
+	transpiler.RegisterSelector("m.Counter", Counter)
+	transpiler.RegisterSelector("m.Links", Links)
+	transpiler.RegisterSelector("m.CurUnit", CurUnit)
+	transpiler.RegisterSelector("m.Time", Time)
+	transpiler.RegisterSelector("m.Tick", Tick)
+	transpiler.RegisterSelector("m.MapW", MapW)
+	transpiler.RegisterSelector("m.MapH", MapH)
 }
 
 type RadarTarget = string
@@ -85,27 +85,20 @@ type Building = interface {
 	HealthC
 }
 
-var (
-	This    Building
-	ThisX   float64
-	ThisY   float64
-	CurUnit Unit
-)
-
 type SpecialVar = string
 
 const (
-	ThisVar    = SpecialVar("@this")
-	ThisXVar   = SpecialVar("@thisx")
-	ThisYVar   = SpecialVar("@thisy")
-	IptVar     = SpecialVar("@ipt")
-	CounterVar = SpecialVar("@counter")
-	LinksVar   = SpecialVar("@links")
-	CurUnitVar = SpecialVar("@unit")
-	TimeVar    = SpecialVar("@time")
-	TickVar    = SpecialVar("@tick")
-	MapWVar    = SpecialVar("@mapw")
-	MapHVar    = SpecialVar("@maph")
+	This    = SpecialVar("@this")
+	ThisX   = SpecialVar("@thisx")
+	ThisY   = SpecialVar("@thisy")
+	Ipt     = SpecialVar("@ipt")
+	Counter = SpecialVar("@counter")
+	Links   = SpecialVar("@links")
+	CurUnit = SpecialVar("@unit")
+	Time    = SpecialVar("@time")
+	Tick    = SpecialVar("@tick")
+	MapW    = SpecialVar("@mapw")
+	MapH    = SpecialVar("@maph")
 )
 
 type BlockFlag = string

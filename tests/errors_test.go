@@ -138,6 +138,11 @@ func main() {
 			input:  TestMain(`a, b, c := 1, 2`),
 			output: `error at 103: mismatched variable assignment sides`,
 		},
+		{
+			name:   "ErrorInvalidBreakLocation",
+			input:  TestMain(`break`),
+			output: `error at 103: branch statement outside any breakable block scope`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

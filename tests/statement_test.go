@@ -92,7 +92,7 @@ jump 3 lessThan _main_i 10`,
 		},
 		{
 			name: "Switch",
-			input: TestMain(`switch 10 {
+			input: TestMain(`switch x := 3 + 7; x {
 case 0:
 	println("0")
 case 1:
@@ -111,30 +111,31 @@ default:
 	println("default")
 	break
 }`),
-			output: `jump 8 equal 10 0
-jump 11 equal 10 1
-jump 13 equal 10 2
-jump 15 equal 10 3
-jump 15 equal 10 4
-jump 18 equal 10 5
-jump 18 equal 10 6
-jump 24 always
+			output: `op add _main_x 3 7
+jump 9 equal _main_x 0
+jump 12 equal _main_x 1
+jump 14 equal _main_x 2
+jump 16 equal _main_x 3
+jump 16 equal _main_x 4
+jump 19 equal _main_x 5
+jump 19 equal _main_x 6
+jump 25 always
 print "0"
 print "\n"
-jump 24 always
+jump 25 always
 print "1"
 print "\n"
 print "2"
 print "\n"
 print "3, 4"
 print "\n"
-jump 24 always
+jump 25 always
 print "5, 6"
 print "\n"
-jump 24 always
+jump 25 always
 print "default"
 print "\n"
-jump 24 always`,
+jump 25 always`,
 		},
 		{
 			name:   "IgnoredVariable",
@@ -145,6 +146,17 @@ jump 24 always`,
 			name:   "OperatorAssign",
 			input:  TestMain(`x += 1`),
 			output: `op add _main_x _main_x 1`,
+		},
+		{
+			name: "SelectorAssignment",
+			input: TestMain(`a := m.RTAny
+b := m.RSDistance
+c := m.This
+d := m.BCore`),
+			output: `set _main_a any
+set _main_b distance
+set _main_c @this
+set _main_d core`,
 		},
 	}
 	for _, test := range tests {
