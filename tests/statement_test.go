@@ -158,6 +158,16 @@ set _main_b distance
 set _main_c @this
 set _main_d core`,
 		},
+		{
+			name:  "main_return",
+			input: TestMain(`if x > 10 { return }; print(x)`),
+			output: `op greaterThan _main_0 _main_x 10
+jump 3 equal _main_0 1
+jump 4 always
+end
+print _main_x
+end`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

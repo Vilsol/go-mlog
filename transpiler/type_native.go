@@ -34,7 +34,13 @@ type MLOGTrampolineBack struct {
 }
 
 func (m *MLOGTrampolineBack) PreProcess(ctx context.Context, global *Global, function *Function) error {
-	if m.Stacked != "" {
+	if m.Function == mainFuncName {
+		m.Statement = [][]Resolvable{
+			{
+				&Value{Value: "end"},
+			},
+		}
+	} else if m.Stacked != "" {
 		m.Statement = [][]Resolvable{
 			{
 				&Value{Value: "read"},
