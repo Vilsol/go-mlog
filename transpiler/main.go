@@ -196,6 +196,11 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		return "", Err(ctx, "empty main function")
 	}
 
+	mainStatements = append(mainStatements, &MLOGTrampolineBack{
+		Stacked:  ctx.Value(contextOptions).(Options).Stacked,
+		Function: mainFuncName,
+	})
+
 	global.Functions = append(global.Functions, &Function{
 		Name:          mainFuncName,
 		Called:        true,

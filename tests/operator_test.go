@@ -73,6 +73,7 @@ print 1`,
 				return
 			}
 
+			test.output = test.output + "\nend"
 			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}
@@ -201,6 +202,7 @@ op not _main_x _main_0 -1`,
 				return
 			}
 
+			test.output = test.output + "\nend"
 			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}
@@ -244,6 +246,7 @@ func TestFunctionOperator(t *testing.T) {
 				return
 			}
 
+			test.output = test.output + "\nend"
 			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}

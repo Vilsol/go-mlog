@@ -47,7 +47,8 @@ set _main_0 @return_0      	# 11
 print _main_0              	# 12	
 print "\n"                 	# 13	
 op add _main_i _main_i 1   	# 14	
-jump 8 lessThan _main_i 10 	# 15	`,
+jump 8 lessThan _main_i 10 	# 15	
+end                        	# 16	`,
 		},
 		{
 			name:  "Comments",
@@ -77,7 +78,8 @@ set _main_0 @return_0      	# Set variable to returned value
 print _main_0              	# Call to native function       	
 print "\n"                 	# Call to native function       	
 op add _main_i _main_i 1   	# Execute increment/decrement   	
-jump 8 lessThan _main_i 10 	# Jump to start of loop         	`,
+jump 8 lessThan _main_i 10 	# Jump to start of loop         	
+end                        	# Trampoline back               	`,
 		},
 		{
 			name:  "Comments",
@@ -101,7 +103,8 @@ set _main_0 @return_0
 print _main_0              	# println(foo(i))	
 print "\n"                 	# println(foo(i))	
 op add _main_i _main_i 1   	# i++            	
-jump 8 lessThan _main_i 10 	                 	`,
+jump 8 lessThan _main_i 10 	                 	
+end                        	                 	`,
 		},
 		{
 			name:  "All",
@@ -133,7 +136,8 @@ set _main_0 @return_0      	# 11	# Set variable to returned value
 print _main_0              	# 12	# Call to native function       	# println(foo(i))	
 print "\n"                 	# 13	# Call to native function       	# println(foo(i))	
 op add _main_i _main_i 1   	# 14	# Execute increment/decrement   	# i++            	
-jump 8 lessThan _main_i 10 	# 15	# Jump to start of loop         	                 	`,
+jump 8 lessThan _main_i 10 	# 15	# Jump to start of loop         	                 	
+end                        	# 16	# Trampoline back               	                 	`,
 		},
 	}
 	for _, test := range tests {

@@ -31,6 +31,7 @@ jump 1 lessThan @time _main_0`,
 				return
 			}
 
+			test.output = test.output + "\nend"
 			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}
