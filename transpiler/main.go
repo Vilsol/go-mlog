@@ -188,11 +188,6 @@ func GolangToMLOG(input string, options Options) (string, error) {
 
 	mainStatements, err := statementToMLOG(context.WithValue(ctx, contextFunction, mainFunc), mainFunc.Body)
 
-	mainStatements = append(mainStatements, &MLOGTrampolineBack{
-		Stacked:  ctx.Value(contextOptions).(Options).Stacked,
-		Function: mainFuncName,
-	})
-
 	if err != nil {
 		return "", err
 	}
@@ -200,6 +195,11 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	if len(mainStatements) == 0 {
 		return "", Err(ctx, "empty main function")
 	}
+
+	mainStatements = append(mainStatements, &MLOGTrampolineBack{
+		Stacked:  ctx.Value(contextOptions).(Options).Stacked,
+		Function: mainFuncName,
+	})
 
 	global.Functions = append(global.Functions, &Function{
 		Name:          mainFuncName,

@@ -159,14 +159,13 @@ set _main_c @this
 set _main_d core`,
 		},
 		{
-			name:  "main_return",
+			name:  "MainReturn",
 			input: TestMain(`if x > 10 { return }; print(x)`),
 			output: `op greaterThan _main_0 _main_x 10
 jump 3 equal _main_0 1
 jump 4 always
 end
-print _main_x
-end`,
+print _main_x`,
 		},
 	}
 	for _, test := range tests {
@@ -180,6 +179,7 @@ end`,
 				return
 			}
 
+			test.output = test.output + "\nend"
 			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}

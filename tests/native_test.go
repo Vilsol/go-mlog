@@ -45,6 +45,7 @@ print "\n"`,
 				return
 			}
 
+			test.output = test.output + "\nend"
 			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}

@@ -145,6 +145,7 @@ jump 8 lessThan _main_i 10 	# 15	# Jump to start of loop         	              
 				return
 			}
 
+			test.output = test.output + "\nend"
 			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}
