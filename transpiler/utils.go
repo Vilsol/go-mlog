@@ -58,6 +58,9 @@ func getFunctionReturnCount(ctx context.Context, callExpr *ast.CallExpr) (int, e
 		global := ctx.Value(contextGlobal).(*Global)
 		for _, function := range global.Functions {
 			if function.Name == funcName {
+				if function.Declaration.Type.Results == nil {
+					return 0, nil
+				}
 				return len(function.Declaration.Type.Results.List), nil
 			}
 		}
