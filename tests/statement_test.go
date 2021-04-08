@@ -146,7 +146,6 @@ print "\n"
 jump 25 always`,
 		},
 		{
-			// TODO
 			name:   "IgnoredVariable",
 			input:  TestMain(`_ = false`, false, false),
 			output: `set @_ false`,

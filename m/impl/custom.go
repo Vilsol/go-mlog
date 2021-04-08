@@ -6,24 +6,10 @@ import (
 )
 
 func init() {
-	// TODO Optimize
-	transpiler.RegisterFuncTranslation("m.Const", transpiler.Translator{
-		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
-			return 1
-		},
-		Variables: 1,
-		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "set"},
-							vars[0],
-							&transpiler.Value{Value: strings.Trim(args[0].GetValue(), "\"")},
-						},
-					},
-				},
-			}, nil
-		},
+	transpiler.RegisterInlineTranslation("m.Const", func(args []transpiler.Resolvable) (transpiler.Resolvable, error) {
+		return &transpiler.Value{Value: strings.Trim(args[0].GetValue(), "\"")}, nil
+	})
+	transpiler.RegisterInlineTranslation("m.B", func(args []transpiler.Resolvable) (transpiler.Resolvable, error) {
+		return &transpiler.Value{Value: strings.Trim(args[0].GetValue(), "\"")}, nil
 	})
 }

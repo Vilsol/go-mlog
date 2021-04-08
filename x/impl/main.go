@@ -3,6 +3,8 @@ package impl
 import "github.com/Vilsol/go-mlog/transpiler"
 
 func init() {
+	transpiler.RegisterValidImport(`"github.com/Vilsol/go-mlog/x"`)
+
 	transpiler.RegisterFuncTranslation("x.Sleep", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 2

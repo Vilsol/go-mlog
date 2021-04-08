@@ -123,7 +123,33 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 		return nil, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
 	}
 
-	if translatedFunc, ok := funcTranslations[funcName]; ok {
+	if inline, ok := inlineTranslations[funcName]; ok {
+		resolvables, statements, err := argumentsToResolvables(ctx, callExpr.Args)
+
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, statements...)
+
+		resolvable, err := inline(resolvables)
+
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, &MLOG{
+			Comment: "Assign value to variable",
+			Statement: [][]Resolvable{
+				{
+					&Value{Value: "set"},
+					ident[0],
+					resolvable,
+				},
+			},
+			SourcePos: ctx.Value(contextStatement).(ast.Node),
+		})
+	} else if translatedFunc, ok := funcTranslations[funcName]; ok {
 		args, instructions, err := argumentsToResolvables(ctx, callExpr.Args)
 		if err != nil {
 			return nil, err
@@ -174,6 +200,47 @@ func argumentsToResolvables(ctx context.Context, args []ast.Expr) ([]Resolvable,
 			result = append(result, &Value{Value: str})
 			break
 		default:
+			if callExpr, ok := argType.(*ast.CallExpr); ok {
+				var funcName string
+				switch funType := callExpr.Fun.(type) {
+				case *ast.Ident:
+					funcName = funType.Name
+					break
+				case *ast.SelectorExpr:
+					switch xType := funType.X.(type) {
+					case *ast.Ident:
+						funcName = xType.Name + "." + funType.Sel.Name
+						break
+					case *ast.SelectorExpr:
+						funcName = xType.Sel.Name + "." + funType.Sel.Name
+						break
+					}
+
+					break
+				default:
+					return nil, nil, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
+				}
+
+				if inline, ok := inlineTranslations[funcName]; ok {
+					resolvables, statements, err := argumentsToResolvables(ctx, callExpr.Args)
+
+					if err != nil {
+						return nil, nil, err
+					}
+
+					instructions = append(instructions, statements...)
+
+					resolvable, err := inline(resolvables)
+
+					if err != nil {
+						return nil, nil, err
+					}
+
+					result = append(result, resolvable)
+					break
+				}
+			}
+
 			res, leftExprInstructions, err := exprToResolvable(ctx, arg)
 			if err != nil {
 				return nil, nil, err

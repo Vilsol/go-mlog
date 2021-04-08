@@ -1,9 +1,6 @@
 package transpiler
 
-var validImports = map[string]bool{
-	`"github.com/Vilsol/go-mlog/m"`: true,
-	`"github.com/Vilsol/go-mlog/x"`: true,
-}
+var validImports = make(map[string]bool)
 
 func RegisterValidImport(path string) {
 	if _, ok := funcTranslations[path]; ok {

@@ -6,3 +6,10 @@ package m
 func Const(constant string) string {
 	return ""
 }
+
+// Return a building of the provided name
+//
+// Example m.B("message1")
+func B(name string) Building {
+	return nil
+}

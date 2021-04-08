@@ -50,7 +50,9 @@ func getFunctionReturnCount(ctx context.Context, callExpr *ast.CallExpr) (int, e
 		return 0, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
 	}
 
-	if translatedFunc, ok := funcTranslations[funcName]; ok {
+	if _, ok := inlineTranslations[funcName]; ok {
+		return 1, nil
+	} else if translatedFunc, ok := funcTranslations[funcName]; ok {
 		return translatedFunc.Variables, nil
 	} else if translatedFunc, ok := funcTranslations[selName]; ok {
 		return translatedFunc.Variables, nil

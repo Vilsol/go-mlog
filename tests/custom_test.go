@@ -27,6 +27,13 @@ print(x)`, true, false),
 			output: `sensor _main_x @this @x
 print _main_x`,
 		},
+		{
+			name:  "Inline",
+			input: TestMain(`print(m.Const("@copper"), m.B("message1"), float64(1))`, true, false),
+			output: `print @copper
+print message1
+print 1`,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
