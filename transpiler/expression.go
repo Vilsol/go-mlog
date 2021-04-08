@@ -147,7 +147,7 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 					resolvable,
 				},
 			},
-			SourcePos: ctx.Value(contextStatement).(ast.Node),
+			SourcePos: callExpr,
 		})
 	} else if translatedFunc, ok := funcTranslations[funcName]; ok {
 		args, instructions, err := argumentsToResolvables(ctx, callExpr.Args)
