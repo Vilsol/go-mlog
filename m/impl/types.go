@@ -3,6 +3,7 @@ package impl
 import (
 	"github.com/Vilsol/go-mlog/m"
 	"github.com/Vilsol/go-mlog/transpiler"
+	"strings"
 )
 
 func init() {
@@ -47,4 +48,54 @@ func init() {
 	transpiler.RegisterSelector("m.Tick", "@tick")
 	transpiler.RegisterSelector("m.MapW", "@mapw")
 	transpiler.RegisterSelector("m.MapH", "@maph")
+
+	// HealthC's attributes
+	transpiler.RegisterFuncTranslation("GetHealth", createSensorFuncTranslation("@health"))
+	transpiler.RegisterFuncTranslation("GetName", createSensorFuncTranslation("@name"))
+	transpiler.RegisterFuncTranslation("GetX", createSensorFuncTranslation("@x"))
+	transpiler.RegisterFuncTranslation("GetY", createSensorFuncTranslation("@y"))
+
+	transpiler.RegisterFuncTranslation("GetTotalItems", createSensorFuncTranslation("@totalItems"))
+	transpiler.RegisterFuncTranslation("GetItemCapacity", createSensorFuncTranslation("@itemCapacity"))
+	transpiler.RegisterFuncTranslation("GetRotation", createSensorFuncTranslation("@rotation"))
+	transpiler.RegisterFuncTranslation("GetShootX", createSensorFuncTranslation("@shootX"))
+	transpiler.RegisterFuncTranslation("GetShootY", createSensorFuncTranslation("@shootY"))
+	transpiler.RegisterFuncTranslation("GetShooting", createSensorFuncTranslation("@shooting"))
+
+	// Building's attributes
+	transpiler.RegisterFuncTranslation("GetTotalLiquids", createSensorFuncTranslation("@totalLiquids"))
+	transpiler.RegisterFuncTranslation("GetLiquidCapaticy", createSensorFuncTranslation("@liquidCapaticy"))
+	transpiler.RegisterFuncTranslation("GetTotalPower", createSensorFuncTranslation("@totalPower"))
+	transpiler.RegisterFuncTranslation("GetPowerCapaticy", createSensorFuncTranslation("@powerCapaticy"))
+	transpiler.RegisterFuncTranslation("GetPowerNetStored", createSensorFuncTranslation("@powerNetStored"))
+	transpiler.RegisterFuncTranslation("GetPowerNetCapacity", createSensorFuncTranslation("@powerNetCapacity"))
+	transpiler.RegisterFuncTranslation("GetPowerNetIn", createSensorFuncTranslation("@powerNetIn"))
+	transpiler.RegisterFuncTranslation("GetPowerNetOut", createSensorFuncTranslation("@powerNetOut"))
+	transpiler.RegisterFuncTranslation("GetHeat", createSensorFuncTranslation("@heat"))
+	transpiler.RegisterFuncTranslation("GetEfficiency", createSensorFuncTranslation("@efficiency"))
+	transpiler.RegisterFuncTranslation("IsEnabled", createSensorFuncTranslation("@enabled"))
+
+}
+
+func createSensorFuncTranslation(attribute string) transpiler.Translator {
+	return transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "sensor"},
+							vars[0],
+							&transpiler.Value{Value: strings.Trim(args[0].GetValue(), "\"")},
+							&transpiler.Value{Value: attribute},
+						},
+					},
+				},
+			}, nil
+		},
+	}
 }

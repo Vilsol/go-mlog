@@ -141,32 +141,5 @@ func init() {
 			}, nil
 		},
 	})
-
-	transpiler.RegisterFuncTranslation("GetHealth", createSensorFuncTranslation("@health"))
-	transpiler.RegisterFuncTranslation("GetName", createSensorFuncTranslation("@name"))
-	transpiler.RegisterFuncTranslation("GetX", createSensorFuncTranslation("@x"))
-	transpiler.RegisterFuncTranslation("GetY", createSensorFuncTranslation("@y"))
 }
 
-func createSensorFuncTranslation(attribute string) transpiler.Translator {
-	return transpiler.Translator{
-		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
-			return 1
-		},
-		Variables: 1,
-		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "sensor"},
-							vars[0],
-							&transpiler.Value{Value: strings.Trim(args[0].GetValue(), "\"")},
-							&transpiler.Value{Value: attribute},
-						},
-					},
-				},
-			}, nil
-		},
-	}
-}

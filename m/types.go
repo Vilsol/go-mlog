@@ -31,6 +31,13 @@ type HealthC = interface {
 	GetName() string
 	GetX() float64
 	GetY() float64
+
+	GetTotalItems() int
+	GetItemCapacity() int
+	GetRotation() float64
+	GetShootX() float64
+	GetShootY() float64
+	GetShooting() bool
 }
 
 type Ranged = interface{}
@@ -43,6 +50,26 @@ type Unit = interface {
 type Building = interface {
 	HealthC
 	Ranged
+
+	GetTotalLiquids() float64
+	GetLiquidCapaticy() float64
+
+	// In case of unbuffered consumers, this is the percentage (1.0f = 100%) of the demanded power which can be supplied.
+	// Blocks will work at a reduced efficiency if this is not equal to 1.0f.
+	// In case of buffered consumers, this is storage capacity.
+	GetTotalPower() float64
+
+	// In case of unbuffered consumers, this is the 0
+	// n case of buffered consumers, this is the maximum storage capacity.
+	GetPowerCapaticy() float64
+
+	GetPowerNetStored() float64
+	GetPowerNetCapacity() float64
+	GetPowerNetIn() float64
+	GetPowerNetOut() float64
+	GetHeat() float64
+	GetEfficiency() float64
+	IsEnabled() bool
 }
 
 var (
