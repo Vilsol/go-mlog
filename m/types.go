@@ -37,7 +37,7 @@ type HealthC = interface {
 	GetRotation() float64
 	GetShootX() float64
 	GetShootY() float64
-	GetShooting() bool
+	IsShooting() bool
 }
 
 type Ranged = interface{}

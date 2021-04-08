@@ -60,7 +60,7 @@ func init() {
 	transpiler.RegisterFuncTranslation("GetRotation", createSensorFuncTranslation("@rotation"))
 	transpiler.RegisterFuncTranslation("GetShootX", createSensorFuncTranslation("@shootX"))
 	transpiler.RegisterFuncTranslation("GetShootY", createSensorFuncTranslation("@shootY"))
-	transpiler.RegisterFuncTranslation("GetShooting", createSensorFuncTranslation("@shooting"))
+	transpiler.RegisterFuncTranslation("IsShooting", createSensorFuncTranslation("@shooting"))
 
 	// Building's attributes
 	transpiler.RegisterFuncTranslation("GetTotalLiquids", createSensorFuncTranslation("@totalLiquids"))
