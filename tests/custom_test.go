@@ -14,9 +14,18 @@ func TestCustom(t *testing.T) {
 		output string
 	}{
 		{
-			name:   "Const",
-			input:  TestMain(`x := m.Const("@copper")`),
-			output: `set _main_x @copper`,
+			name: "Const",
+			input: TestMain(`x := m.Const("@copper")
+print(x)`, true, false),
+			output: `set _main_x @copper
+print _main_x`,
+		},
+		{
+			name: "NestedSelector",
+			input: TestMain(`x := m.This.GetX()
+print(x)`, true, false),
+			output: `sensor _main_x @this @x
+print _main_x`,
 		},
 	}
 	for _, test := range tests {

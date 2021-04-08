@@ -1,49 +1,5 @@
 package m
 
-import "github.com/Vilsol/go-mlog/transpiler"
-
-func init() {
-	transpiler.RegisterSelector("m.RTAny", RTAny)
-	transpiler.RegisterSelector("m.RTEnemy", RTEnemy)
-	transpiler.RegisterSelector("m.RTAlly", RTAlly)
-	transpiler.RegisterSelector("m.RTPlayer", RTPlayer)
-	transpiler.RegisterSelector("m.RTAttacker", RTAttacker)
-	transpiler.RegisterSelector("m.RTFlying", RTFlying)
-	transpiler.RegisterSelector("m.RTBoss", RTBoss)
-	transpiler.RegisterSelector("m.RTGround", RTGround)
-
-	transpiler.RegisterSelector("m.RSDistance", RSDistance)
-	transpiler.RegisterSelector("m.RSHealth", RSHealth)
-	transpiler.RegisterSelector("m.RSShield", RSShield)
-	transpiler.RegisterSelector("m.RSArmor", RSArmor)
-	transpiler.RegisterSelector("m.RSMaxHealth", RSMaxHealth)
-
-	transpiler.RegisterSelector("m.BCore", BCore)
-	transpiler.RegisterSelector("m.BStorage", BStorage)
-	transpiler.RegisterSelector("m.BGenerator", BGenerator)
-	transpiler.RegisterSelector("m.BTurret", BTurret)
-	transpiler.RegisterSelector("m.BFactory", BFactory)
-	transpiler.RegisterSelector("m.BRepair", BRepair)
-	transpiler.RegisterSelector("m.BRally", BRally)
-	transpiler.RegisterSelector("m.BBattery", BBattery)
-	transpiler.RegisterSelector("m.BResupply", BResupply)
-	transpiler.RegisterSelector("m.BReactor", BReactor)
-	transpiler.RegisterSelector("m.BUnitModifier", BUnitModifier)
-	transpiler.RegisterSelector("m.BExtinguisher", BExtinguisher)
-
-	transpiler.RegisterSelector("m.This", This)
-	transpiler.RegisterSelector("m.ThisX", ThisX)
-	transpiler.RegisterSelector("m.ThisY", ThisY)
-	transpiler.RegisterSelector("m.Ipt", Ipt)
-	transpiler.RegisterSelector("m.Counter", Counter)
-	transpiler.RegisterSelector("m.Links", Links)
-	transpiler.RegisterSelector("m.CurUnit", CurUnit)
-	transpiler.RegisterSelector("m.Time", Time)
-	transpiler.RegisterSelector("m.Tick", Tick)
-	transpiler.RegisterSelector("m.MapW", MapW)
-	transpiler.RegisterSelector("m.MapH", MapH)
-}
-
 type RadarTarget = string
 
 const (
@@ -77,28 +33,63 @@ type HealthC = interface {
 	GetY() float64
 }
 
+type Ranged = interface{}
+
 type Unit = interface {
 	HealthC
+	Ranged
 }
 
 type Building = interface {
 	HealthC
+	Ranged
 }
 
-type SpecialVar = string
+var (
+	// A Building Object that represents the processor itself.
+	// You can use this with sensor to find various properties about the processor.
+	This = Building(nil)
 
-const (
-	This    = SpecialVar("@this")
-	ThisX   = SpecialVar("@thisx")
-	ThisY   = SpecialVar("@thisy")
-	Ipt     = SpecialVar("@ipt")
-	Counter = SpecialVar("@counter")
-	Links   = SpecialVar("@links")
-	CurUnit = SpecialVar("@unit")
-	Time    = SpecialVar("@time")
-	Tick    = SpecialVar("@tick")
-	MapW    = SpecialVar("@mapw")
-	MapH    = SpecialVar("@maph")
+	// The x coordinate of the processor.
+	ThisX = 0
+	// Convenience constant, same as float64(ThisX)
+	ThisXf = float64(ThisX)
+
+	// The y coordinate of the processor.
+	ThisY = 0
+	// Convenience constant, same as float64(ThisY)
+	ThisYf = float64(ThisY)
+
+	// The number of instructions executed per tick (60 ticks/second).
+	//
+	// Micro Processor -> 2
+	// Logic Processor -> 8
+	// Hyper Processor -> 25
+	Ipt = 0
+
+	// A variable that represents the next line the processor will read code from, equivalent to %IP in x86.
+	// It can be changed like any other variable as another way to perform jumps.
+	Counter = 0
+
+	// A constant that equals the number of buildings linked to the processor.
+	// It is changed by the processor when blocks are linked or unlinked.
+	Links = 0
+
+	// A constant that represents the current bound unit.
+	// It only changes when the processor unbinds a unit, or binds another one.
+	CurUnit = Unit(nil)
+
+	// Represents the current UNIX timestamp in milliseconds.
+	Time = 0
+
+	// Represents the amount of ticks (60 ticks/second) since the map began.
+	Tick = float64(0)
+
+	// Width of the map, in tiles.
+	MapW = 0
+
+	// Height of the map, in tiles.
+	MapH = 0
 )
 
 type BlockFlag = string

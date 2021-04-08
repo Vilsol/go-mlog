@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	_ "github.com/Vilsol/go-mlog/m"
+	_ "github.com/Vilsol/go-mlog/m/impl"
 	"github.com/Vilsol/go-mlog/transpiler"
 	_ "github.com/Vilsol/go-mlog/x"
+	_ "github.com/Vilsol/go-mlog/x/impl"
 	"runtime/debug"
 	"syscall/js"
 )

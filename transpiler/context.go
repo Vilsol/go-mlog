@@ -10,6 +10,7 @@ const (
 	contextBlock             = "block"
 	contextBreakableBlock    = "breakableBlock"
 	contextSwitchClauseBlock = "switchClauseBlock"
+	typeError                = "typeError"
 )
 
 type ContextBlock struct {

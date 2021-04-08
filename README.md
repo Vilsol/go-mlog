@@ -34,10 +34,13 @@ There are several example programs available on [the wiki](https://github.com/Vi
 * Multi-pass pre/post-processing
 * Stackless functions
 * Comment generation including source mapping
+* Sub-selector support
+* Type checking
 
 ## Roadmap
 
 * Full variable block scoping
+* Nested sub-selector support
 
 ## Planned Optimizations
 

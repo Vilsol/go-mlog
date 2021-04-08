@@ -15,22 +15,22 @@ func TestControl(t *testing.T) {
 	}{
 		{
 			name:   "ControlEnabled",
-			input:  TestMain(`m.ControlEnabled("A", true)`),
+			input:  TestMain(`m.ControlEnabled("A", true)`, true, false),
 			output: `control enabled "A" true`,
 		},
 		{
 			name:   "ControlShoot",
-			input:  TestMain(`m.ControlShoot("A", 3, 4, true)`),
+			input:  TestMain(`m.ControlShoot("A", 3, 4, true)`, true, false),
 			output: `control shoot "A" 3 4 true`,
 		},
 		{
 			name:   "ControlShootP",
-			input:  TestMain(`m.ControlShootP("A", 5, true)`),
+			input:  TestMain(`m.ControlShootP("A", 5, true)`, true, false),
 			output: `control shootp "A" 5 true`,
 		},
 		{
 			name:   "ControlConfigure",
-			input:  TestMain(`m.ControlConfigure("A", 1)`),
+			input:  TestMain(`m.ControlConfigure("A", 1)`, true, false),
 			output: `control configure "A" 1`,
 		},
 	}

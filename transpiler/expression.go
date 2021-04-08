@@ -89,6 +89,7 @@ func selectorExprToMLOG(ctx context.Context, ident Resolvable, selectorExpr *ast
 
 func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolvable) ([]MLOGStatement, error) {
 	results := make([]MLOGStatement, 0)
+	var subSelector Resolvable
 
 	var funcName, exprName, selName string
 	switch funType := callExpr.Fun.(type) {
@@ -96,9 +97,27 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 		funcName = funType.Name
 		break
 	case *ast.SelectorExpr:
-		exprName = funType.X.(*ast.Ident).Name
-		selName = funType.Sel.Name
-		funcName = exprName + "." + selName
+		switch xType := funType.X.(type) {
+		case *ast.Ident:
+			exprName = xType.Name
+			selName = funType.Sel.Name
+			funcName = exprName + "." + selName
+			break
+		case *ast.SelectorExpr:
+			_, str, err := selectorExprToMLOG(ctx, nil, xType)
+
+			if err != nil {
+				return nil, err
+			}
+
+			subSelector = &Value{Value: str}
+
+			// TODO Recursive check
+			exprName = xType.Sel.Name
+			selName = funType.Sel.Name
+			funcName = exprName + "." + selName
+			break
+		}
 		break
 	default:
 		return nil, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
@@ -117,10 +136,14 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 			SourcePos: callExpr,
 		})
 	} else if translatedFunc, ok := funcTranslations[selName]; ok {
+		if subSelector == nil {
+			subSelector = &NormalVariable{Name: exprName}
+		}
+
 		results = append(results, &MLOGFunc{
 			Function: translatedFunc,
 			Arguments: []Resolvable{
-				&NormalVariable{Name: exprName},
+				subSelector,
 			},
 			Variables: ident,
 			SourcePos: callExpr,

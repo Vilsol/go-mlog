@@ -3,10 +3,12 @@ package transpiler
 import (
 	"context"
 	"fmt"
+	"github.com/Vilsol/go-mlog/checker"
 	"github.com/olekukonko/tablewriter"
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"go/types"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -319,6 +321,18 @@ func GolangToMLOG(input string, options Options) (string, error) {
 				return "", err
 			}
 		}
+	}
+
+	// Type check at the end to prioritize custom errors
+	conf := types.Config{Importer: checker.New()}
+
+	_, err = conf.Check("cmd/hello", fileSet, []*ast.File{f}, nil)
+	if err != nil {
+		if tError, ok := err.(types.Error); ok {
+			return "", Err(context.WithValue(ctx, typeError, tError), tError.Msg)
+		}
+
+		return "", Err(ctx, err.Error())
 	}
 
 	var tableString *strings.Builder

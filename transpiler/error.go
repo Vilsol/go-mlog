@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/types"
 )
 
 type ContextualError struct {
@@ -27,6 +28,8 @@ func (e ContextualError) Error() string {
 			return fmt.Sprintf("error at %d: %s", spec.Pos(), e.error.Error())
 		} else if decl, ok := e.Context.Value(contextDecl).(ast.Decl); ok {
 			return fmt.Sprintf("error at %d: %s", decl.Pos(), e.error.Error())
+		} else if tError, ok := e.Context.Value(typeError).(types.Error); ok {
+			return fmt.Sprintf("error at %d: %s", tError.Pos, e.error.Error())
 		}
 	}
 	return e.error.Error()

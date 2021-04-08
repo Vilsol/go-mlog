@@ -19,7 +19,6 @@ func TestStacklessFunction(t *testing.T) {
 
 import (
 	"github.com/Vilsol/go-mlog/m"
-	"github.com/Vilsol/go-mlog/x"
 )
 
 func main() {
@@ -49,11 +48,6 @@ print _main_3`,
 			name: "FunctionStatic",
 			input: `package main
 
-import (
-	"github.com/Vilsol/go-mlog/m"
-	"github.com/Vilsol/go-mlog/x"
-)
-
 func main() {
 	print(sampleStatic())
 }
@@ -72,11 +66,6 @@ print _main_0`,
 		{
 			name: "FunctionVariable",
 			input: `package main
-
-import (
-	"github.com/Vilsol/go-mlog/m"
-	"github.com/Vilsol/go-mlog/x"
-)
 
 func main() {
 	print(sampleVariable())
@@ -98,11 +87,6 @@ print _main_0`,
 		{
 			name: "FunctionNone",
 			input: `package main
-
-import (
-	"github.com/Vilsol/go-mlog/m"
-	"github.com/Vilsol/go-mlog/x"
-)
 
 func main() {
 	sampleNone()

@@ -21,7 +21,7 @@ func TestStatement(t *testing.T) {
 	print(5)
 } else {
 	print(6)
-}`),
+}`, false, false),
 			output: `set _main_x 1
 op equal _main_0 _main_x 2
 jump 4 equal _main_0 1
@@ -37,7 +37,7 @@ print 6`,
 		},
 		{
 			name:  "ForLoop",
-			input: TestMain(`for i := 0; i < 10; i++ { print(i) }`),
+			input: TestMain(`for i := 0; i < 10; i++ { print(i) }`, false, false),
 			output: `set _main_i 0
 jump 3 lessThan _main_i 10
 jump 6 always
@@ -46,23 +46,31 @@ op add _main_i _main_i 1
 jump 3 lessThan _main_i 10`,
 		},
 		{
-			name:   "Reassignment",
-			input:  TestMain(`x := y`),
-			output: `set _main_x _main_y`,
+			name: "Reassignment",
+			input: TestMain(`y := 1
+x := y
+print(x)`, false, false),
+			output: `set _main_y 1
+set _main_x _main_y
+print _main_x`,
 		},
 		{
-			name:   "VariableBooleans",
-			input:  TestMain(`x := false`),
-			output: `set _main_x false`,
+			name: "VariableBooleans",
+			input: TestMain(`x := false
+print(x)`, false, false),
+			output: `set _main_x false
+print _main_x`,
 		},
 		{
-			name:   "VariableCharacter",
-			input:  TestMain(`x := 'A'`),
-			output: `set _main_x "A"`,
+			name: "VariableCharacter",
+			input: TestMain(`x := 'A'
+print(x)`, false, false),
+			output: `set _main_x "A"
+print _main_x`,
 		},
 		{
 			name:  "Break",
-			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { break; }; println(i); }`),
+			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { break; }; println(i); }`, false, false),
 			output: `set _main_i 0
 jump 3 lessThan _main_i 10
 jump 11 always
@@ -77,7 +85,7 @@ jump 3 lessThan _main_i 10`,
 		},
 		{
 			name:  "Continue",
-			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { continue; }; println(i); }`),
+			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { continue; }; println(i); }`, false, false),
 			output: `set _main_i 0
 jump 3 lessThan _main_i 10
 jump 11 always
@@ -110,7 +118,7 @@ case 5, 6:
 default:
 	println("default")
 	break
-}`),
+}`, false, false),
 			output: `op add _main_x 3 7
 jump 9 equal _main_x 0
 jump 12 equal _main_x 1
@@ -138,32 +146,44 @@ print "\n"
 jump 25 always`,
 		},
 		{
+			// TODO
 			name:   "IgnoredVariable",
-			input:  TestMain(`_ := false`),
+			input:  TestMain(`_ = false`, false, false),
 			output: `set @_ false`,
 		},
 		{
-			name:   "OperatorAssign",
-			input:  TestMain(`x += 1`),
-			output: `op add _main_x _main_x 1`,
+			name: "OperatorAssign",
+			input: TestMain(`x := 1
+x += 1`, false, false),
+			output: `set _main_x 1
+op add _main_x _main_x 1`,
 		},
 		{
 			name: "SelectorAssignment",
 			input: TestMain(`a := m.RTAny
 b := m.RSDistance
 c := m.This
-d := m.BCore`),
+d := m.BCore
+print(a)
+print(b)
+print(c)
+print(d)`, true, false),
 			output: `set _main_a any
 set _main_b distance
 set _main_c @this
-set _main_d core`,
+set _main_d core
+print _main_a
+print _main_b
+print _main_c
+print _main_d`,
 		},
 		{
 			name:  "MainReturn",
-			input: TestMain(`if x > 10 { return }; print(x)`),
-			output: `op greaterThan _main_0 _main_x 10
-jump 3 equal _main_0 1
-jump 4 always
+			input: TestMain(`x := 11; if x > 10 { return }; print(x)`, false, false),
+			output: `set _main_x 11
+op greaterThan _main_0 _main_x 10
+jump 4 equal _main_0 1
+jump 5 always
 end
 print _main_x`,
 		},

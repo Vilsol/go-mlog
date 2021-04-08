@@ -14,44 +14,60 @@ func TestBase(t *testing.T) {
 		output string
 	}{
 		{
-			name:   "Read",
-			input:  TestMain(`x := m.Read("cell1", 0)`),
-			output: `read _main_x cell1 0`,
+			name: "Read",
+			input: TestMain(`x := m.Read("cell1", 0)
+print(x)`, true, false),
+			output: `read _main_x cell1 0
+print _main_x`,
 		},
 		{
 			name:   "Write",
-			input:  TestMain(`m.Write(1, "cell1", 0)`),
+			input:  TestMain(`m.Write(1, "cell1", 0)`, true, false),
 			output: `write 1 cell1 0`,
 		},
 		{
 			name:   "PrintFlush",
-			input:  TestMain(`m.PrintFlush("message1")`),
+			input:  TestMain(`m.PrintFlush("message1")`, true, false),
 			output: `printflush message1`,
 		},
 		{
-			name:   "GetLink",
-			input:  TestMain(`x := m.GetLink(0)`),
-			output: `getlink _main_x 0`,
+			name: "GetLink",
+			input: TestMain(`x := m.GetLink(0)
+print(x)`, true, false),
+			output: `getlink _main_x 0
+print _main_x`,
 		},
 		{
-			name:   "Radar",
-			input:  TestMain(`x := m.Radar("A", m.RTAlly, m.RTEnemy, m.RTBoss, 0, m.RSArmor)`),
-			output: `radar ally enemy boss armor "A" 0 _main_x`,
+			name: "Radar",
+			input: TestMain(`x := m.Radar(m.This, m.RTAlly, m.RTEnemy, m.RTBoss, false, m.RSArmor)
+print(x)`, true, false),
+			output: `radar ally enemy boss armor @this false _main_x
+print _main_x`,
 		},
 		{
-			name:   "Sensor",
-			input:  TestMain(`x := m.Sensor("A", "B")`),
-			output: `sensor _main_x A B`,
+			name: "Sensor",
+			input: TestMain(`_, _, _, b := m.UnitLocateDamaged()
+x := m.Sensor(b, "B")
+print(x)`, true, false),
+			output: `ulocate damaged core true @copper @_ @_ @_ _main_b
+sensor _main_x _main_b B
+print _main_x`,
 		},
 		{
-			name:   "Sensor_GetHealth",
-			input:  TestMain(`x := y.GetHealth()`),
-			output: `sensor _main_x _main_y @health`,
+			name: "Sensor_GetHealth",
+			input: TestMain(`_, _, _, b := m.UnitLocateDamaged()
+x := b.GetHealth()
+print(x)`, true, false),
+			output: `ulocate damaged core true @copper @_ @_ @_ _main_b
+sensor _main_x _main_b @health
+print _main_x`,
 		},
 		{
-			name:   "Radar_This",
-			input:  TestMain(`x := m.Radar(m.This, m.RTAlly, m.RTEnemy, m.RTBoss, 0, m.RSArmor)`),
-			output: `radar ally enemy boss armor @this 0 _main_x`,
+			name: "Radar_This",
+			input: TestMain(`x := m.Radar(m.This, m.RTAlly, m.RTEnemy, m.RTBoss, false, m.RSArmor)
+print(x)`, true, false),
+			output: `radar ally enemy boss armor @this false _main_x
+print _main_x`,
 		},
 	}
 	for _, test := range tests {
