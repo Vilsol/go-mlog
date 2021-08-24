@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -18,17 +19,15 @@ var rootCmd = &cobra.Command{
 
 		_ = viper.ReadInConfig()
 
-		level, err := log.ParseLevel(viper.GetString("log"))
+		level, err := zerolog.ParseLevel(viper.GetString("log"))
 
 		if err != nil {
 			panic(err)
 		}
 
-		log.SetFormatter(&log.TextFormatter{
-			ForceColors: viper.GetBool("colors"),
-		})
-		log.SetOutput(os.Stdout)
-		log.SetLevel(level)
+		zerolog.SetGlobalLevel(level)
+
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	},
 }
 

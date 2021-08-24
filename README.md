@@ -37,6 +37,10 @@ There are several example programs available on [the wiki](https://github.com/Vi
 * Sub-selector support
 * Type checking
 
+## In Progress
+
+* MLOG Runtime
+
 ## Roadmap
 
 * Full variable block scoping
@@ -55,7 +59,7 @@ There are several example programs available on [the wiki](https://github.com/Vi
 ## Endgame Roadmap
 
 * Transpilation optimizations
-* MLOG Runtime
+* MLOG to Go decompiler
 
 ## CLI Usage
 

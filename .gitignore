@@ -114,3 +114,4 @@ modules.xml
 samples/
 *.mlog
 *.masm
+config.json
