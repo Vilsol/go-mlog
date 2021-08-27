@@ -54,7 +54,9 @@ jobs:
           fetch-depth: 0
 
       - name: Test
-        run: go test -v -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... $(go list ./... | grep -v wasm)
+        run: |
+          go test -v -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... github.com/Vilsol/go-mlog/tests/runtime \
+            && go test -v -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... github.com/Vilsol/go-mlog/tests/transpiler
         env:
           CGO_ENABLED: 0
 
