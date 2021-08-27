@@ -336,14 +336,9 @@ func opOperation(args []string) (OperationExecutor, error) {
 			logLine.Msg("executing")
 			ctx.Set(args[1], rand.Float64()*ctx.ResolveFloat(args[2]))
 		}, nil
-	default:
-		panic("unknown operation: " + args[0])
 	}
 
-	return func(ctx *ExecutionContext) {
-		log.Debug().Str("op", "op").Strs("args", args).Msg("executing")
-
-	}, nil
+	panic("unknown operation: " + args[0])
 }
 
 func printOperation(args []string) (OperationExecutor, error) {
