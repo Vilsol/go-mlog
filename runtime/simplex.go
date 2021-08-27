@@ -19,8 +19,8 @@ func raw2d(seed int, x float64, y float64) float64 {
 
 	// Hairy factor for 2D
 	s := (x + y) * F2
-	i := math.Floor(x + s)
-	j := math.Floor(y + s)
+	i := fastfloor(x + s)
+	j := fastfloor(y + s)
 
 	G2 := (3.0 - math.Sqrt(3.0)) / 6.0
 	t := (i + j) * G2
@@ -91,9 +91,17 @@ func perm(seed int, x int) int {
 	r := ((uint(x) >> 16) ^ uint(x)) * uint(0x45d9f3b)
 	r = ((r >> 16) ^ r) * (0x45d9f3b + uint(seed))
 	r = (r >> 16) ^ r
-	return x & 0xff
+	return int(r) & 0xff
 }
 
 func dot(g []int, x float64, y float64) float64 {
 	return float64(g[0])*x + float64(g[1])*y
+}
+
+func fastfloor(x float64) float64 {
+	if x > 0 {
+		return float64(int64(x))
+	}
+
+	return float64(int64(x - 1))
 }

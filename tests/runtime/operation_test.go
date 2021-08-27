@@ -168,16 +168,9 @@ op rand r35 25 12`)
 	testza.AssertEqual(t, int64(-26), context.Variables["r20"].Value)
 	testza.AssertEqual(t, float64(25), context.Variables["r21"].Value)
 	testza.AssertEqual(t, float64(12), context.Variables["r22"].Value)
-
-	// TODO Fix angle operation
-	//testza.AssertEqual(t, float64(25.835), context.Variables["r23"].Value)
-
+	testza.AssertEqual(t, float64(25.835288062773845), context.Variables["r23"].Value)
 	testza.AssertEqual(t, float64(27.730849247724095), context.Variables["r24"].Value)
-
-	// TODO Fix noise operation
-	//noise := context.Variables["r25"].Value.(float64)
-	//testza.AssertTrue(t, noise > float64(0) && noise < float64(1))
-
+	testza.AssertEqual(t, float64(0.49890396713293766), context.Variables["r25"].Value)
 	testza.AssertEqual(t, float64(25), context.Variables["r26"].Value)
 	testza.AssertEqual(t, float64(3.2188758248682006), context.Variables["r27"].Value)
 	testza.AssertEqual(t, float64(1.3979400086720375), context.Variables["r28"].Value)

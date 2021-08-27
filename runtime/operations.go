@@ -266,7 +266,7 @@ func opOperation(args []string) (OperationExecutor, error) {
 			x := ctx.ResolveFloat(args[2])
 			y := ctx.ResolveFloat(args[3])
 
-			ang := math.Atan2(x, y) * (float64(180) / math.Pi)
+			ang := FastAtan2(x, y) * (float64(180) / math.Pi)
 
 			if ang < 0 {
 				ang += 360
