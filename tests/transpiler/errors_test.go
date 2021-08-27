@@ -1,8 +1,8 @@
 package transpiler
 
 import (
+	"github.com/MarvinJWendt/testza"
 	"github.com/Vilsol/go-mlog/transpiler"
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -153,19 +153,19 @@ func main() {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			_, err := transpiler.GolangToMLOG(test.input, transpiler.Options{})
-			assert.EqualError(t, err, test.output)
+			testza.AssertEqual(t, err.Error(), test.output)
 		})
 	}
 }
 
 func TestRegisterSelectorPanic(t *testing.T) {
-	assert.Panics(t, func() {
+	testza.AssertPanics(t, func() {
 		transpiler.RegisterSelector("m.RTAny", "any")
 	})
 }
 
 func TestRegisterFuncTranslationPanic(t *testing.T) {
-	assert.Panics(t, func() {
+	testza.AssertPanics(t, func() {
 		transpiler.RegisterFuncTranslation("print", transpiler.Translator{})
 	})
 }

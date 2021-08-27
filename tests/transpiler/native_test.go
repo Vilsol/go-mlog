@@ -1,8 +1,8 @@
 package transpiler
 
 import (
+	"github.com/MarvinJWendt/testza"
 	"github.com/Vilsol/go-mlog/transpiler"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
@@ -52,7 +52,7 @@ print _main_x`,
 			}
 
 			test.output = test.output + "\nend"
-			assert.Equal(t, test.output, strings.Trim(mlog, "\n"))
+			testza.AssertEqual(t, test.output, strings.Trim(mlog, "\n"))
 		})
 	}
 }
