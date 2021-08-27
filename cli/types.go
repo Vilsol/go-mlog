@@ -4,18 +4,22 @@ import (
 	"encoding/json"
 	"github.com/Vilsol/go-mlog/runtime"
 	"image"
-	"os"
+	"io"
 )
 
 // Compile-time checks
-var _ runtime.Message = (*Message)(nil)
-var _ runtime.Display = (*Display)(nil)
+var (
+	_ runtime.Message = (*Message)(nil)
+	_ runtime.Display = (*Display)(nil)
+	_ runtime.Memory  = (*Memory)(nil)
+)
 
 type ObjectType string
 
 const (
 	ObjectMessage = ObjectType("message")
 	ObjectDisplay = ObjectType("display")
+	ObjectMemory  = ObjectType("memory")
 )
 
 type Config struct {
@@ -34,7 +38,7 @@ type MessageOptions struct {
 
 type Message struct {
 	Name   string
-	Output *os.File
+	Output io.Writer
 }
 
 type DisplayOptions struct {
@@ -45,10 +49,21 @@ type DisplayOptions struct {
 }
 
 type Display struct {
-	Width         int
-	Height        int
-	Scale         float64
-	Output        string
-	FrameCount    int
-	PreviousFrame image.Image
+	Width            int
+	Height           int
+	Scale            float64
+	Output           string
+	FrameCount       int
+	PreviousFrame    image.Image
+	SaveCurrentFrame func(img image.Image, display *Display)
+}
+
+type MemoryOptions struct {
+	Size int64
+}
+
+type Memory struct {
+	Name string
+	Size int64
+	Data map[int64]float64
 }

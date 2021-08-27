@@ -36,7 +36,7 @@ var trexCmd = &cobra.Command{
 		}
 
 		// TODO Output streaming
-		if _, err := runtime.ExecuteMLOG(result, objects); err != nil {
+		if err := runtime.ExecuteMLOG(result, objects); err != nil {
 			return err
 		}
 

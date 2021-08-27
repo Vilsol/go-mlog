@@ -1,4 +1,4 @@
-package tests
+package transpiler
 
 import (
 	"github.com/Vilsol/go-mlog/transpiler"
@@ -7,31 +7,24 @@ import (
 	"testing"
 )
 
-func TestConstant(t *testing.T) {
+func TestExtra(t *testing.T) {
 	tests := []struct {
 		name   string
 		input  string
 		output string
 	}{
 		{
-			name: "Constant",
-			input: `package main
-
-const x = 1
-const y = x
-
-func main() {
-	print(x)
-}`,
-			output: `set x 1
-set y x
-jump 3 always
-print x`,
+			name:  "Sleep",
+			input: TestMain(`x.Sleep(1000)`, false, true),
+			output: `op add _main_0 @time 1000
+jump 1 lessThan @time _main_0`,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mlog, err := transpiler.GolangToMLOG(test.input, transpiler.Options{})
+			mlog, err := transpiler.GolangToMLOG(test.input, transpiler.Options{
+				NoStartup: true,
+			})
 
 			if err != nil {
 				t.Error(err)

@@ -2,9 +2,18 @@ package cli
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"os"
 )
+
+type MessageHijacker struct {
+	Prefix string
+	Output io.Writer
+}
+
+func (h MessageHijacker) Write(p []byte) (n int, err error) {
+	return h.Output.Write(append(append([]byte("["+h.Prefix+"] "), p...), byte('\n')))
+}
 
 func NewMessage(config ObjectConfig) (*Message, error) {
 	output := os.Stdout
@@ -19,13 +28,16 @@ func NewMessage(config ObjectConfig) (*Message, error) {
 	}
 
 	return &Message{
-		Name:   config.Name,
-		Output: output,
+		Name: config.Name,
+		Output: &MessageHijacker{
+			Prefix: config.Name,
+			Output: output,
+		},
 	}, nil
 }
 
 func (m Message) PrintFlush(buffer string) {
 	if m.Output != nil {
-		_, _ = m.Output.WriteString(fmt.Sprintf("[%s] %s\n", m.Name, buffer))
+		_, _ = m.Output.Write([]byte(buffer))
 	}
 }

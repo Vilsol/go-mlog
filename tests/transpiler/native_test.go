@@ -1,4 +1,4 @@
-package tests
+package transpiler
 
 import (
 	"github.com/Vilsol/go-mlog/transpiler"
@@ -7,17 +7,37 @@ import (
 	"testing"
 )
 
-func TestExtra(t *testing.T) {
+func TestNative(t *testing.T) {
 	tests := []struct {
 		name   string
 		input  string
 		output string
 	}{
 		{
-			name:  "Sleep",
-			input: TestMain(`x.Sleep(1000)`, false, true),
-			output: `op add _main_0 @time 1000
-jump 1 lessThan @time _main_0`,
+			name: "print",
+			input: TestMain(`x := 2
+print(1, "A", x)`, false, false),
+			output: `set _main_x 2
+print 1
+print "A"
+print _main_x`,
+		},
+		{
+			name: "println",
+			input: TestMain(`x := 2
+println(1, "A", x)`, false, false),
+			output: `set _main_x 2
+print 1
+print "A"
+print _main_x
+print "\n"`,
+		},
+		{
+			name: "float64",
+			input: TestMain(`x := float64(1)
+print(x)`, false, false),
+			output: `set _main_x 1
+print _main_x`,
 		},
 	}
 	for _, test := range tests {

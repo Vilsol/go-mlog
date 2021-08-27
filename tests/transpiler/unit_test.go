@@ -1,4 +1,4 @@
-package tests
+package transpiler
 
 import (
 	"github.com/Vilsol/go-mlog/transpiler"

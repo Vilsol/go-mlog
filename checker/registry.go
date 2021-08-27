@@ -13,7 +13,7 @@ func RegisterPackages(path string, files map[string]string) {
 	asts := make([]*ast.File, 0)
 
 	for name, file := range files {
-		f, err := parser.ParseFile(registryFset, name, file, 0)
+		f, err := parser.ParseFile(registryFset, name, file, parser.ParseComments)
 		if err != nil {
 			panic(err)
 		}

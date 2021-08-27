@@ -22,11 +22,14 @@ func ConstructObjectsFromConfig() (map[string]interface{}, error) {
 
 	for _, object := range config.Objects {
 		switch object.Type {
-		case "message":
+		case ObjectMessage:
 			objects[object.Name], err = NewMessage(object)
 			break
-		case "display":
+		case ObjectDisplay:
 			objects[object.Name], err = NewDisplay(object)
+			break
+		case ObjectMemory:
+			objects[object.Name], err = NewMemory(object)
 			break
 		default:
 			return nil, errors.New("unknown object type: " + string(object.Type))

@@ -210,7 +210,11 @@ func (c ExecutionContext) Set(variable string, value interface{}) {
 	// Special condition for counter variable
 	if variable == counterVariable {
 		if _, ok := value.(int64); !ok {
-			value = c.ResolveInt(fmt.Sprintf("%v", value))
+			if f64, ok := value.(float64); ok {
+				value = int64(f64)
+			} else {
+				panic("cannot assign non-integer to @counter")
+			}
 		}
 	}
 
@@ -253,4 +257,18 @@ func (c ExecutionContext) Display(name string) (Display, error) {
 	}
 
 	return nil, errors.New(fmt.Sprintf("object with name \"%s\" is not a display (is %t)", name, obj))
+}
+
+func (c ExecutionContext) Memory(name string) (Memory, error) {
+	obj, err := c.Object(name)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if memory, ok := obj.(Memory); ok {
+		return memory, nil
+	}
+
+	return nil, errors.New(fmt.Sprintf("object with name \"%s\" is not a memory (is %t)", name, obj))
 }

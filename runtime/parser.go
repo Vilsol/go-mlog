@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"strings"
 )
@@ -35,6 +36,7 @@ func Tokenize(input string) ([]MLOGLine, int) {
 
 			result[j] = MLOGLine{
 				Instruction: currentLine,
+				SourceLine:  j,
 			}
 
 			currentLine = make([]string, 0)
@@ -68,6 +70,7 @@ func Tokenize(input string) ([]MLOGLine, int) {
 
 	result[j] = MLOGLine{
 		Instruction: currentLine,
+		SourceLine:  j,
 	}
 
 	if len(currentLine) > 0 {
@@ -81,10 +84,10 @@ func Tokenize(input string) ([]MLOGLine, int) {
 	return result, operationLines
 }
 
-func Parse(input string) ([]OperationExecutor, error) {
+func Parse(input string) ([]Operation, error) {
 	lines, operationLines := Tokenize(input)
 
-	instructions := make([]OperationExecutor, operationLines)
+	instructions := make([]Operation, operationLines)
 	i := 0
 	for _, line := range lines {
 		if len(line.Instruction) == 0 {
@@ -93,11 +96,18 @@ func Parse(input string) ([]OperationExecutor, error) {
 
 		if op, ok := operationRegistry[line.Instruction[0]]; ok {
 			var err error
-			instructions[i], err = op(line.Instruction[1:])
+			executor, err := op(line.Instruction[1:])
+
 			if err != nil {
 				// TODO Contextual errors
-				return nil, errors.Wrap(err, "error on line '"+strings.Join(line.Instruction, " ")+"'")
+				return nil, errors.Wrap(err, fmt.Sprintf("error on line %d: '%s'", line.SourceLine, strings.Join(line.Instruction, " ")))
 			}
+
+			instructions[i] = Operation{
+				Line:     line,
+				Executor: executor,
+			}
+
 			i++
 		} else {
 			return nil, errors.New("unknown operation: " + line.Instruction[0])

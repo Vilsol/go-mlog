@@ -9,6 +9,7 @@ import (
 	"image"
 	"image/draw"
 	"image/png"
+	"math"
 	"os"
 	"path"
 	"strconv"
@@ -26,12 +27,28 @@ func NewDisplay(config ObjectConfig) (*Display, error) {
 		Height: options.Height,
 		Scale:  options.Scale,
 		Output: options.Output,
+		SaveCurrentFrame: func(result image.Image, display *Display) {
+			dir, f := path.Split(display.Output)
+			split := strings.SplitN(f, ".", 2)
+			name := split[0] + "-" + strconv.Itoa(display.FrameCount) + "." + split[1]
+			file, err := os.OpenFile(path.Join(dir, name), os.O_RDWR|os.O_CREATE, 0755)
+			if err != nil {
+				log.Err(err).Msg("error saving image")
+				return
+			}
+
+			if err := png.Encode(file, result); err != nil {
+				log.Err(err).Msg("error saving image")
+				return
+			}
+
+			log.Info().Int("frame", display.FrameCount).Str("path", file.Name()).Msg("saved")
+		},
 	}, nil
 }
 
 func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 	var img *image.RGBA
-	var drawContext *gg.Context
 
 	if m.PreviousFrame != nil {
 		source := m.PreviousFrame
@@ -42,7 +59,8 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 		img = image.NewRGBA(image.Rect(0, 0, m.Width, m.Height))
 	}
 
-	drawContext = gg.NewContextForRGBA(img)
+	drawContext := gg.NewContextForRGBA(img)
+	drawContext.SetLineCapSquare()
 
 	for _, statement := range buffer {
 		log.Trace().Interface("args", statement.Arguments).Interface("action", statement.Action).Msg("flushing")
@@ -63,7 +81,8 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			drawContext.SetRGBA255(int(r), int(g), int(b), int(a))
 			break
 		case runtime.DrawActionStroke:
-			log.Warn().Msg("STROKE")
+			w := toFloat64(statement.Arguments[0])
+			drawContext.SetLineWidth(w)
 			break
 		case runtime.DrawActionLine:
 			x1 := toFloat64(statement.Arguments[0])
@@ -94,8 +113,8 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			y := toFloat64(statement.Arguments[1])
 			sides := toFloat64(statement.Arguments[2])
 			radius := toFloat64(statement.Arguments[3])
-			rotation := toFloat64(statement.Arguments[3])
-			drawContext.DrawRegularPolygon(int(sides), x, y, radius, rotation)
+			rotation := gg.Radians(toFloat64(statement.Arguments[4]) + 90)
+			DrawRegularPolygon(drawContext, int(sides), x, y, radius, rotation)
 			drawContext.Fill()
 			break
 		case runtime.DrawActionLinePoly:
@@ -103,16 +122,29 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			y := toFloat64(statement.Arguments[1])
 			sides := toFloat64(statement.Arguments[2])
 			radius := toFloat64(statement.Arguments[3])
-			rotation := toFloat64(statement.Arguments[3])
-			drawContext.DrawRegularPolygon(int(sides), x, y, radius, rotation)
+			rotation := gg.Radians(toFloat64(statement.Arguments[4]) + 90)
+			DrawRegularPolygon(drawContext, int(sides), x, y, radius, rotation)
 			drawContext.Stroke()
 			break
 		case runtime.DrawActionTriangle:
-			log.Warn().Msg("TRIANGLE")
+			x1 := toFloat64(statement.Arguments[0])
+			y1 := toFloat64(statement.Arguments[1])
+			x2 := toFloat64(statement.Arguments[2])
+			y2 := toFloat64(statement.Arguments[3])
+			x3 := toFloat64(statement.Arguments[4])
+			y3 := toFloat64(statement.Arguments[5])
+			drawContext.MoveTo(x1, y1)
+			drawContext.LineTo(x2, y2)
+			drawContext.LineTo(x3, y3)
+			drawContext.ClosePath()
+			drawContext.Fill()
 			break
 		case runtime.DrawActionImage:
+			// TODO Image drawing
 			log.Warn().Msg("IMAGE")
 			break
+		default:
+			panic("unknown draw action: " + statement.Action)
 		}
 	}
 
@@ -123,22 +155,7 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 
 	result = imaging.FlipV(result)
 
-	dir, f := path.Split(m.Output)
-	split := strings.SplitN(f, ".", 2)
-	name := split[0] + "-" + strconv.Itoa(m.FrameCount) + "." + split[1]
-	file, err := os.OpenFile(path.Join(dir, name), os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		log.Err(err).Msg("error saving image")
-		return
-	}
-
-	if err := png.Encode(file, result); err != nil {
-		log.Err(err).Msg("error saving image")
-		return
-	}
-
-	log.Info().Int("frame", m.FrameCount).Str("path", file.Name()).Msg("saved")
-
+	m.SaveCurrentFrame(result, m)
 	m.FrameCount++
 	m.PreviousFrame = img
 }
@@ -158,4 +175,15 @@ func toFloat64(n interface{}) float64 {
 	}
 
 	return 0
+}
+
+func DrawRegularPolygon(ctx *gg.Context, n int, x, y, r, rotation float64) {
+	angle := 2 * math.Pi / float64(n)
+	rotation -= math.Pi / 2
+	ctx.NewSubPath()
+	for i := 0; i < n; i++ {
+		a := rotation + angle*float64(i)
+		ctx.LineTo(x+r*math.Cos(a), y+r*math.Sin(a))
+	}
+	ctx.ClosePath()
 }

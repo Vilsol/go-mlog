@@ -22,7 +22,7 @@ var executeCmd = &cobra.Command{
 			return err
 		}
 
-		if _, err := runtime.ExecuteMLOGFile(args[0], objects); err != nil {
+		if err := runtime.ExecuteMLOGFile(args[0], objects); err != nil {
 			return err
 		}
 

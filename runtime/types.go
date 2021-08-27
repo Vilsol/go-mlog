@@ -9,6 +9,11 @@ type ExecutionContext struct {
 	PrintBuffer strings.Builder
 	DrawBuffer  []DrawStatement
 	Objects     map[string]interface{}
+	Metrics     map[int64]*Metrics
+}
+
+type Metrics struct {
+	Executions uint64
 }
 
 type Variable struct {
@@ -19,6 +24,12 @@ type Variable struct {
 type MLOGLine struct {
 	Instruction []string
 	Comment     string
+	SourceLine  int
+}
+
+type Operation struct {
+	Line     MLOGLine
+	Executor OperationExecutor
 }
 
 type OperationExecutor func(ctx *ExecutionContext)
@@ -51,6 +62,11 @@ type DrawStatement struct {
 
 type Display interface {
 	DrawFlush(buffer []DrawStatement)
+}
+
+type Memory interface {
+	Write(value float64, position int64)
+	Read(position int64) float64
 }
 
 type PostExecute interface {
