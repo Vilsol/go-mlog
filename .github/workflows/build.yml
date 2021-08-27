@@ -54,7 +54,7 @@ jobs:
           fetch-depth: 0
 
       - name: Test
-        run: go test -v -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... github.com/Vilsol/go-mlog/tests/runtime github.com/Vilsol/go-mlog/tests/transpiler
+        run: go test -v -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... github.com/Vilsol/go-mlog/tests/transpiler github.com/Vilsol/go-mlog/tests/runtime
         env:
           CGO_ENABLED: 0
 
