@@ -10,6 +10,8 @@ func Tokenize(input string) ([]MLOGLine, int) {
 	count := strings.Count(input, "\n")
 	result := make([]MLOGLine, count+1)
 
+	// TODO Parse labels
+
 	operationLines := 0
 	j := 0
 	inString := false
