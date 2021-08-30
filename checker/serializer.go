@@ -65,7 +65,6 @@ func GetSerializablePackages() {
 					}
 
 					result[pack][castDecl.Name.String()] = f
-					break
 				case *ast.GenDecl:
 					for _, spec := range castDecl.Specs {
 						switch castSpec := spec.(type) {
@@ -88,11 +87,8 @@ func GetSerializablePackages() {
 								value.Comments = comments
 								result[pack][name.String()] = value
 							}
-
-							break
 						}
 					}
-					break
 				}
 			}
 		}
@@ -103,21 +99,24 @@ func GetSerializablePackages() {
 }
 
 func serializeField(field *ast.Field) []serializedField {
-	results := make([]serializedField, len(field.Names))
 	if field.Names != nil && len(field.Names) > 0 {
+		results := make([]serializedField, len(field.Names))
+
 		for i, name := range field.Names {
 			results[i] = serializedField{
 				Name: &name.Name,
 				Type: exprToName(field.Type),
 			}
 		}
-	} else {
-		results = append(results, serializedField{
-			Type: exprToName(field.Type),
-		})
+
+		return results
 	}
 
-	return results
+	return []serializedField{
+		{
+			Type: exprToName(field.Type),
+		},
+	}
 }
 
 func exprToName(expr ast.Expr) string {

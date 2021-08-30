@@ -267,7 +267,6 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 	var loopEndJump *MLOGJump
 	if binaryExpr, ok := statement.Cond.(*ast.BinaryExpr); ok {
 		if translatedOp, ok := jumpOperators[binaryExpr.Op]; ok {
-
 			leftSide, leftExprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
 			if err != nil {
 				return nil, err
@@ -400,7 +399,7 @@ func branchStmtToMLOG(ctx context.Context, statement *ast.BranchStmt) ([]MLOGSta
 	case token.CONTINUE:
 		block := ctx.Value(contextBreakableBlock)
 		if block == nil {
-			return nil, Err(ctx, fmt.Sprintf("branch statement outside any breakable block scope"))
+			return nil, Err(ctx, "branch statement outside any breakable block scope")
 		}
 		return []MLOGStatement{&MLOGBranch{
 			Block: block.(*ContextBlock),

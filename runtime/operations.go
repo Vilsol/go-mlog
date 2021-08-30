@@ -417,47 +417,38 @@ func drawOperation(args []string) (OperationExecutor, error) {
 		if len(args) < 4 {
 			return nil, errors.New("expecting at least 4 arguments")
 		}
-		break
 	case string(DrawActionColor):
 		if len(args) < 5 {
 			return nil, errors.New("expecting at least 5 arguments")
 		}
-		break
 	case string(DrawActionLine):
 		if len(args) < 5 {
 			return nil, errors.New("expecting at least 5 arguments")
 		}
-		break
 	case string(DrawActionRect):
 		if len(args) < 5 {
 			return nil, errors.New("expecting at least 5 arguments")
 		}
-		break
 	case string(DrawActionLineRect):
 		if len(args) < 5 {
 			return nil, errors.New("expecting at least 5 arguments")
 		}
-		break
 	case string(DrawActionPoly):
 		if len(args) < 6 {
 			return nil, errors.New("expecting at least 6 arguments")
 		}
-		break
 	case string(DrawActionLinePoly):
 		if len(args) < 6 {
 			return nil, errors.New("expecting at least 6 arguments")
 		}
-		break
 	case string(DrawActionTriangle):
 		if len(args) < 7 {
 			return nil, errors.New("expecting at least 7 arguments")
 		}
-		break
 	case string(DrawActionImage):
 		if len(args) < 6 {
 			return nil, errors.New("expecting at least 6 arguments")
 		}
-		break
 	}
 
 	return func(ctx *ExecutionContext) {

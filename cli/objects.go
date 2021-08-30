@@ -24,13 +24,10 @@ func ConstructObjectsFromConfig() (map[string]interface{}, error) {
 		switch object.Type {
 		case ObjectMessage:
 			objects[object.Name], err = NewMessage(object)
-			break
 		case ObjectDisplay:
 			objects[object.Name], err = NewDisplay(object)
-			break
 		case ObjectMemory:
 			objects[object.Name], err = NewMemory(object)
-			break
 		default:
 			return nil, errors.New("unknown object type: " + string(object.Type))
 		}

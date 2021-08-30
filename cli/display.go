@@ -72,18 +72,15 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			b := toFloat64(statement.Arguments[2])
 			drawContext.SetRGB255(int(r), int(g), int(b))
 			drawContext.Clear()
-			break
 		case runtime.DrawActionColor:
 			r := toFloat64(statement.Arguments[0])
 			g := toFloat64(statement.Arguments[1])
 			b := toFloat64(statement.Arguments[2])
 			a := toFloat64(statement.Arguments[3])
 			drawContext.SetRGBA255(int(r), int(g), int(b), int(a))
-			break
 		case runtime.DrawActionStroke:
 			w := toFloat64(statement.Arguments[0])
 			drawContext.SetLineWidth(w)
-			break
 		case runtime.DrawActionLine:
 			x1 := toFloat64(statement.Arguments[0])
 			y1 := toFloat64(statement.Arguments[1])
@@ -91,7 +88,6 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			y2 := toFloat64(statement.Arguments[3])
 			drawContext.DrawLine(x1, y1, x2, y2)
 			drawContext.Stroke()
-			break
 		case runtime.DrawActionRect:
 			x := toFloat64(statement.Arguments[0])
 			y := toFloat64(statement.Arguments[1])
@@ -99,7 +95,6 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			h := toFloat64(statement.Arguments[3])
 			drawContext.DrawRectangle(x, y, w, h)
 			drawContext.Fill()
-			break
 		case runtime.DrawActionLineRect:
 			x := toFloat64(statement.Arguments[0])
 			y := toFloat64(statement.Arguments[1])
@@ -107,7 +102,6 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			h := toFloat64(statement.Arguments[3])
 			drawContext.DrawRectangle(x, y, w, h)
 			drawContext.Stroke()
-			break
 		case runtime.DrawActionPoly:
 			x := toFloat64(statement.Arguments[0])
 			y := toFloat64(statement.Arguments[1])
@@ -116,7 +110,6 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			rotation := gg.Radians(toFloat64(statement.Arguments[4]) + 90)
 			DrawRegularPolygon(drawContext, int(sides), x, y, radius, rotation)
 			drawContext.Fill()
-			break
 		case runtime.DrawActionLinePoly:
 			x := toFloat64(statement.Arguments[0])
 			y := toFloat64(statement.Arguments[1])
@@ -125,7 +118,6 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			rotation := gg.Radians(toFloat64(statement.Arguments[4]) + 90)
 			DrawRegularPolygon(drawContext, int(sides), x, y, radius, rotation)
 			drawContext.Stroke()
-			break
 		case runtime.DrawActionTriangle:
 			x1 := toFloat64(statement.Arguments[0])
 			y1 := toFloat64(statement.Arguments[1])
@@ -138,11 +130,9 @@ func (m *Display) DrawFlush(buffer []runtime.DrawStatement) {
 			drawContext.LineTo(x3, y3)
 			drawContext.ClosePath()
 			drawContext.Fill()
-			break
 		case runtime.DrawActionImage:
 			// TODO Image drawing
 			log.Warn().Msg("IMAGE")
-			break
 		default:
 			panic("unknown draw action: " + statement.Action)
 		}

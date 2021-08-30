@@ -64,14 +64,12 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			if castDecl.Name.Name == mainFuncName {
 				mainFunc = castDecl
 			}
-			break
 		case *ast.GenDecl:
 			if castDecl.Tok.String() == "var" {
 				return "", Err(context.WithValue(ctx, contextDecl, decl), "global scope may only contain constants not variables")
 			} else if castDecl.Tok.String() == "const" {
 				constants = append(constants, castDecl)
 			}
-			break
 		case *ast.BadDecl:
 			return "", Err(ctx, "syntax error in input file")
 		}
@@ -184,7 +182,6 @@ func GolangToMLOG(input string, options Options) (string, error) {
 				Statements:    statements,
 				ArgumentCount: len(castDecl.Type.Params.List),
 			})
-			break
 		}
 	}
 
@@ -236,10 +233,8 @@ func GolangToMLOG(input string, options Options) (string, error) {
 				switch valueType := valueSpec.Values[i].(type) {
 				case *ast.BasicLit:
 					value = valueType.Value
-					break
 				case *ast.Ident:
 					value = valueType.Name
-					break
 				default:
 					return "", Err(context.WithValue(ctx, contextSpec, spec), fmt.Sprintf("unknown constant type: %T", valueSpec.Values[i]))
 				}

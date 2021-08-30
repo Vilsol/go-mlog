@@ -52,7 +52,7 @@ func ConstructContext(objects map[string]interface{}) (*ExecutionContext, *Varia
 		},
 		PrintBuffer: strings.Builder{},
 		Objects:     objects,
-		Metrics:     make(map[int64]*Metrics, 0),
+		Metrics:     make(map[int64]*Metrics),
 	}
 
 	return context, counter
@@ -85,7 +85,7 @@ func ExecuteContext(operations []Operation, context *ExecutionContext, counter *
 		}
 	}
 
-	log.Info().Dur("took", time.Now().Sub(start)).Int64("executed", executedCount).Msg("completed execution")
+	log.Info().Dur("took", time.Since(start)).Int64("executed", executedCount).Msg("completed execution")
 
 	if metrics {
 		table := tablewriter.NewWriter(os.Stdout)

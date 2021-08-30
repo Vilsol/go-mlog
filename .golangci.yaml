@@ -1,0 +1,33 @@
+run:
+  skip-dirs:
+    - (^|\\)samples$($|\\)
+    - (^|\\)wasm($|\\)
+
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - gosimple
+    - structcheck
+    - varcheck
+    - asciicheck
+    - depguard
+    - dogsled
+    - dupl
+    - whitespace
+    - wastedassign
+    - unparam
+    - unconvert
+    - predeclared
+    - prealloc
+    - nilerr
+    - makezero
+    - ifshort
+    - goprintffuncname
+    - goconst
+    - exportloopref
+    - durationcheck

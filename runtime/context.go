@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"errors"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"strconv"
@@ -72,7 +71,7 @@ func (c ExecutionContext) ResolveStr(val string) string {
 		return strconv.FormatFloat(cast, 'f', -1, 64)
 	}
 
-	panic(fmt.Sprintf("unkonwn value type: %t", result))
+	panic(fmt.Sprintf("unknown value type: %t", result))
 }
 
 func (c ExecutionContext) ResolveFloat(val string) float64 {
@@ -116,7 +115,7 @@ func (c ExecutionContext) ResolveFloat(val string) float64 {
 		return cast
 	}
 
-	panic(fmt.Sprintf("unkonwn value type: %t", result))
+	panic(fmt.Sprintf("unknown value type: %t", result))
 }
 
 func (c ExecutionContext) ResolveInt(val string) int64 {
@@ -166,7 +165,7 @@ func (c ExecutionContext) ResolveInt(val string) int64 {
 		return int64(cast)
 	}
 
-	panic(fmt.Sprintf("unkonwn value type: %t", result))
+	panic(fmt.Sprintf("unknown value type: %t", result))
 }
 
 func (c ExecutionContext) IsNumber(val string) bool {
@@ -228,7 +227,7 @@ func (c ExecutionContext) Object(name string) (interface{}, error) {
 		return obj, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("no object with name \"%s\" is connected", name))
+	return nil, fmt.Errorf("no object with name \"%s\" is connected", name)
 }
 
 func (c ExecutionContext) Message(name string) (Message, error) {
@@ -242,7 +241,7 @@ func (c ExecutionContext) Message(name string) (Message, error) {
 		return message, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("object with name \"%s\" is not a message (is %t)", name, obj))
+	return nil, fmt.Errorf("object with name \"%s\" is not a message (is %t)", name, obj)
 }
 
 func (c ExecutionContext) Display(name string) (Display, error) {
@@ -256,7 +255,7 @@ func (c ExecutionContext) Display(name string) (Display, error) {
 		return display, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("object with name \"%s\" is not a display (is %t)", name, obj))
+	return nil, fmt.Errorf("object with name \"%s\" is not a display (is %t)", name, obj)
 }
 
 func (c ExecutionContext) Memory(name string) (Memory, error) {
@@ -270,5 +269,5 @@ func (c ExecutionContext) Memory(name string) (Memory, error) {
 		return memory, nil
 	}
 
-	return nil, errors.New(fmt.Sprintf("object with name \"%s\" is not a memory (is %t)", name, obj))
+	return nil, fmt.Errorf("object with name \"%s\" is not a memory (is %t)", name, obj)
 }

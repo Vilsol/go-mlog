@@ -30,22 +30,17 @@ func getFunctionReturnCount(ctx context.Context, callExpr *ast.CallExpr) (int, e
 	switch funType := callExpr.Fun.(type) {
 	case *ast.Ident:
 		funcName = funType.Name
-		break
 	case *ast.SelectorExpr:
 		switch xType := funType.X.(type) {
 		case *ast.Ident:
 			exprName = xType.Name
 			selName = funType.Sel.Name
 			funcName = exprName + "." + selName
-			break
 		case *ast.SelectorExpr:
 			exprName = xType.Sel.Name
 			selName = funType.Sel.Name
 			funcName = exprName + "." + selName
-			break
 		}
-
-		break
 	default:
 		return 0, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
 	}

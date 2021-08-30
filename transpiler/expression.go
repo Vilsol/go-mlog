@@ -95,14 +95,12 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 	switch funType := callExpr.Fun.(type) {
 	case *ast.Ident:
 		funcName = funType.Name
-		break
 	case *ast.SelectorExpr:
 		switch xType := funType.X.(type) {
 		case *ast.Ident:
 			exprName = xType.Name
 			selName = funType.Sel.Name
 			funcName = exprName + "." + selName
-			break
 		case *ast.SelectorExpr:
 			_, str, err := selectorExprToMLOG(ctx, nil, xType)
 
@@ -116,9 +114,7 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 			exprName = xType.Sel.Name
 			selName = funType.Sel.Name
 			funcName = exprName + "." + selName
-			break
 		}
-		break
 	default:
 		return nil, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
 	}
@@ -198,25 +194,19 @@ func argumentsToResolvables(ctx context.Context, args []ast.Expr) ([]Resolvable,
 				return nil, nil, err
 			}
 			result = append(result, &Value{Value: str})
-			break
 		default:
 			if callExpr, ok := argType.(*ast.CallExpr); ok {
 				var funcName string
 				switch funType := callExpr.Fun.(type) {
 				case *ast.Ident:
 					funcName = funType.Name
-					break
 				case *ast.SelectorExpr:
 					switch xType := funType.X.(type) {
 					case *ast.Ident:
 						funcName = xType.Name + "." + funType.Sel.Name
-						break
 					case *ast.SelectorExpr:
 						funcName = xType.Sel.Name + "." + funType.Sel.Name
-						break
 					}
-
-					break
 				default:
 					return nil, nil, Err(ctx, fmt.Sprintf("unknown call expression: %T", callExpr.Fun))
 				}
@@ -247,7 +237,6 @@ func argumentsToResolvables(ctx context.Context, args []ast.Expr) ([]Resolvable,
 			}
 			instructions = append(instructions, leftExprInstructions...)
 			result = append(result, res...)
-			break
 		}
 	}
 
@@ -278,7 +267,6 @@ func unaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.UnaryExp
 				x[0],
 				&Value{Value: "-1"},
 			}
-			break
 		case token.SUB:
 			statement = []Resolvable{
 				&Value{Value: "op"},
@@ -287,7 +275,6 @@ func unaryExprToMLOG(ctx context.Context, ident []Resolvable, expr *ast.UnaryExp
 				x[0],
 				&Value{Value: "-1"},
 			}
-			break
 		}
 
 		if statement == nil {

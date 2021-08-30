@@ -1,16 +1,18 @@
 package transpiler
 
+type ContextKey string
+
 const (
-	contextOptions           = "options"
-	contextGlobal            = "global"
-	contextFunction          = "function"
-	contextStatement         = "statement"
-	contextSpec              = "spec"
-	contextDecl              = "decl"
-	contextBlock             = "block"
-	contextBreakableBlock    = "breakableBlock"
-	contextSwitchClauseBlock = "switchClauseBlock"
-	typeError                = "typeError"
+	contextOptions           = ContextKey("options")
+	contextGlobal            = ContextKey("global")
+	contextFunction          = ContextKey("function")
+	contextStatement         = ContextKey("statement")
+	contextSpec              = ContextKey("spec")
+	contextDecl              = ContextKey("decl")
+	contextBlock             = ContextKey("block")
+	contextBreakableBlock    = ContextKey("breakableBlock")
+	contextSwitchClauseBlock = ContextKey("switchClauseBlock")
+	typeError                = ContextKey("typeError")
 )
 
 type ContextBlock struct {
