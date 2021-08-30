@@ -7,307 +7,98 @@ func init() {
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "stop"},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "stop"}, 0, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitMove", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "move"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "move"}, 2, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitApproach", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "approach"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "approach"}, 3, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitBoost", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "boost"},
-							&transpiler.Value{Value: args[0].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "boost"}, 1, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitPathfind", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "pathfind"},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "pathfind"}, 0, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitTarget", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "target"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "target"}, 3, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitTargetP", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "targetp"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "targetp"}, 2, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitItemDrop", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "itemDrop"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "itemDrop"}, 2, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitItemTake", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "itemTake"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "itemTake"}, 3, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitPayloadDrop", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "payDrop"},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "payDrop"}, 0, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitPayloadTake", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "payTake"},
-							&transpiler.Value{Value: args[0].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "payTake"}, 1, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitMine", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "mine"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "mine"}, 2, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitFlag", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "flag"},
-							&transpiler.Value{Value: args[0].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "flag"}, 1, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitBuild", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "build"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
-							&transpiler.Value{Value: args[3].GetValue()},
-							&transpiler.Value{Value: args[4].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "build"}, 5, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitGetBlock", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
 		Variables: 2,
-		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "getBlock"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							vars[0],
-							vars[1],
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "getBlock"}, 2, 2),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitWithin", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
 		Variables: 1,
-		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ucontrol"},
-							&transpiler.Value{Value: "within"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
-							vars[0],
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"ucontrol", "within"}, 3, 1),
 	})
 }

@@ -102,49 +102,15 @@ func init() {
 			return 1
 		},
 		Variables: 4,
-		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ulocate"},
-							&transpiler.Value{Value: "spawn"},
-							&transpiler.Value{Value: "core"},    // Remove once fixed in game
-							&transpiler.Value{Value: "true"},    // Remove once fixed in game
-							&transpiler.Value{Value: "@copper"}, // Remove once fixed in game
-							vars[0],
-							vars[1],
-							vars[2],
-							vars[3],
-						},
-					},
-				},
-			}, nil
-		},
+		// Cleanup arguments once fixed in game
+		Translate: genBasicFuncTranslation([]string{"ulocate", "spawn", "core", "true", "@copper"}, 0, 4),
 	})
 	transpiler.RegisterFuncTranslation("m.UnitLocateDamaged", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
 		Variables: 4,
-		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "ulocate"},
-							&transpiler.Value{Value: "damaged"},
-							&transpiler.Value{Value: "core"},    // Remove once fixed in game
-							&transpiler.Value{Value: "true"},    // Remove once fixed in game
-							&transpiler.Value{Value: "@copper"}, // Remove once fixed in game
-							vars[0],
-							vars[1],
-							vars[2],
-							vars[3],
-						},
-					},
-				},
-			}, nil
-		},
+		// Cleanup arguments once fixed in game
+		Translate: genBasicFuncTranslation([]string{"ulocate", "damaged", "core", "true", "@copper"}, 0, 4),
 	})
 }

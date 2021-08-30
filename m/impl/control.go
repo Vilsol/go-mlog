@@ -7,79 +7,24 @@ func init() {
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "control"},
-							&transpiler.Value{Value: "enabled"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"control", "enabled"}, 2, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.ControlShoot", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "control"},
-							&transpiler.Value{Value: "shoot"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
-							&transpiler.Value{Value: args[3].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"control", "shoot"}, 4, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.ControlShootP", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "control"},
-							&transpiler.Value{Value: "shootp"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-							&transpiler.Value{Value: args[2].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"control", "shootp"}, 3, 0),
 	})
 	transpiler.RegisterFuncTranslation("m.ControlConfigure", transpiler.Translator{
 		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
 			return 1
 		},
-		Translate: func(args []transpiler.Resolvable, _ []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
-			return []transpiler.MLOGStatement{
-				&transpiler.MLOG{
-					Statement: [][]transpiler.Resolvable{
-						{
-							&transpiler.Value{Value: "control"},
-							&transpiler.Value{Value: "configure"},
-							&transpiler.Value{Value: args[0].GetValue()},
-							&transpiler.Value{Value: args[1].GetValue()},
-						},
-					},
-				},
-			}, nil
-		},
+		Translate: genBasicFuncTranslation([]string{"control", "configure"}, 2, 0),
 	})
 }

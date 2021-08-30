@@ -74,7 +74,6 @@ func init() {
 	transpiler.RegisterFuncTranslation("GetHeat", createSensorFuncTranslation("@heat"))
 	transpiler.RegisterFuncTranslation("GetEfficiency", createSensorFuncTranslation("@efficiency"))
 	transpiler.RegisterFuncTranslation("IsEnabled", createSensorFuncTranslation("@enabled"))
-
 }
 
 func createSensorFuncTranslation(attribute string) transpiler.Translator {
@@ -97,5 +96,29 @@ func createSensorFuncTranslation(attribute string) transpiler.Translator {
 				},
 			}, nil
 		},
+	}
+}
+
+func genBasicFuncTranslation(constants []string, nArgs int, nVars int) transpiler.TranslateFunc {
+	return func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+		statements := make([]transpiler.Resolvable, len(constants)+nArgs+nVars)
+
+		for i, constant := range constants {
+			statements[i] = &transpiler.Value{Value: constant}
+		}
+
+		for i := 0; i < nArgs; i++ {
+			statements[i+len(constants)] = &transpiler.Value{Value: args[i].GetValue()}
+		}
+
+		for i := 0; i < nVars; i++ {
+			statements[i+len(constants)+nArgs] = vars[i]
+		}
+
+		return []transpiler.MLOGStatement{
+			&transpiler.MLOG{
+				Statement: [][]transpiler.Resolvable{statements},
+			},
+		}, nil
 	}
 }
