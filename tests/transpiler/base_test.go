@@ -1,18 +1,11 @@
 package transpiler
 
 import (
-	"github.com/MarvinJWendt/testza"
-	"github.com/Vilsol/go-mlog/transpiler"
-	"strings"
 	"testing"
 )
 
 func TestBase(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  string
-		output string
-	}{
+	tests := []Test{
 		{
 			name: "Read",
 			input: TestMain(`x := m.Read("cell1", 0)
@@ -22,6 +15,11 @@ print _main_x`,
 		},
 		{
 			name:   "Write",
+			input:  TestMain(`m.Write(1.23, "cell1", 0)`, true, false),
+			output: `write 1.23 cell1 0`,
+		},
+		{
+			name:   "WriteInt",
 			input:  TestMain(`m.Write(1, "cell1", 0)`, true, false),
 			output: `write 1 cell1 0`,
 		},
@@ -54,18 +52,5 @@ sensor _main_x _main_b B
 print _main_x`,
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			mlog, err := transpiler.GolangToMLOG(test.input, transpiler.Options{
-				NoStartup: true,
-			})
-
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			test.output = test.output + "\nend"
-			testza.AssertEqual(t, test.output, strings.Trim(mlog, "\n"))
-		})
-	}
+	RunTests(t, tests)
 }

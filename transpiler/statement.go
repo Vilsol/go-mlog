@@ -30,6 +30,8 @@ func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, 
 		return branchStmtToMLOG(subCtx, castStmt)
 	case *ast.SwitchStmt:
 		return switchStmtToMLOG(subCtx, castStmt)
+	case *ast.LabeledStmt:
+		return labeledStmtToMLOG(subCtx, castStmt)
 	}
 
 	return nil, Err(subCtx, fmt.Sprintf("statement type not supported: %T", statement))
@@ -408,6 +410,19 @@ func branchStmtToMLOG(ctx context.Context, statement *ast.BranchStmt) ([]MLOGSta
 	case token.FALLTHROUGH:
 		// Requires no extra instructions
 		return []MLOGStatement{}, nil
+	case token.GOTO:
+		return []MLOGStatement{
+			&MLOG{
+				Statement: [][]Resolvable{
+					{
+						&Value{Value: "jump"},
+						&Value{Value: statement.Label.Name},
+					},
+				},
+				Comment:   "Jump to label",
+				SourcePos: statement,
+			},
+		}, nil
 	}
 
 	return nil, Err(ctx, fmt.Sprintf("branch statement not supported: %s", statement.Tok))
@@ -518,4 +533,20 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 	blockCtxStruct.Statements = combined
 
 	return append(results, combined...), nil
+}
+
+func labeledStmtToMLOG(ctx context.Context, statement *ast.LabeledStmt) ([]MLOGStatement, error) {
+	subStmt, err := statementToMLOG(ctx, statement.Stmt)
+	if err != nil {
+		return nil, err
+	}
+
+	return append([]MLOGStatement{
+		&MLOGLabel{
+			MLOG: MLOG{
+				SourcePos: statement,
+			},
+			Name: statement.Label.Name,
+		},
+	}, subStmt...), nil
 }

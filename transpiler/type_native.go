@@ -23,6 +23,10 @@ func (m *MLOGStackWriter) ToMLOG() [][]Resolvable {
 	}
 }
 
+func (m *MLOGStackWriter) Size() int {
+	return 1
+}
+
 func (m *MLOGStackWriter) GetComment(int) string {
 	return "Update Stack Pointer"
 }

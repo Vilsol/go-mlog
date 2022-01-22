@@ -7,11 +7,7 @@ import (
 )
 
 func TestErrors(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  string
-		output string
-	}{
+	tests := []Test{
 		{
 			name:   "InvalidInput",
 			input:  `hello world`,

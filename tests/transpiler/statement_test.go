@@ -1,18 +1,11 @@
 package transpiler
 
 import (
-	"github.com/MarvinJWendt/testza"
-	"github.com/Vilsol/go-mlog/transpiler"
-	"strings"
 	"testing"
 )
 
 func TestStatement(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  string
-		output string
-	}{
+	tests := []Test{
 		{
 			name: "IfElseifElse",
 			input: TestMain(`if x := 1; x == 2 {
@@ -186,20 +179,41 @@ jump 5 always
 end
 print _main_x`,
 		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			mlog, err := transpiler.GolangToMLOG(test.input, transpiler.Options{
-				NoStartup: true,
-			})
+		{
+			name: "Labels",
+			input: TestMain(`print(1)
+	goto loop
 
-			if err != nil {
-				t.Error(err)
-				return
-			}
+test:
+	print(2)
+	goto end
 
-			test.output = test.output + "\nend"
-			testza.AssertEqual(t, test.output, strings.Trim(mlog, "\n"))
-		})
+loop:
+	for i := 0; i < 10; i++ {
+		print(3)
 	}
+
+	print(4)
+	goto test
+end:
+	print(5)`, false, false),
+			output: `print 1
+jump loop
+test:
+print 2
+jump end
+loop:
+set _main_i 0
+jump 7 lessThan _main_i 10
+jump 10 always
+print 3
+op add _main_i _main_i 1
+jump 7 lessThan _main_i 10
+print 4
+jump test
+end:
+print 5`,
+		},
+	}
+	RunTests(t, tests)
 }

@@ -122,3 +122,8 @@ func genBasicFuncTranslation(constants []string, nArgs int, nVars int) transpile
 		}, nil
 	}
 }
+
+const (
+	TRUE  = "true"
+	FALSE = "false"
+)

@@ -181,6 +181,10 @@ func (m *MLOGTrampoline) ToMLOG() [][]Resolvable {
 	}
 }
 
+func (m *MLOGTrampoline) Size() int {
+	return 1
+}
+
 func (m *MLOGTrampoline) GetComment(int) string {
 	return "Set Trampoline Address"
 }

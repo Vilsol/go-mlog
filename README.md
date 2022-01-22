@@ -27,6 +27,8 @@ There are several example programs available on [the wiki](https://github.com/Vi
 * `if`/`else if`/`else` statements
 * `switch` statement
 * `break`/`continue`/`fallthrough` statements
+* Statement labeling
+* `goto` statements
 * Binary and Unary math
 * Function level variable scopes
 * Contextual errors
@@ -40,11 +42,14 @@ There are several example programs available on [the wiki](https://github.com/Vi
 ## In Progress
 
 * MLOG Runtime
+* MLOG to Go decompiler
 
 ## Roadmap
 
 * Full variable block scoping
 * Nested sub-selector support
+* Merged compiler and decompiler registries
+* Constant string and number slices
 
 ## Planned Optimizations
 
@@ -59,22 +64,29 @@ There are several example programs available on [the wiki](https://github.com/Vi
 ## Endgame Roadmap
 
 * Transpilation optimizations
-* MLOG to Go decompiler
+* Support tail-recursion
 
 ## CLI Usage
 
 ```
 Usage:
-  go-mlog transpile [flags] <program>
+  go-mlog [command]
+
+Available Commands:
+  completion  generate the autocompletion script for the specified shell
+  decompile   Decompile MLOG to Go
+  execute     Execute MLOG
+  help        Help about any command
+  transpile   Transpile Go to MLOG
+  trex        Transpile Go to MLOG and execute it
 
 Flags:
-  -h, --help   help for transpile
-
-Global Flags:
       --colors               Force log output with colors
       --comment-offset int   Comment offset from line start (default 60)
       --comments             Output comments
+  -h, --help                 help for go-mlog
       --log string           The log level to output (default "info")
+      --metrics              Output source metrics after execution
       --numbers              Output line numbers
       --output string        Output file. Outputs to stdout if unspecified
       --source               Output source code after comment

@@ -8,11 +8,7 @@ import (
 )
 
 func TestStacklessFunction(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  string
-		output string
-	}{
+	tests := []Test{
 		{
 			name: "FunctionDynamicReturn",
 			input: `package main

@@ -40,6 +40,7 @@ read m1000 cell1 1000`)
 
 	context, counter := runtime.ConstructContext(objects)
 	err = runtime.ExecuteContext(operations, context, counter)
+	testza.AssertNil(t, err)
 
 	testza.AssertEqual(t, float64(1234), context.Variables["m0"].Value)
 	testza.AssertEqual(t, 1.234, context.Variables["m1"].Value)

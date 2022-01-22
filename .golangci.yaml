@@ -31,3 +31,8 @@ linters:
     - goconst
     - exportloopref
     - durationcheck
+
+linters-settings:
+  goconst:
+    min-len: 4
+    min-occurrences: 5

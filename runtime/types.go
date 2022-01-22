@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"github.com/Vilsol/go-mlog/mlog"
 	"strings"
 )
 
@@ -21,14 +22,8 @@ type Variable struct {
 	Constant bool
 }
 
-type MLOGLine struct {
-	Instruction []string
-	Comment     string
-	SourceLine  int
-}
-
 type Operation struct {
-	Line     MLOGLine
+	Line     mlog.MLOGLine
 	Executor OperationExecutor
 }
 

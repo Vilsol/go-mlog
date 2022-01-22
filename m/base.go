@@ -8,7 +8,7 @@ func Read(memory string, position int) int {
 // Write a float64 value to memory at specified position
 //
 // For integer equivalent use WriteInt
-func Write(value int, memory string, position int) {
+func Write(value float64, memory string, position int) {
 }
 
 // Write an integer value to memory at specified position

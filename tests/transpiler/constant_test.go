@@ -8,11 +8,7 @@ import (
 )
 
 func TestConstant(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  string
-		output string
-	}{
+	tests := []Test{
 		{
 			name: "Constant",
 			input: `package main

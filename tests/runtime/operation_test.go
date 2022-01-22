@@ -46,7 +46,6 @@ func TestOperationDraw(t *testing.T) {
 	_, err = runtime.Parse(`draw image 1`)
 	testza.AssertNotNil(t, err)
 	testza.AssertEqual(t, "error on line 0: 'draw image 1': expecting at least 6 arguments", err.Error())
-
 }
 
 func TestOperationDrawFlush(t *testing.T) {
@@ -204,6 +203,7 @@ set float 1.234`)
 
 	context, counter := runtime.ConstructContext(map[string]interface{}{})
 	err = runtime.ExecuteContext(operations, context, counter)
+	testza.AssertNil(t, err)
 
 	testza.AssertEqual(t, "hello", context.Variables["str"].Value)
 	testza.AssertEqual(t, int64(1234), context.Variables["int"].Value)
@@ -239,6 +239,7 @@ jump 11 strictEqual 1 1`)
 
 	context, counter := runtime.ConstructContext(map[string]interface{}{})
 	err = runtime.ExecuteContext(operations, context, counter)
+	testza.AssertNil(t, err)
 
 	testza.AssertEqual(t, int64(0), context.Variables["a"].Value)
 	testza.AssertEqual(t, int64(1), context.Variables["b"].Value)

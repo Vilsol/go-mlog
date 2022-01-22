@@ -1,8 +1,6 @@
 package checker
 
 import (
-	"encoding/json"
-	"fmt"
 	"go/ast"
 	"strings"
 )
@@ -29,7 +27,7 @@ type serializedValue struct {
 	Comments []string `json:"comments,omitempty"`
 }
 
-func GetSerializablePackages() {
+func GetSerializablePackages() map[string]map[string]interface{} {
 	result := make(map[string]map[string]interface{})
 
 	for pack, files := range packages {
@@ -68,9 +66,6 @@ func GetSerializablePackages() {
 				case *ast.GenDecl:
 					for _, spec := range castDecl.Specs {
 						switch castSpec := spec.(type) {
-						case *ast.TypeSpec:
-							// TODO
-							break
 						case *ast.ValueSpec:
 							var comments []string
 							if castSpec.Doc != nil {
@@ -94,8 +89,7 @@ func GetSerializablePackages() {
 		}
 	}
 
-	marshal, _ := json.Marshal(result)
-	fmt.Println(string(marshal))
+	return result
 }
 
 func serializeField(field *ast.Field) []serializedField {

@@ -32,16 +32,6 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	// Allow running from explorer
-	cobra.MousetrapHelpText = ""
-
-	// Execute transpile command as default
-	cmd, _, err := rootCmd.Find(os.Args[1:])
-	if (len(os.Args) <= 1 || os.Args[1] != "help") && (err != nil || cmd == rootCmd) {
-		args := append([]string{"transpile"}, os.Args[1:]...)
-		rootCmd.SetArgs(args)
-	}
-
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}

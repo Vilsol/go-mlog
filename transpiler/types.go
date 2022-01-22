@@ -3,6 +3,7 @@ package transpiler
 import (
 	"context"
 	"strconv"
+	"strings"
 )
 
 func MLOGToString(ctx context.Context, statements [][]Resolvable, statement MLOGAble, lineNumber int, source string) [][]string {
@@ -31,7 +32,7 @@ func MLOGToString(ctx context.Context, statements [][]Resolvable, statement MLOG
 		if ctx.Value(contextOptions).(Options).Source {
 			sourcePos := statement.GetSourcePos(lineNumber)
 			if sourcePos != nil {
-				currentLine = append(currentLine, "# "+source[sourcePos.Pos()-1:sourcePos.End()-1])
+				currentLine = append(currentLine, "# "+strings.ReplaceAll(source[sourcePos.Pos()-1:sourcePos.End()-1], "\n", ""))
 			} else {
 				currentLine = append(currentLine, "")
 			}

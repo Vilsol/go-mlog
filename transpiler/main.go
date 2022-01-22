@@ -296,7 +296,9 @@ func GolangToMLOG(input string, options Options) (string, error) {
 		}
 
 		for _, statement := range fn.Statements {
-			position += statement.SetPosition(position)
+			if statement.Size() > 0 {
+				position += statement.SetPosition(position)
+			}
 		}
 	}
 
@@ -358,7 +360,9 @@ func GolangToMLOG(input string, options Options) (string, error) {
 				outputData += line[0] + "\n"
 			}
 		}
-		lineNumber += len(statements)
+		if statement.Size() > 0 {
+			lineNumber += len(statements)
+		}
 	}
 
 	for _, fn := range global.Functions {
@@ -382,7 +386,9 @@ func GolangToMLOG(input string, options Options) (string, error) {
 					outputData += line[0] + "\n"
 				}
 			}
-			lineNumber += len(statements)
+			if statement.Size() > 0 {
+				lineNumber += len(statements)
+			}
 		}
 	}
 
