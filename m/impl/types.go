@@ -37,9 +37,9 @@ func init() {
 
 	transpiler.RegisterSelector("m.This", "@this")
 	transpiler.RegisterSelector("m.ThisX", "@thisx")
-	transpiler.RegisterSelector("m.ThisXF", "@thisx")
+	transpiler.RegisterSelector("m.ThisXf", "@thisx")
 	transpiler.RegisterSelector("m.ThisY", "@thisy")
-	transpiler.RegisterSelector("m.ThisYF", "@thisy")
+	transpiler.RegisterSelector("m.ThisYf", "@thisy")
 	transpiler.RegisterSelector("m.Ipt", "@ipt")
 	transpiler.RegisterSelector("m.Counter", "@counter")
 	transpiler.RegisterSelector("m.Links", "@links")
