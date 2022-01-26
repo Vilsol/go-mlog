@@ -79,6 +79,8 @@ Available Commands:
   help        Help about any command
   transpile   Transpile Go to MLOG
   trex        Transpile Go to MLOG and execute it
+  typings     Output typings as JSON
+  version     Print current go-mlog version
 
 Flags:
       --colors               Force log output with colors
