@@ -8,6 +8,12 @@ import (
 	"os"
 )
 
+var (
+	buildVersion = ""
+	buildDate    = ""
+	buildCommit  = ""
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "go-mlog",
 	Short: "golang to mlog transpiler",
@@ -31,7 +37,10 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func Execute() {
+func Execute(version string, date string, commit string) {
+	buildVersion = version
+	buildDate = date
+	buildCommit = commit
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}
