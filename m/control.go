@@ -7,7 +7,7 @@ func ControlEnabled(target Building, enabled bool) {
 // Shoot with the provided turret at the target absolute position
 //
 // If shoot parameter is false, it will cease firing
-func ControlShoot(turret Building, x int, y int, shoot bool) {
+func ControlShoot[A integer, B integer](turret Building, x A, y B, shoot bool) {
 }
 
 // Smart version of ControlShoot
@@ -19,5 +19,5 @@ func ControlShootP(turret Building, target HealthC, shoot bool) {
 }
 
 // Set the configuration of the target building
-func ControlConfigure(target Building, configuration int) {
+func ControlConfigure[A integer](target Building, configuration A) {
 }

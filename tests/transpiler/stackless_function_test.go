@@ -25,8 +25,8 @@ func sampleDynamic(arg1 int, arg2 int) int {
 	return arg1 + arg2
 }`,
 			output: `jump 6 always
-set _sampleDynamic_arg2 @funcArg_sampleDynamic_1
 set _sampleDynamic_arg1 @funcArg_sampleDynamic_0
+set _sampleDynamic_arg2 @funcArg_sampleDynamic_1
 op add _sampleDynamic_0 _sampleDynamic_arg1 _sampleDynamic_arg2
 set @return_0 _sampleDynamic_0
 set @counter @funcTramp_sampleDynamic
@@ -168,9 +168,9 @@ set @return_0 1
 set @return_1 2
 set @return_2 3
 set @counter @funcTramp_Hello
-set _World_z @funcArg_World_2
-set _World_y @funcArg_World_1
 set _World_x @funcArg_World_0
+set _World_y @funcArg_World_1
+set _World_z @funcArg_World_2
 print _World_x
 print _World_y
 print _World_z

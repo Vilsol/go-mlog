@@ -226,6 +226,13 @@ print(x)`, true, false),
 print _main_x`,
 		},
 		{
+			name: "IntDiv",
+			input: TestMain(`x := m.IntDiv(6, 2)
+print(x)`, true, false),
+			output: `op idiv _main_x 6 2
+print _main_x`,
+		},
+		{
 			name: "Random",
 			input: TestMain(`x := m.Random(1.2)
 print(x)`, true, false),
@@ -237,6 +244,83 @@ print _main_x`,
 			input: TestMain(`x := m.Log10(1.2)
 print(x)`, true, false),
 			output: `op log10 _main_x 1.2
+print _main_x`,
+		},
+		{
+			name: "Log",
+			input: TestMain(`x := m.Log(1.2)
+print(x)`, true, false),
+			output: `op log _main_x 1.2
+print _main_x`,
+		},
+		{
+			name: "Min",
+			input: TestMain(`x := m.Min(1.2, 2.3)
+print(x)`, true, false),
+			output: `op min _main_x 1.2 2.3
+print _main_x`,
+		},
+		{
+			name: "Max",
+			input: TestMain(`x := m.Max(1.2, 2.3)
+print(x)`, true, false),
+			output: `op max _main_x 1.2 2.3
+print _main_x`,
+		},
+		{
+			name: "Sqrt",
+			input: TestMain(`x := m.Sqrt(1.2)
+print(x)`, true, false),
+			output: `op sqrt _main_x 1.2
+print _main_x`,
+		},
+		{
+			name: "Log",
+			input: TestMain(`x := m.Abs(1.2)
+print(x)`, true, false),
+			output: `op abs _main_x 1.2
+print _main_x`,
+		},
+		{
+			name: "Noise",
+			input: TestMain(`x := m.Noise(1.2, 2.3)
+print(x)`, true, false),
+			output: `op noise _main_x 1.2 2.3
+print _main_x`,
+		},
+		{
+			name: "Angle",
+			input: TestMain(`x := m.Angle(1.2, 2.3)
+print(x)`, true, false),
+			output: `op angle _main_x 1.2 2.3
+print _main_x`,
+		},
+		{
+			name: "Len",
+			input: TestMain(`x := m.Len(1.2, 2.3)
+print(x)`, true, false),
+			output: `op len _main_x 1.2 2.3
+print _main_x`,
+		},
+		{
+			name: "Sin",
+			input: TestMain(`x := m.Sin(1.2)
+print(x)`, true, false),
+			output: `op sin _main_x 1.2
+print _main_x`,
+		},
+		{
+			name: "Cos",
+			input: TestMain(`x := m.Cos(1.2)
+print(x)`, true, false),
+			output: `op cos _main_x 1.2
+print _main_x`,
+		},
+		{
+			name: "Tan",
+			input: TestMain(`x := m.Tan(1.2)
+print(x)`, true, false),
+			output: `op tan _main_x 1.2
 print _main_x`,
 		},
 	}

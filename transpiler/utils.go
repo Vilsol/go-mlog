@@ -61,6 +61,23 @@ func getFunctionReturnCount(ctx context.Context, callExpr *ast.CallExpr) (int, e
 				return len(function.Declaration.Type.Results.List), nil
 			}
 		}
-		return 0, nil
+		return 0, Err(ctx, fmt.Sprintf("unknown function: %s", funcName))
 	}
+}
+
+func contextOrVariable(ctx context.Context, name string) Resolvable {
+	if value := ctx.Value("var_" + name); value != nil {
+		if varRef, ok := value.(*VarReference); ok {
+			return varRef.Identity
+		}
+	}
+
+	return &NormalVariable{Name: name}
+}
+
+func addVariablesToContext(ctx context.Context, references []*VarReference) context.Context {
+	for _, reference := range references {
+		ctx = context.WithValue(ctx, "var_"+reference.Name, reference)
+	}
+	return ctx
 }

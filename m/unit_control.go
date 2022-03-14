@@ -5,13 +5,13 @@ func UnitStop() {
 }
 
 // Move to the provided absolute position on the map
-func UnitMove(x float64, y float64) {
+func UnitMove[A float, B float](x A, y B) {
 }
 
 // Approach a circular radius around the provided point
 //
 // Will stop moving once it is the provided radius away from the point
-func UnitApproach(x float64, y float64, radius float64) {
+func UnitApproach[A float, B float, C float](x A, y B, radius C) {
 }
 
 // Enable/Disable boosting for mechs
@@ -31,7 +31,7 @@ func UnitPathfind() {
 // If shoot parameter is false, it will cease firing
 //
 // Will not shoot outside of the units range!
-func UnitTarget(x float64, y float64, shoot bool) {
+func UnitTarget[A float, B float](x A, y B, shoot bool) {
 }
 
 // Like ControlShootP but for units
@@ -45,13 +45,13 @@ func UnitTargetP(target HealthC, shoot bool) {
 // Drops items into the provided building
 //
 // Will not drop more than provided amount
-func UnitItemDrop(to Building, amount int) {
+func UnitItemDrop[A integer](to Building, amount A) {
 }
 
 // Takes the provided item type from the provided building
 //
 // Will not take more than provided amount
-func UnitItemTake(from Building, item string, amount int) {
+func UnitItemTake[A integer](from Building, item string, amount A) {
 }
 
 // Drops the current payload
@@ -69,25 +69,25 @@ func UnitPayloadTake(takeUnits bool) {
 // Mine the ore at the specified absolute position
 //
 // Will not do anything if there is no minable ore or it is already being mined
-func UnitMine(x float64, y float64) {
+func UnitMine[A float, B float](x A, y B) {
 }
 
 // Set the units flag
 //
 // Shown as a number when hovering over a unit
-func UnitFlag(flag float64) {
+func UnitFlag[A float](flag A) {
 }
 
 // Build a block at the specified absolute position
-func UnitBuild(x float64, y float64, block string, rotation int, config int) {
+func UnitBuild[A float, B float, C integer, D integer](x A, y B, block string, rotation C, config D) {
 }
 
 // Retrieve the building and its type at the specified absolute position
-func UnitGetBlock(x float64, y float64) (blockType string, building Building) {
+func UnitGetBlock[A float, B float](x A, y B) (blockType string, building Building) {
 	return "", nil
 }
 
 // Checks whether there is a unit within the specified radius around the provided absolute position
-func UnitWithin(x float64, y float64, radius float64) bool {
+func UnitWithin[A float, B float, C float](x A, y B, radius C) bool {
 	return false
 }

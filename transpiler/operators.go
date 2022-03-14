@@ -21,10 +21,8 @@ var regularOperators = map[token.Token]string{
 	token.MUL_ASSIGN: "mul",
 	token.QUO:        "div",
 	token.QUO_ASSIGN: "div",
-	// TODO //
 	token.REM:        "mod",
 	token.REM_ASSIGN: "mod",
-	// TODO SQRT
 	token.EQL:        "equal",
 	token.NEQ:        "notEqual",
 	token.LSS:        "lessThan",
@@ -44,19 +42,4 @@ var regularOperators = map[token.Token]string{
 	token.XOR:        "xor",
 	token.XOR_ASSIGN: "xor",
 	token.NOT:        "not",
-	// TODO max
-	// TODO min
-	// TODO atan2
-	// TODO dst
-	// TODO noise
-	// TODO abs
-	// TODO log
-	// TODO log10
-	// TODO sin
-	// TODO cos
-	// TODO tan
-	// TODO floor
-	// TODO ceil
-	// TODO sqrt
-	// TODO rand
 }

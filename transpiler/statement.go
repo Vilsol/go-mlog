@@ -8,80 +8,114 @@ import (
 	"strconv"
 )
 
-func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, error) {
+func statementToMLOG(ctx context.Context, statement ast.Stmt) ([]MLOGStatement, []*VarReference, error) {
 	subCtx := context.WithValue(ctx, contextStatement, statement)
 
 	switch castStmt := statement.(type) {
 	case *ast.ForStmt:
-		return forStmtToMLOG(subCtx, castStmt)
+		mlog, err := forStmtToMLOG(subCtx, castStmt)
+		return mlog, nil, err
 	case *ast.ExprStmt:
-		return expressionToMLOG(subCtx, nil, castStmt.X)
+		mlog, err := expressionToMLOG(subCtx, nil, castStmt.X)
+		return mlog, nil, err
 	case *ast.IfStmt:
 		return ifStmtToMLOG(subCtx, castStmt)
 	case *ast.AssignStmt:
 		return assignStmtToMLOG(subCtx, castStmt)
 	case *ast.ReturnStmt:
-		return returnStmtToMLOG(subCtx, castStmt)
+		mlog, err := returnStmtToMLOG(subCtx, castStmt)
+		return mlog, nil, err
 	case *ast.BlockStmt:
 		return blockStmtToMLOG(subCtx, castStmt)
 	case *ast.IncDecStmt:
-		return incDecStmtToMLOG(subCtx, castStmt)
+		mlog, err := incDecStmtToMLOG(subCtx, castStmt)
+		return mlog, nil, err
 	case *ast.BranchStmt:
-		return branchStmtToMLOG(subCtx, castStmt)
+		mlog, err := branchStmtToMLOG(subCtx, castStmt)
+		return mlog, nil, err
 	case *ast.SwitchStmt:
-		return switchStmtToMLOG(subCtx, castStmt)
+		mlog, err := switchStmtToMLOG(subCtx, castStmt)
+		return mlog, nil, err
 	case *ast.LabeledStmt:
-		return labeledStmtToMLOG(subCtx, castStmt)
+		mlog, err := labeledStmtToMLOG(subCtx, castStmt)
+		return mlog, nil, err
 	}
 
-	return nil, Err(subCtx, fmt.Sprintf("statement type not supported: %T", statement))
+	return nil, nil, Err(subCtx, fmt.Sprintf("statement type not supported: %T", statement))
 }
 
-func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGStatement, error) {
+func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGStatement, []*VarReference, error) {
 	mlog := make([]MLOGStatement, 0)
+	varReferences := make([]*VarReference, 0)
 
 	if len(statement.Lhs) != len(statement.Rhs) {
 		if len(statement.Rhs) == 1 {
 			leftSide := make([]Resolvable, len(statement.Lhs))
 
 			for i, lhs := range statement.Lhs {
-				leftSide[i] = &NormalVariable{Name: lhs.(*ast.Ident).Name}
+				var nVar Resolvable
+
+				if statement.Tok != token.DEFINE {
+					nVar = contextOrVariable(ctx, lhs.(*ast.Ident).Name)
+				}
+
+				if nVar == nil {
+					nVar = &NormalVariable{Name: lhs.(*ast.Ident).Name}
+				}
+
+				leftSide[i] = nVar
+
+				if statement.Tok == token.DEFINE {
+					varReferences = append(varReferences, &VarReference{
+						Name:     lhs.(*ast.Ident).Name,
+						Identity: nVar,
+					})
+				}
 			}
 
 			if callExpr, ok := statement.Rhs[0].(*ast.CallExpr); ok {
 				count, err := getFunctionReturnCount(ctx, callExpr)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 
 				if count != len(statement.Lhs) {
-					return nil, Err(ctx, "mismatched variable assignment sides")
+					return nil, nil, Err(ctx, "mismatched variable assignment sides")
 				}
 			}
 
 			exprMLOG, err := expressionToMLOG(ctx, leftSide, statement.Rhs[0])
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			mlog = append(mlog, exprMLOG...)
 		} else {
-			return nil, Err(ctx, "mismatched variable assignment sides")
+			return nil, nil, Err(ctx, "mismatched variable assignment sides")
 		}
 	} else {
 		for i, expr := range statement.Lhs {
 			if ident, ok := expr.(*ast.Ident); ok {
-				nVar := &NormalVariable{Name: ident.Name}
+				var nVar Resolvable
+
+				if statement.Tok != token.DEFINE {
+					nVar = contextOrVariable(ctx, ident.Name)
+				}
+
+				if nVar == nil {
+					nVar = &NormalVariable{Name: ident.Name}
+				}
+
 				if opTranslated, ok := regularOperators[statement.Tok]; ok {
 					instructions := make([]MLOGStatement, 0)
 
 					rightSide, rightExprInstructions, err := exprToResolvable(ctx, statement.Rhs[i])
 					if err != nil {
-						return nil, err
+						return nil, nil, err
 					}
 					instructions = append(instructions, rightExprInstructions...)
 
 					if len(rightSide) != 1 {
-						return nil, Err(ctx, "unknown error")
+						return nil, nil, Err(ctx, "unknown error")
 					}
 
 					return append(instructions, &MLOG{
@@ -96,36 +130,43 @@ func assignStmtToMLOG(ctx context.Context, statement *ast.AssignStmt) ([]MLOGSta
 							},
 						},
 						SourcePos: statement,
-					}), nil
+					}), varReferences, nil
 				}
 
 				if statement.Tok != token.ASSIGN && statement.Tok != token.DEFINE {
-					return nil, Err(ctx, "only direct assignment is supported")
+					return nil, nil, Err(ctx, "only direct assignment is supported")
 				}
 
 				if callExpr, ok := statement.Rhs[i].(*ast.CallExpr); ok {
 					count, err := getFunctionReturnCount(ctx, callExpr)
 					if err != nil {
-						return nil, err
+						return nil, nil, err
 					}
 
 					if count != len(statement.Lhs) {
-						return nil, Err(ctx, "mismatched variable assignment sides")
+						return nil, nil, Err(ctx, "mismatched variable assignment sides")
 					}
 				}
 
 				exprMLOG, err := expressionToMLOG(ctx, []Resolvable{nVar}, statement.Rhs[i])
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				mlog = append(mlog, exprMLOG...)
+
+				if statement.Tok == token.DEFINE {
+					varReferences = append(varReferences, &VarReference{
+						Name:     ident.Name,
+						Identity: nVar,
+					})
+				}
 			} else {
-				return nil, Err(ctx, "left side variable assignment can only contain identifications")
+				return nil, nil, Err(ctx, "left side variable assignment can only contain identifications")
 			}
 		}
 	}
 
-	return mlog, nil
+	return mlog, varReferences, nil
 }
 
 func returnStmtToMLOG(ctx context.Context, statement *ast.ReturnStmt) ([]MLOGStatement, error) {
@@ -164,34 +205,37 @@ func returnStmtToMLOG(ctx context.Context, statement *ast.ReturnStmt) ([]MLOGSta
 	}), nil
 }
 
-func ifStmtToMLOG(ctx context.Context, statement *ast.IfStmt) ([]MLOGStatement, error) {
+func ifStmtToMLOG(ctx context.Context, statement *ast.IfStmt) ([]MLOGStatement, []*VarReference, error) {
 	results := make([]MLOGStatement, 0)
+	varReferences := make([]*VarReference, 0)
 
 	if statement.Init != nil {
-		instructions, err := statementToMLOG(ctx, statement.Init)
+		instructions, references, err := statementToMLOG(ctx, statement.Init)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		results = append(results, instructions...)
+		varReferences = append(varReferences, references...)
+		ctx = addVariablesToContext(ctx, references)
 	}
 
 	var condVar Resolvable
 	if condIdent, ok := statement.Cond.(*ast.Ident); ok {
-		condVar = &NormalVariable{Name: condIdent.Name}
+		condVar = contextOrVariable(ctx, condIdent.Name)
 	} else {
 		condVar = &DynamicVariable{}
 
 		instructions, err := expressionToMLOG(ctx, []Resolvable{condVar}, statement.Cond)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		results = append(results, instructions...)
 	}
 
-	blockInstructions, err := statementToMLOG(ctx, statement.Body)
+	blockInstructions, references, err := statementToMLOG(ctx, statement.Body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	results = append(results, &MLOGJump{
@@ -207,6 +251,9 @@ func ifStmtToMLOG(ctx context.Context, statement *ast.IfStmt) ([]MLOGStatement, 
 			Statement: blockInstructions[0],
 		},
 	})
+
+	varReferences = append(varReferences, references...)
+	ctx = addVariablesToContext(ctx, references)
 
 	afterIfTarget := &StatementJumpTarget{
 		After:     true,
@@ -225,9 +272,9 @@ func ifStmtToMLOG(ctx context.Context, statement *ast.IfStmt) ([]MLOGStatement, 
 	results = append(results, blockInstructions...)
 
 	if statement.Else != nil {
-		elseInstructions, err := statementToMLOG(ctx, statement.Else)
+		elseInstructions, _, err := statementToMLOG(ctx, statement.Else)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		afterElseJump := &MLOGJump{
@@ -248,90 +295,102 @@ func ifStmtToMLOG(ctx context.Context, statement *ast.IfStmt) ([]MLOGStatement, 
 		results = append(results, elseInstructions...)
 	}
 
-	return results, nil
+	return results, varReferences, nil
 }
 
 func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement, error) {
 	results := make([]MLOGStatement, 0)
+	varReferences := make([]*VarReference, 0)
 
 	if len(statement.Body.List) == 0 {
 		return results, nil
 	}
 
-	initMlog, err := statementToMLOG(ctx, statement.Init)
-	if err != nil {
-		return nil, err
+	if statement.Init != nil {
+		initMlog, references, err := statementToMLOG(ctx, statement.Init)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, initMlog...)
+		varReferences = append(varReferences, references...)
+		ctx = addVariablesToContext(ctx, references)
 	}
-	results = append(results, initMlog...)
 
 	var loopStartJump *MLOGJump
 	var intoLoopJump *MLOGJump
-	var loopEndJump *MLOGJump
-	if binaryExpr, ok := statement.Cond.(*ast.BinaryExpr); ok {
-		if translatedOp, ok := jumpOperators[binaryExpr.Op]; ok {
-			leftSide, leftExprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, leftExprInstructions...)
 
-			if len(leftSide) != 1 {
-				return nil, Err(ctx, "unknown error")
-			}
+	if statement.Cond != nil {
+		if binaryExpr, ok := statement.Cond.(*ast.BinaryExpr); ok {
+			if translatedOp, ok := jumpOperators[binaryExpr.Op]; ok {
+				leftSide, leftExprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
+				if err != nil {
+					return nil, err
+				}
+				results = append(results, leftExprInstructions...)
 
-			rightSide, rightExprInstructions, err := exprToResolvable(ctx, binaryExpr.Y)
-			if err != nil {
-				return nil, err
-			}
-			results = append(results, rightExprInstructions...)
+				if len(leftSide) != 1 {
+					return nil, Err(ctx, "unknown error")
+				}
 
-			if len(rightSide) != 1 {
-				return nil, Err(ctx, "unknown error")
-			}
+				rightSide, rightExprInstructions, err := exprToResolvable(ctx, binaryExpr.Y)
+				if err != nil {
+					return nil, err
+				}
+				results = append(results, rightExprInstructions...)
 
-			loopStartJump = &MLOGJump{
-				MLOG: MLOG{
-					Comment: "Jump to start of loop",
-				},
-				Condition: []Resolvable{
-					&Value{Value: translatedOp},
-					leftSide[0],
-					rightSide[0],
-				},
-			}
+				if len(rightSide) != 1 {
+					return nil, Err(ctx, "unknown error")
+				}
 
-			intoLoopJump = &MLOGJump{
-				MLOG: MLOG{
-					Comment: "Jump into the loop",
-				},
-				Condition: []Resolvable{
-					&Value{Value: translatedOp},
-					leftSide[0],
-					rightSide[0],
-				},
-			}
+				loopStartJump = &MLOGJump{
+					MLOG: MLOG{
+						Comment: "Jump to start of loop",
+					},
+					Condition: []Resolvable{
+						&Value{Value: translatedOp},
+						leftSide[0],
+						rightSide[0],
+					},
+				}
 
-			loopEndJump = &MLOGJump{
-				MLOG: MLOG{
-					Comment: "Jump to end of loop",
-				},
-				Condition: []Resolvable{
-					&Value{Value: "always"},
-				},
-				JumpTarget: &StatementJumpTarget{
-					Statement: loopStartJump,
-					After:     true,
-				},
+				intoLoopJump = &MLOGJump{
+					MLOG: MLOG{
+						Comment: "Jump into the loop",
+					},
+					Condition: []Resolvable{
+						&Value{Value: translatedOp},
+						leftSide[0],
+						rightSide[0],
+					},
+				}
+			} else {
+				return nil, Err(ctx, fmt.Sprintf("jump statement cannot use this operation: %T", binaryExpr.Op))
 			}
 		} else {
-			return nil, Err(ctx, fmt.Sprintf("jump statement cannot use this operation: %T", binaryExpr.Op))
+			return nil, Err(ctx, "for loop can only have binary conditional expressions")
 		}
 	} else {
-		return nil, Err(ctx, "for loop can only have binary conditional expressions")
+		loopStartJump = &MLOGJump{
+			MLOG: MLOG{
+				Comment: "Jump to start of loop",
+			},
+			Condition: []Resolvable{
+				&Value{Value: "always"},
+			},
+		}
+
+		intoLoopJump = &MLOGJump{
+			MLOG: MLOG{
+				Comment: "Jump into the loop",
+			},
+			Condition: []Resolvable{
+				&Value{Value: "always"},
+			},
+		}
 	}
 
 	blockCtxStruct := &ContextBlock{}
-	bodyMLOG, err := statementToMLOG(context.WithValue(ctx, contextBreakableBlock, blockCtxStruct), statement.Body)
+	bodyMLOG, _, err := statementToMLOG(context.WithValue(ctx, contextBreakableBlock, blockCtxStruct), statement.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -340,16 +399,31 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 	intoLoopJump.JumpTarget = bodyMLOG[0]
 	results = append(results, intoLoopJump)
 
-	results = append(results, loopEndJump)
+	if statement.Cond != nil {
+		results = append(results, &MLOGJump{
+			MLOG: MLOG{
+				Comment: "Jump to end of loop",
+			},
+			Condition: []Resolvable{
+				&Value{Value: "always"},
+			},
+			JumpTarget: &StatementJumpTarget{
+				Statement: loopStartJump,
+				After:     true,
+			},
+		})
+	}
 
 	results = append(results, bodyMLOG...)
 
-	instructions, err := statementToMLOG(ctx, statement.Post)
-	if err != nil {
-		return nil, err
+	if statement.Post != nil {
+		instructions, _, err := statementToMLOG(ctx, statement.Post)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, instructions...)
+		blockCtxStruct.Extra = append(blockCtxStruct.Extra, instructions...)
 	}
-	results = append(results, instructions...)
-	blockCtxStruct.Extra = append(blockCtxStruct.Extra, instructions...)
 
 	loopStartJump.JumpTarget = bodyMLOG[0]
 	results = append(results, loopStartJump)
@@ -358,23 +432,26 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 	return results, nil
 }
 
-func blockStmtToMLOG(ctx context.Context, statement *ast.BlockStmt) ([]MLOGStatement, error) {
+func blockStmtToMLOG(ctx context.Context, statement *ast.BlockStmt) ([]MLOGStatement, []*VarReference, error) {
 	blockCtxStruct := &ContextBlock{}
 	statements := make([]MLOGStatement, 0)
+	varReferences := make([]*VarReference, 0)
 	for _, s := range statement.List {
-		instructions, err := statementToMLOG(context.WithValue(ctx, contextBlock, blockCtxStruct), s)
+		instructions, references, err := statementToMLOG(context.WithValue(ctx, contextBlock, blockCtxStruct), s)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		statements = append(statements, instructions...)
+		varReferences = append(varReferences, references...)
+		ctx = addVariablesToContext(ctx, references)
 	}
 	blockCtxStruct.Statements = statements
 
-	return statements, nil
+	return statements, varReferences, nil
 }
 
-func incDecStmtToMLOG(_ context.Context, statement *ast.IncDecStmt) ([]MLOGStatement, error) {
-	name := &NormalVariable{Name: statement.X.(*ast.Ident).Name}
+func incDecStmtToMLOG(ctx context.Context, statement *ast.IncDecStmt) ([]MLOGStatement, error) {
+	name := contextOrVariable(ctx, statement.X.(*ast.Ident).Name)
 	op := "add"
 	if statement.Tok == token.DEC {
 		op = "sub"
@@ -432,11 +509,12 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 	results := make([]MLOGStatement, 0)
 
 	if statement.Init != nil {
-		instructions, err := statementToMLOG(ctx, statement.Init)
+		instructions, references, err := statementToMLOG(ctx, statement.Init)
 		if err != nil {
 			return nil, err
 		}
 		results = append(results, instructions...)
+		ctx = addVariablesToContext(ctx, references)
 	}
 
 	tag, leftExprInstructions, err := exprToResolvable(ctx, statement.Tag)
@@ -461,7 +539,7 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 			statements := make([]MLOGStatement, 0)
 			switchClauseBlockCtxStruct := &ContextBlock{}
 			for _, s := range caseStmt.Body {
-				bodyInstructions, err := statementToMLOG(context.WithValue(blockCtx, contextSwitchClauseBlock, switchClauseBlockCtxStruct), s)
+				bodyInstructions, _, err := statementToMLOG(context.WithValue(blockCtx, contextSwitchClauseBlock, switchClauseBlockCtxStruct), s)
 				if err != nil {
 					return nil, err
 				}
@@ -474,7 +552,7 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 				if tagBasic, ok := caseExpr.(*ast.BasicLit); ok {
 					caseTag = &Value{Value: tagBasic.Value}
 				} else if tagIdent, ok := caseExpr.(*ast.Ident); ok {
-					caseTag = &NormalVariable{Name: tagIdent.Name}
+					caseTag = contextOrVariable(ctx, tagIdent.Name)
 				} else {
 					return nil, Err(ctx, fmt.Sprintf("unknown switch case condition type: %T", caseExpr))
 				}
@@ -536,7 +614,7 @@ func switchStmtToMLOG(ctx context.Context, statement *ast.SwitchStmt) ([]MLOGSta
 }
 
 func labeledStmtToMLOG(ctx context.Context, statement *ast.LabeledStmt) ([]MLOGStatement, error) {
-	subStmt, err := statementToMLOG(ctx, statement.Stmt)
+	subStmt, _, err := statementToMLOG(ctx, statement.Stmt)
 	if err != nil {
 		return nil, err
 	}

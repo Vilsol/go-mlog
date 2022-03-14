@@ -113,13 +113,9 @@ var (
 
 	// The x coordinate of the processor.
 	ThisX = 0
-	// Convenience constant, same as float64(ThisX)
-	ThisXf = float64(ThisX)
 
 	// The y coordinate of the processor.
 	ThisY = 0
-	// Convenience constant, same as float64(ThisY)
-	ThisYf = float64(ThisY)
 
 	// The number of instructions executed per tick (60 ticks/second).
 	//

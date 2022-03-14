@@ -38,7 +38,7 @@ func exprToResolvable(ctx context.Context, expr ast.Expr) ([]Resolvable, []MLOGS
 		if castUnary.Name == "true" || castUnary.Name == "false" {
 			return []Resolvable{&Value{Value: castUnary.Name}}, nil, nil
 		} else {
-			return []Resolvable{&NormalVariable{Name: castUnary.Name}}, nil, nil
+			return []Resolvable{contextOrVariable(ctx, castUnary.Name)}, nil, nil
 		}
 	case ast.Expr:
 		dVars, err := getSuggestedDynamicVariableCount(ctx, castUnary)
@@ -159,7 +159,7 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 		})
 	} else if translatedFunc, ok := funcTranslations[selName]; ok {
 		if subSelector == nil {
-			subSelector = &NormalVariable{Name: exprName}
+			subSelector = contextOrVariable(ctx, exprName)
 		}
 
 		results = append(results, &MLOGFunc{
@@ -176,6 +176,7 @@ func callExprToMLOG(ctx context.Context, callExpr *ast.CallExpr, ident []Resolva
 			Variables:    ident,
 			FunctionName: funcName,
 			SourcePos:    callExpr,
+			Context:      ctx,
 		})
 	}
 
@@ -357,7 +358,7 @@ func identToMLOG(ctx context.Context, ident []Resolvable, expr *ast.Ident) ([]ML
 			{
 				&Value{Value: "set"},
 				ident[0],
-				&NormalVariable{Name: expr.Name},
+				contextOrVariable(ctx, expr.Name),
 			},
 		},
 		SourcePos: ctx.Value(contextStatement).(ast.Node),

@@ -11,12 +11,14 @@ type Global struct {
 }
 
 type Function struct {
-	Name            string
-	Called          bool
-	Declaration     *ast.FuncDecl
-	Statements      []MLOGStatement
-	ArgumentCount   int
-	VariableCounter int
+	Name                 string
+	Called               bool
+	Declaration          *ast.FuncDecl
+	Statements           []MLOGStatement
+	ArgumentCount        int
+	VariableCounter      int
+	ScopeVariableCounter map[string]int
+	RootVariables        []*VarReference
 }
 
 type MLOGAble interface {

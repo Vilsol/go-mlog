@@ -38,6 +38,7 @@ There are several example programs available on [the wiki](https://github.com/Vi
 * Comment generation including source mapping
 * Sub-selector support
 * Type checking
+* Full variable block scoping
 
 ## In Progress
 
@@ -46,7 +47,6 @@ There are several example programs available on [the wiki](https://github.com/Vi
 
 ## Roadmap
 
-* Full variable block scoping
 * Nested sub-selector support
 * Merged compiler and decompiler registries
 * Constant string and number slices
@@ -54,6 +54,10 @@ There are several example programs available on [the wiki](https://github.com/Vi
 ## Planned Optimizations
 
 * Simple jump instructions
+* Recursive constant propagation
+* Write directly to function return variable
+* Write directly to function parameters before jump
+* Single-reference function inlining
 
 ## Design Limitations
 

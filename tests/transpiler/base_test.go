@@ -51,6 +51,15 @@ print(x)`, true, false),
 sensor _main_x _main_b B
 print _main_x`,
 		},
+		{
+			name: "SensorStr",
+			input: TestMain(`_, _, _, b := m.UnitLocateDamaged()
+x := m.SensorStr(b, "B")
+print(x)`, true, false),
+			output: `ulocate damaged core true @copper @_ @_ @_ _main_b
+sensor _main_x _main_b B
+print _main_x`,
+		},
 	}
 	RunTests(t, tests)
 }

@@ -25,10 +25,10 @@ func sampleDynamic(arg1 int, arg2 int) int {
 }`,
 			output: `set @stack 0
 jump 9 always
-op sub _sampleDynamic_0 @stack 1
-read _sampleDynamic_arg2 bank1 _sampleDynamic_0
-op sub _sampleDynamic_1 @stack 2
-read _sampleDynamic_arg1 bank1 _sampleDynamic_1
+op sub _sampleDynamic_0 @stack 2
+read _sampleDynamic_arg1 bank1 _sampleDynamic_0
+op sub _sampleDynamic_1 @stack 1
+read _sampleDynamic_arg2 bank1 _sampleDynamic_1
 op add _sampleDynamic_2 _sampleDynamic_arg1 _sampleDynamic_arg2
 set @return_0 _sampleDynamic_2
 read @counter bank1 @stack
@@ -190,12 +190,12 @@ set @return_0 1
 set @return_1 2
 set @return_2 3
 read @counter bank1 @stack
-op sub _World_0 @stack 1
-read _World_z bank1 _World_0
+op sub _World_0 @stack 3
+read _World_x bank1 _World_0
 op sub _World_1 @stack 2
 read _World_y bank1 _World_1
-op sub _World_2 @stack 3
-read _World_x bank1 _World_2
+op sub _World_2 @stack 1
+read _World_z bank1 _World_2
 print _World_x
 print _World_y
 print _World_z

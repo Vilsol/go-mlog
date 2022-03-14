@@ -15,6 +15,7 @@ type MLOGCustomFunction struct {
 	Comments        map[int]string
 	SourcePositions map[int]ast.Node
 	SourcePos       ast.Node
+	Context         context.Context
 }
 
 func (m *MLOGCustomFunction) ToMLOG() [][]Resolvable {
@@ -62,7 +63,7 @@ func (m *MLOGCustomFunction) PreProcess(ctx context.Context, global *Global, fun
 	argOffset := 0
 
 	for _, arg := range m.Arguments {
-		value, argInstructions, err := exprToResolvable(ctx, arg)
+		value, argInstructions, err := exprToResolvable(m.Context, arg)
 		if err != nil {
 			return err
 		}

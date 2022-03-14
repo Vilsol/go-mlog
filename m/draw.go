@@ -1,45 +1,45 @@
 package m
 
 // Fill the display with the provided color
-func DrawClear(r int, g int, b int) {
+func DrawClear[A integer, B integer, C integer](r A, g B, b C) {
 }
 
 // Set the drawing color for future statements
-func DrawColor(r int, g int, b int, a int) {
+func DrawColor[A integer, B integer, C integer, D integer](r A, g B, b C, a D) {
 }
 
 // Set the line width for future line statements
 //
 // Affects DrawLine, DrawLineRect and DrawLinePoly
-func DrawStroke(width int) {
+func DrawStroke[A integer](width A) {
 }
 
 // Draw a line between 2 points
-func DrawLine(x1 int, y1 int, x2 int, y2 int) {
+func DrawLine[A integer, B integer, C integer, D integer](x1 A, y1 B, x2 C, y2 D) {
 }
 
 // Draw a filled rectangle from the provided point with the provided width and height
-func DrawRect(x int, y int, width int, height int) {
+func DrawRect[A integer, B integer, C integer, D integer](x A, y B, width C, height D) {
 }
 
 // Draw an outlined rectangle from the provided point with the provided width and height
-func DrawLineRect(x int, y int, width int, height int) {
+func DrawLineRect[A integer, B integer, C integer, D integer](x A, y B, width C, height D) {
 }
 
 // Draw a filled equilateral polygon centered around the provided point
-func DrawPoly(x int, y int, sides int, radius float64, rotation float64) {
+func DrawPoly[A integer, B integer, C integer, D float, E float](x A, y B, sides C, radius D, rotation E) {
 }
 
 // Draw an outlined equilateral polygon centered around the provided point
-func DrawLinePoly(x int, y int, sides int, radius float64, rotation float64) {
+func DrawLinePoly[A integer, B integer, C integer, D float, E float](x A, y B, sides C, radius D, rotation E) {
 }
 
 // Draw a filled triangle between provided points
-func DrawTriangle(x1 int, y1 int, x2 int, y2 int, x3 int, y3 int) {
+func DrawTriangle[A integer, B integer, C integer, D integer, E integer, F integer](x1 A, y1 B, x2 C, y2 D, x3 E, y3 F) {
 }
 
 // Draw provided icon centered around the provided point
-func DrawImage(x int, y int, image string, size float64, rotation float64) {
+func DrawImage[A integer, B integer, C float, D float](x A, y B, image string, size C, rotation D) {
 }
 
 // Flush all draw statements to the provided display block

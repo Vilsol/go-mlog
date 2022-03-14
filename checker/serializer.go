@@ -11,9 +11,10 @@ type serializedData struct {
 
 type serializedFunction struct {
 	serializedData
-	Comments []string          `json:"comments,omitempty"`
-	Params   []serializedField `json:"params,omitempty"`
-	Results  []serializedField `json:"results,omitempty"`
+	Comments   []string          `json:"comments,omitempty"`
+	Params     []serializedField `json:"params,omitempty"`
+	Results    []serializedField `json:"results,omitempty"`
+	TypeParams []serializedField `json:"type_params,omitempty"`
 }
 
 type serializedField struct {
@@ -59,6 +60,13 @@ func GetSerializablePackages() map[string]map[string]interface{} {
 						f.Results = make([]serializedField, 0, funcType.Results.NumFields())
 						for _, field := range funcType.Results.List {
 							f.Results = append(f.Results, serializeField(field)...)
+						}
+					}
+
+					if funcType.TypeParams != nil && funcType.TypeParams.NumFields() > 0 {
+						f.TypeParams = make([]serializedField, 0, funcType.TypeParams.NumFields())
+						for _, field := range funcType.TypeParams.List {
+							f.TypeParams = append(f.TypeParams, serializeField(field)...)
 						}
 					}
 

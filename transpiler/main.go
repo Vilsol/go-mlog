@@ -91,15 +91,9 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			if castDecl.Name.Name == mainFuncName {
 				continue
 			}
-			fnCtx := context.WithValue(ctx, contextFunction, castDecl)
-			statements, err := statementToMLOG(fnCtx, castDecl.Body)
-			if err != nil {
-				return "", err
-			}
 
-			if len(statements) == 0 {
-				continue
-			}
+			fnCtx := context.WithValue(ctx, contextFunction, castDecl)
+			statements := make([]MLOGStatement, 0)
 
 			prevArgs := 0
 			for i, param := range castDecl.Type.Params.List {
@@ -122,51 +116,72 @@ func GolangToMLOG(input string, options Options) (string, error) {
 				dVar := &DynamicVariable{}
 
 				if options.Stacked != "" {
+					statements = append(statements, &MLOG{
+						Comment: "Calculate address of parameter",
+						Statement: [][]Resolvable{
+							{
+								&Value{Value: "op"},
+								&Value{Value: "sub"},
+								dVar,
+								&Value{Value: stackVariable},
+								&Value{Value: strconv.Itoa(position)},
+							},
+						},
+					})
+
 					for _, name := range param.Names {
-						statements = append([]MLOGStatement{&MLOG{
+						resolvable := &NormalVariable{Name: name.Name}
+						fnCtx = addVariablesToContext(fnCtx, []*VarReference{{
+							Name:     name.Name,
+							Identity: resolvable,
+						}})
+
+						statements = append(statements, &MLOG{
 							Comment: "Read parameter into variable",
 							Statement: [][]Resolvable{
 								{
 									&Value{Value: "read"},
-									&NormalVariable{Name: name.Name},
+									resolvable,
 									&Value{Value: options.Stacked},
 									dVar,
 								},
 							},
-						}}, statements...)
+						})
 					}
-
-					statements = append([]MLOGStatement{
-						&MLOG{
-							Comment: "Calculate address of parameter",
-							Statement: [][]Resolvable{
-								{
-									&Value{Value: "op"},
-									&Value{Value: "sub"},
-									dVar,
-									&Value{Value: stackVariable},
-									&Value{Value: strconv.Itoa(position)},
-								},
-							},
-						},
-					}, statements...)
 				} else {
 					for j, name := range param.Names {
-						statements = append([]MLOGStatement{&MLOG{
+						resolvable := &NormalVariable{Name: name.Name}
+						fnCtx = addVariablesToContext(fnCtx, []*VarReference{{
+							Name:     name.Name,
+							Identity: resolvable,
+						}})
+
+						statements = append(statements, &MLOG{
 							Comment: "Read parameter into variable",
 							Statement: [][]Resolvable{
 								{
 									&Value{Value: "set"},
-									&NormalVariable{Name: name.Name},
+									resolvable,
 									&Value{Value: FunctionArgumentPrefix + castDecl.Name.Name + "_" + strconv.Itoa(prevArgs+j)},
 								},
 							},
-						}}, statements...)
+						})
 					}
 				}
 
 				prevArgs += len(param.Names)
 			}
+
+			innerStatements, references, err := statementToMLOG(fnCtx, castDecl.Body)
+			if err != nil {
+				return "", err
+			}
+
+			if len(innerStatements) == 0 {
+				continue
+			}
+
+			statements = append(statements, innerStatements...)
 
 			lastStatement := statements[len(statements)-1]
 			if _, ok := lastStatement.(*MLOGTrampolineBack); !ok {
@@ -177,15 +192,17 @@ func GolangToMLOG(input string, options Options) (string, error) {
 			}
 
 			global.Functions = append(global.Functions, &Function{
-				Name:          castDecl.Name.Name,
-				Declaration:   castDecl,
-				Statements:    statements,
-				ArgumentCount: len(castDecl.Type.Params.List),
+				Name:                 castDecl.Name.Name,
+				Declaration:          castDecl,
+				Statements:           statements,
+				ArgumentCount:        len(castDecl.Type.Params.List),
+				ScopeVariableCounter: make(map[string]int),
+				RootVariables:        references,
 			})
 		}
 	}
 
-	mainStatements, err := statementToMLOG(context.WithValue(ctx, contextFunction, mainFunc), mainFunc.Body)
+	mainStatements, references, err := statementToMLOG(context.WithValue(ctx, contextFunction, mainFunc), mainFunc.Body)
 
 	if err != nil {
 		return "", err
@@ -201,11 +218,13 @@ func GolangToMLOG(input string, options Options) (string, error) {
 	})
 
 	global.Functions = append(global.Functions, &Function{
-		Name:          mainFuncName,
-		Called:        true,
-		Declaration:   mainFunc,
-		Statements:    mainStatements,
-		ArgumentCount: len(mainFunc.Type.Params.List),
+		Name:                 mainFuncName,
+		Called:               true,
+		Declaration:          mainFunc,
+		Statements:           mainStatements,
+		ArgumentCount:        len(mainFunc.Type.Params.List),
+		ScopeVariableCounter: make(map[string]int),
+		RootVariables:        references,
 	})
 
 	var startup []MLOGStatement
@@ -283,7 +302,9 @@ func GolangToMLOG(input string, options Options) (string, error) {
 
 	for _, fn := range global.Functions {
 		for _, statement := range fn.Statements {
-			if err := statement.PreProcess(context.WithValue(ctx, contextFunction, fn.Declaration), global, fn); err != nil {
+			fnCtx := context.WithValue(ctx, contextFunction, fn.Declaration)
+			fnCtx = addVariablesToContext(fnCtx, fn.RootVariables)
+			if err := statement.PreProcess(fnCtx, global, fn); err != nil {
 				return "", err
 			}
 		}

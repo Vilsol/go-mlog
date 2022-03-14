@@ -95,7 +95,252 @@ func initOperationTranspiler() {
 			}, nil
 		},
 	})
-	//op idiv result a b
+	transpiler.RegisterFuncTranslation("m.IntDiv", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 2
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "idiv"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+							&transpiler.Value{Value: args[1].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Log", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "log"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Min", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 2
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "min"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+							&transpiler.Value{Value: args[1].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Max", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 2
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "max"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+							&transpiler.Value{Value: args[1].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Sqrt", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "sqrt"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Abs", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "abs"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Noise", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 2
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "noise"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+							&transpiler.Value{Value: args[1].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Angle", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 2
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "angle"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+							&transpiler.Value{Value: args[1].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Len", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 2
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "len"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+							&transpiler.Value{Value: args[1].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Sin", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "sin"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Cos", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "cos"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
+	transpiler.RegisterFuncTranslation("m.Tan", transpiler.Translator{
+		Count: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) int {
+			return 1
+		},
+		Variables: 1,
+		Translate: func(args []transpiler.Resolvable, vars []transpiler.Resolvable) ([]transpiler.MLOGStatement, error) {
+			return []transpiler.MLOGStatement{
+				&transpiler.MLOG{
+					Statement: [][]transpiler.Resolvable{
+						{
+							&transpiler.Value{Value: "op"},
+							&transpiler.Value{Value: "tan"},
+							vars[0],
+							&transpiler.Value{Value: args[0].GetValue()},
+						},
+					},
+				},
+			}, nil
+		},
+	})
 }
 
 type opDecompiler struct {
