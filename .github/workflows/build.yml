@@ -30,6 +30,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.18.0-beta2
+          stable: false
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -47,6 +48,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.18.0-beta2
+          stable: false
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -62,20 +64,21 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v1
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.18.0-beta2
-
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          args: cli cmd m m/impl runtime transpiler x x/impl
-          skip-go-installation: true
+#  lint:
+#    name: Lint
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Set up Go
+#        uses: actions/setup-go@v2
+#        with:
+#          go-version: 1.18.0-beta2
+#          stable: false
+#
+#      - name: Check out code into the Go module directory
+#        uses: actions/checkout@v2
+#
+#      - name: golangci-lint
+#        uses: golangci/golangci-lint-action@v2
+#        with:
+#          args: cli cmd m m/impl runtime transpiler x x/impl
+#          skip-go-installation: true
