@@ -319,7 +319,21 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 	var loopStartJump *MLOGJump
 	var intoLoopJump *MLOGJump
 
+	var loopStartOverride *MLOGStatement
+
 	if statement.Cond != nil {
+		loopStartJump = &MLOGJump{
+			MLOG: MLOG{
+				Comment: "Jump to start of loop",
+			},
+		}
+
+		intoLoopJump = &MLOGJump{
+			MLOG: MLOG{
+				Comment: "Jump into the loop",
+			},
+		}
+
 		if binaryExpr, ok := statement.Cond.(*ast.BinaryExpr); ok {
 			if translatedOp, ok := jumpOperators[binaryExpr.Op]; ok {
 				leftSide, leftExprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
@@ -342,32 +356,70 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 					return nil, Err(ctx, "unknown error")
 				}
 
-				loopStartJump = &MLOGJump{
-					MLOG: MLOG{
-						Comment: "Jump to start of loop",
-					},
-					Condition: []Resolvable{
-						&Value{Value: translatedOp},
-						leftSide[0],
-						rightSide[0],
-					},
+				loopStartJump.Condition = []Resolvable{
+					&Value{Value: translatedOp},
+					leftSide[0],
+					rightSide[0],
 				}
 
-				intoLoopJump = &MLOGJump{
-					MLOG: MLOG{
-						Comment: "Jump into the loop",
-					},
-					Condition: []Resolvable{
-						&Value{Value: translatedOp},
-						leftSide[0],
-						rightSide[0],
-					},
+				intoLoopJump.Condition = []Resolvable{
+					&Value{Value: translatedOp},
+					leftSide[0],
+					rightSide[0],
 				}
 			} else {
-				return nil, Err(ctx, fmt.Sprintf("jump statement cannot use this operation: %T", binaryExpr.Op))
+				expr, exprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
+				if err != nil {
+					return nil, err
+				}
+
+				results = append(results, exprInstructions...)
+
+				if len(expr) != 1 {
+					return nil, Err(ctx, "unknown error")
+				}
+
+				loopStartJump.Condition = []Resolvable{
+					&Value{Value: "always"},
+				}
+
+				intoLoopJump.Condition = []Resolvable{
+					&Value{Value: jumpOperators[token.EQL]},
+					expr[0],
+					&Value{Value: "true"},
+				}
+
+				loopStartOverride = &exprInstructions[0]
+			}
+		} else if unaryExpr, ok := statement.Cond.(*ast.UnaryExpr); ok {
+			if unaryExpr.Op != token.NOT {
+				return nil, Err(ctx, fmt.Sprintf("loop unary expresion cannot use this operation: %T", binaryExpr.Op))
+			}
+
+			expr, exprInstructions, err := exprToResolvable(ctx, unaryExpr.X)
+			if err != nil {
+				return nil, err
+			}
+
+			results = append(results, exprInstructions...)
+
+			if len(expr) != 1 {
+				return nil, Err(ctx, "unknown error")
+			}
+
+			loopStartJump.Condition = []Resolvable{
+				&Value{Value: jumpOperators[token.NEQ]},
+				expr[0],
+				&Value{Value: "true"},
+			}
+
+			intoLoopJump.Condition = []Resolvable{
+				&Value{Value: jumpOperators[token.NEQ]},
+				expr[0],
+				&Value{Value: "true"},
 			}
 		} else {
-			return nil, Err(ctx, "for loop can only have binary conditional expressions")
+			return nil, Err(ctx, "for loop can only have unary or binary conditional expressions")
 		}
 	} else {
 		loopStartJump = &MLOGJump{
@@ -425,7 +477,12 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 		blockCtxStruct.Extra = append(blockCtxStruct.Extra, instructions...)
 	}
 
-	loopStartJump.JumpTarget = bodyMLOG[0]
+	if loopStartOverride != nil {
+		loopStartJump.JumpTarget = *loopStartOverride
+	} else {
+		loopStartJump.JumpTarget = bodyMLOG[0]
+	}
+
 	results = append(results, loopStartJump)
 	blockCtxStruct.Extra = append(blockCtxStruct.Extra, loopStartJump)
 

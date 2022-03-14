@@ -39,6 +39,35 @@ op add _main_i _main_i 1
 jump 3 lessThan _main_i 10`,
 		},
 		{
+			name: "ForLoop2",
+			input: TestMain(`x := false
+for !x {
+x = true
+}`, false, false),
+			output: `set _main_x false
+jump 3 notEqual _main_x true
+jump 5 always
+set _main_x true
+jump 3 notEqual _main_x true`,
+		},
+		{
+			name: "ForLoop3",
+			input: TestMain(`s := m.B("switch1")
+a := 1
+b := 2
+for s.IsEnabled() && a < b {
+    print(1)
+}`, true, false),
+			output: `set _main_s switch1
+set _main_a 1
+set _main_b 2
+sensor _main_0 _main_s @enabled
+jump 6 equal _main_0 true
+jump 8 always
+print 1
+jump 3 always`,
+		},
+		{
 			name: "Reassignment",
 			input: TestMain(`y := 1
 x := y
