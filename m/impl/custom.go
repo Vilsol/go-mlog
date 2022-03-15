@@ -11,4 +11,7 @@ func init() {
 	transpiler.RegisterInlineTranslation("m.B", func(args []transpiler.Resolvable) (transpiler.Resolvable, error) {
 		return &transpiler.InlineVariable{Value: args[0]}, nil
 	})
+	transpiler.RegisterInlineTranslation("m.GetTurret", func(args []transpiler.Resolvable) (transpiler.Resolvable, error) {
+		return &transpiler.InlineVariable{Value: args[0]}, nil
+	})
 }

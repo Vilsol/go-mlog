@@ -39,19 +39,19 @@ func UnitTarget[A float, B float](x A, y B, shoot bool) {
 // Shoot with the cached unit at the predicted position of target unit
 //
 // If shoot parameter is false, it will cease firing
-func UnitTargetP(target HealthC, shoot bool) {
+func UnitTargetP(target Shootable, shoot bool) {
 }
 
 // Drops items into the provided building
 //
 // Will not drop more than provided amount
-func UnitItemDrop[A integer](to Building, amount A) {
+func UnitItemDrop[A integer](to HasInventory, amount A) {
 }
 
 // Takes the provided item type from the provided building
 //
 // Will not take more than provided amount
-func UnitItemTake[A integer](from Building, item string, amount A) {
+func UnitItemTake[A integer](from HasInventory, item ItemType, amount A) {
 }
 
 // Drops the current payload
@@ -83,7 +83,7 @@ func UnitBuild[A float, B float, C integer, D integer](x A, y B, block string, r
 }
 
 // Retrieve the building and its type at the specified absolute position
-func UnitGetBlock[A float, B float](x A, y B) (blockType string, building Building) {
+func UnitGetBlock[A float, B float](x A, y B) (blockType string, building UnspecifiedBuilding) {
 	return "", nil
 }
 
