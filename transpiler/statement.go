@@ -335,62 +335,30 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 		}
 
 		if binaryExpr, ok := statement.Cond.(*ast.BinaryExpr); ok {
-			if translatedOp, ok := jumpOperators[binaryExpr.Op]; ok {
-				leftSide, leftExprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
-				if err != nil {
-					return nil, err
-				}
-				results = append(results, leftExprInstructions...)
+			// TODO Optimize jump instruction if possible
 
-				if len(leftSide) != 1 {
-					return nil, Err(ctx, "unknown error")
-				}
-
-				rightSide, rightExprInstructions, err := exprToResolvable(ctx, binaryExpr.Y)
-				if err != nil {
-					return nil, err
-				}
-				results = append(results, rightExprInstructions...)
-
-				if len(rightSide) != 1 {
-					return nil, Err(ctx, "unknown error")
-				}
-
-				loopStartJump.Condition = []Resolvable{
-					&Value{Value: translatedOp},
-					leftSide[0],
-					rightSide[0],
-				}
-
-				intoLoopJump.Condition = []Resolvable{
-					&Value{Value: translatedOp},
-					leftSide[0],
-					rightSide[0],
-				}
-			} else {
-				expr, exprInstructions, err := exprToResolvable(ctx, binaryExpr.X)
-				if err != nil {
-					return nil, err
-				}
-
-				results = append(results, exprInstructions...)
-
-				if len(expr) != 1 {
-					return nil, Err(ctx, "unknown error")
-				}
-
-				loopStartJump.Condition = []Resolvable{
-					&Value{Value: "always"},
-				}
-
-				intoLoopJump.Condition = []Resolvable{
-					&Value{Value: jumpOperators[token.EQL]},
-					expr[0],
-					&Value{Value: "true"},
-				}
-
-				loopStartOverride = &exprInstructions[0]
+			expr, exprInstructions, err := exprToResolvable(ctx, binaryExpr)
+			if err != nil {
+				return nil, err
 			}
+
+			results = append(results, exprInstructions...)
+
+			if len(expr) != 1 {
+				return nil, Err(ctx, "unknown error")
+			}
+
+			loopStartJump.Condition = []Resolvable{
+				&Value{Value: "always"},
+			}
+
+			intoLoopJump.Condition = []Resolvable{
+				&Value{Value: jumpOperators[token.EQL]},
+				expr[0],
+				&Value{Value: "true"},
+			}
+
+			loopStartOverride = &exprInstructions[0]
 		} else if unaryExpr, ok := statement.Cond.(*ast.UnaryExpr); ok {
 			if unaryExpr.Op != token.NOT {
 				return nil, Err(ctx, fmt.Sprintf("loop unary expresion cannot use this operation: %T", binaryExpr.Op))

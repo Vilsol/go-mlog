@@ -32,11 +32,12 @@ print 6`,
 			name:  "ForLoop",
 			input: TestMain(`for i := 0; i < 10; i++ { print(i) }`, false, false),
 			output: `set _main_i 0
-jump 3 lessThan _main_i 10
-jump 6 always
+op lessThan _main_0 _main_i 10
+jump 4 equal _main_0 true
+jump 7 always
 print _main_i
 op add _main_i _main_i 1
-jump 3 lessThan _main_i 10`,
+jump 1 always`,
 		},
 		{
 			name: "ForLoop2",
@@ -62,8 +63,10 @@ for s.IsEnabled() && a < b {
 set _main_a 1
 set _main_b 2
 sensor _main_0 _main_s @enabled
-jump 6 equal _main_0 true
-jump 8 always
+op lessThan _main_1 _main_a _main_b
+op land _main_2 _main_0 _main_1
+jump 8 equal _main_2 true
+jump 10 always
 print 1
 jump 3 always`,
 		},
@@ -94,31 +97,33 @@ print _main_x`,
 			name:  "Break",
 			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { break; }; println(i); }`, false, false),
 			output: `set _main_i 0
-jump 3 lessThan _main_i 10
-jump 11 always
-op equal _main_0 _main_i 5
-jump 6 equal _main_0 1
-jump 7 always
-jump 11 always
+op lessThan _main_0 _main_i 10
+jump 4 equal _main_0 true
+jump 12 always
+op equal _main_1 _main_i 5
+jump 7 equal _main_1 1
+jump 8 always
+jump 12 always
 print _main_i
 print "\n"
 op add _main_i _main_i 1
-jump 3 lessThan _main_i 10`,
+jump 1 always`,
 		},
 		{
 			name:  "Continue",
 			input: TestMain(`for i := 0; i < 10; i++ { if i == 5 { continue; }; println(i); }`, false, false),
 			output: `set _main_i 0
-jump 3 lessThan _main_i 10
-jump 11 always
-op equal _main_0 _main_i 5
-jump 6 equal _main_0 1
-jump 7 always
-jump 9 always
+op lessThan _main_0 _main_i 10
+jump 4 equal _main_0 true
+jump 12 always
+op equal _main_1 _main_i 5
+jump 7 equal _main_1 1
+jump 8 always
+jump 10 always
 print _main_i
 print "\n"
 op add _main_i _main_i 1
-jump 3 lessThan _main_i 10`,
+jump 1 always`,
 		},
 		{
 			name: "Switch",
@@ -233,11 +238,12 @@ print 2
 jump end
 loop:
 set _main_i 0
-jump 7 lessThan _main_i 10
-jump 10 always
+op lessThan _main_0 _main_i 10
+jump 8 equal _main_0 true
+jump 11 always
 print 3
 op add _main_i _main_i 1
-jump 7 lessThan _main_i 10
+jump 5 always
 print 4
 jump test
 end:
