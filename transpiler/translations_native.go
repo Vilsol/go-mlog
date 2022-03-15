@@ -65,4 +65,7 @@ func init() {
 	RegisterInlineTranslation("float64", func(args []Resolvable) (Resolvable, error) {
 		return args[0], nil
 	})
+	RegisterInlineTranslation("int", func(args []Resolvable) (Resolvable, error) {
+		return args[0], nil
+	})
 }
