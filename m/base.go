@@ -28,11 +28,11 @@ func Radar(from Building, target1 RadarTarget, target2 RadarTarget, target3 Rada
 // Extract information indicated by sense from the provided block.
 //Use this only if the needed information is not available using The getters of the building itself
 //main purpose is to use generic "senses" or use things that are not mapped
-func Sensor(block UnspecifiedBuilding, sense string) float64 {
+func Sensor(block GameElement, sense string) float64 {
 	return 0
 }
 
 // String equivalent of Sensor
-func SensorStr(block UnspecifiedBuilding, sense string) string {
+func SensorStr(block GameElement, sense string) string {
 	return ""
 }
