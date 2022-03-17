@@ -1,7 +1,6 @@
 package transpiler
 
 import (
-	"github.com/Vilsol/go-mlog/m"
 	"testing"
 )
 
