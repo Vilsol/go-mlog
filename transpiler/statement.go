@@ -300,7 +300,6 @@ func ifStmtToMLOG(ctx context.Context, statement *ast.IfStmt) ([]MLOGStatement, 
 
 func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement, error) {
 	results := make([]MLOGStatement, 0)
-	varReferences := make([]*VarReference, 0)
 
 	if len(statement.Body.List) == 0 {
 		return results, nil
@@ -312,7 +311,6 @@ func forStmtToMLOG(ctx context.Context, statement *ast.ForStmt) ([]MLOGStatement
 			return nil, err
 		}
 		results = append(results, initMlog...)
-		varReferences = append(varReferences, references...)
 		ctx = addVariablesToContext(ctx, references)
 	}
 

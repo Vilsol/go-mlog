@@ -10,8 +10,8 @@ linters:
     - govet
     - ineffassign
     - misspell
-    - staticcheck
-    - gosimple
+#    - staticcheck
+#    - gosimple
     - structcheck
     - varcheck
     - asciicheck
@@ -19,12 +19,12 @@ linters:
     - dogsled
     - dupl
     - whitespace
-    - wastedassign
-    - unparam
+#    - wastedassign
+#    - unparam
     - unconvert
     - predeclared
     - prealloc
-    - nilerr
+#    - nilerr
     - makezero
     - ifshort
     - goprintffuncname
@@ -36,3 +36,5 @@ linters-settings:
   goconst:
     min-len: 4
     min-occurrences: 5
+  dupl:
+    threshold: 250
