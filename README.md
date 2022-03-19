@@ -1,3 +1,7 @@
+<div align="center">
+
+![](./.github/logo.png)
+
 # go-mlog
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/vilsol/go-mlog/build)
@@ -7,7 +11,7 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/vilsol/go-mlog)
 [![Go Reference](https://pkg.go.dev/badge/github.com/Vilsol/go-mlog.svg)](https://pkg.go.dev/github.com/Vilsol/go-mlog)
 
-Go to MLOG transpiler.
+</div>
 
 ## Web IDE
 
