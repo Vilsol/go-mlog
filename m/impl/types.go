@@ -165,10 +165,10 @@ func registerConstants() {
 	transpiler.RegisterSelector("m.BUnitModifier", m.BUnitModifier)
 	transpiler.RegisterSelector("m.BExtinguisher", m.BExtinguisher)
 
-	transpiler.RegisterSelector("m.ctrlProcessor", strconv.Itoa(m.CtrlProcessor))
-	transpiler.RegisterSelector("m.ctrlFormation", strconv.Itoa(m.CtrlFormation))
-	transpiler.RegisterSelector("m.ctrlPlayer", strconv.Itoa(m.CtrlPlayer))
-	transpiler.RegisterSelector("m.ctrlSelf", strconv.Itoa(m.CtrlSelf))
+	transpiler.RegisterSelector("m.CtrlProcessor", strconv.Itoa(m.CtrlProcessor))
+	transpiler.RegisterSelector("m.CtrlFormation", strconv.Itoa(m.CtrlFormation))
+	transpiler.RegisterSelector("m.CtrlPlayer", strconv.Itoa(m.CtrlPlayer))
+	transpiler.RegisterSelector("m.CtrlSelf", strconv.Itoa(m.CtrlSelf))
 }
 
 func createSensorFuncTranslation(attribute string) transpiler.Translator {

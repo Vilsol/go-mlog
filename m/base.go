@@ -21,7 +21,7 @@ func GetLink[A integer](address A) UnspecifiedBuilding {
 // Retrieve a list of units that match specified conditions
 //
 // Conditions are combined using an `and` operation
-func Radar(from Building, target1 RadarTarget, target2 RadarTarget, target3 RadarTarget, sortOrder bool, sort RadarSort) Unit {
+func Radar(from Ranged, target1 RadarTarget, target2 RadarTarget, target3 RadarTarget, sortOrder bool, sort RadarSort) Unit {
 	return nil
 }
 

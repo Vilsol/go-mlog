@@ -4,7 +4,7 @@ type Turret interface {
 	Building
 	HasAmmo
 	HasInventory
-	HasRange
+	Ranged
 	HasLiquid
 	HasPower
 	Controllable
@@ -20,8 +20,8 @@ type Turret interface {
 
 type Building interface {
 	HasPosition
-	HasHealth
-	Teamed
+	Healthc
+	Teamc
 	GameElement
 	// GetType the type of the block (e.g. "cyclone" "microprocessor") not compatible with BlockFlag
 	GetType() string
@@ -29,10 +29,10 @@ type Building interface {
 }
 type Unit interface {
 	HasPosition
-	HasHealth
-	HasRange
+	Healthc
+	Ranged
 	Controllable
-	Teamed
+	Teamc
 	GameElement
 	HasInventory
 	GetType() UnitType
@@ -46,7 +46,7 @@ type MiningUnit interface {
 	CanMine
 }
 type CarrierUnit interface {
-	HasPayload
+	Payloadc
 	Unit
 }
 type UnspecifiedBuilding interface {
@@ -56,10 +56,11 @@ type UnspecifiedBuilding interface {
 	HasInventory
 	HasLiquid
 	HasConfig
+	Ranged
 }
 type GameElement interface{}
 
-type HasHealth interface {
+type Healthc interface {
 	// GetHealth Get the current health value of Unit or Building
 	GetHealth() int
 	GetMaxHealth() int
@@ -79,7 +80,7 @@ type HasLiquid interface {
 	GetLiquidCapacity() int
 }
 type Shootable interface {
-	HasHealth
+	Healthc
 	HasPosition
 }
 type HasPower interface {
@@ -133,11 +134,11 @@ type Controllable interface {
 	//TODO: dont offer this method or find a more typesave way
 	GetController() string
 }
-type Teamed interface {
+type Teamc interface {
 	// GetTeam The team the thing belongs to
 	GetTeam() int
 }
-type HasRange interface {
+type Ranged interface {
 	// GetRange To shoot and or detect who knows (TODO: better docs)
 	GetRange() float64
 }
@@ -155,8 +156,7 @@ type HasConfig interface {
 	GetConfig() string //mapped to "@configure" not "@config" nobody knows what latter one is
 }
 
-// HasPayload TODO needs closer clarification from MLOG side
-type HasPayload interface {
+type Payloadc interface {
 	// GetPayloadType block or unit type this unit is carrying
 	GetPayloadType() string
 	// GetPayloadCount How many things this unit is carrying (not items)
