@@ -14,7 +14,7 @@ func PrintFlush(targetMessage string) {
 }
 
 // Get the linked tile at the specified address
-func GetLink[A integer](address A) Link {
+func GetLink[A integer](address A) UnspecifiedBuilding {
 	return nil
 }
 
@@ -25,12 +25,14 @@ func Radar(from Ranged, target1 RadarTarget, target2 RadarTarget, target3 RadarT
 	return nil
 }
 
-// Extract information indicated by sense from the provided block
-func Sensor(block HealthC, sense string) float64 {
+// Extract information indicated by sense from the provided block.
+//Use this only if the needed information is not available using The getters of the building itself
+//main purpose is to use generic "senses" or use things that are not mapped
+func Sensor(block GameElement, sense string) float64 {
 	return 0
 }
 
 // String equivalent of Sensor
-func SensorStr(block HealthC, sense string) string {
+func SensorStr(block GameElement, sense string) string {
 	return ""
 }

@@ -3,7 +3,7 @@ package m
 // Load the next cached unit of the provided type into memory
 //
 // Will loop over once it reaches the end of the cache
-func UnitBind(unitType string) {
+func UnitBind(unitType UnitType) {
 }
 
 // Like Radar but originates from the cached units
@@ -27,7 +27,7 @@ func UnitLocateOre(ore string) (x int, y int, found bool) {
 // If enemy is true, derelict blocks cannot be located
 //
 // Also locates blocks outside the range of the unit
-func UnitLocateBuilding(buildingType BlockFlag, enemy bool) (x int, y int, found bool, building Building) {
+func UnitLocateBuilding(buildingType BlockFlag, enemy bool) (x int, y int, found bool, building UnspecifiedBuilding) {
 	return 0, 0, false, nil
 }
 
@@ -41,6 +41,6 @@ func UnitLocateSpawn() (x int, y int, found bool, building Building) {
 // Locate a damaged building
 //
 // Also locates blocks outside the range of the unit
-func UnitLocateDamaged() (x int, y int, found bool, building Building) {
+func UnitLocateDamaged() (x int, y int, found bool, building UnspecifiedBuilding) {
 	return 0, 0, false, nil
 }
